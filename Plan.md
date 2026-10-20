@@ -9,7 +9,8 @@
 > three/four options and multiple teacher-accepted labels while each student
 > chooses one. Manifest stays v1. The original four-choice/single-answer rules
 > below describe v1; v2 authoring follows the approved supplement in `AGENTS.md`.
-> This revision remains within schema/editor work; Phase 3 is still awaiting review.
+> Phase 2/v2 review is approved. Phase 3 student loading is now implemented in
+> `student/`; see `docs/phase-3-results.md`. Stop for review before Phase 4.
 
 ## 1. Project objective
 
@@ -211,10 +212,10 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 
 ### Phase 3 — Web loading and unit selection
 
-- [ ] Student selector lists only playable units from manifest.
-- [ ] S01 and S02 can load distinct titles, videos, answer keys, and form links.
-- [ ] Missing/unreleased S03 cannot be launched; no load attempt against guessed JSON paths.
-- [ ] Switching units starts a fresh attempt without leaking prior unit state; clear error states.
+- [x] Student selector lists only playable units from manifest.
+- [x] S01 and S02 can load distinct titles, videos, answer keys, and form links.
+- [x] Missing/unreleased S03 cannot be launched; no load attempt against guessed JSON paths.
+- [x] Switching units starts a fresh attempt without leaking prior unit state; clear error states.
 
 ### Phase 4 — Full gameplay integration
 

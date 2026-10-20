@@ -16,8 +16,11 @@ to v2 rather than silent migration. Keep public manifest version 1. Incomplete
 private v2 drafts may have no accepted answers; public export may not. Preserve
 retained Q05 and removed D text/acceptance privately. Reference course content
 stays in ignored private drafts; do not invent missing URLs, translate supplied
-Chinese choices, or commit unreleased answers. The original student game has
-**not** been migrated to v2. Stop before Phase 3 pending instructor GUI review.
+Chinese choices, or commit unreleased answers. The original prototype remains
+the immutable baseline. Phase 2/v2 GUI review is approved, including instructor
+Windows 11 question-editing verification.
+Phase 3 integration is in `student/`; see `docs/phase-3-results.md`. Stop for
+instructor review before Phase 4. Do not start visual improvements.
 
 ## 1. Priority and working method
 
