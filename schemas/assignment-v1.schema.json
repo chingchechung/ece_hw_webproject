@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EMI Maze publishable assignment v1",
+  "$comment": "Normalize ordinary fields first. Also check unitId against the filename. URLs are syntax checks only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "unitId",
+    "title",
+    "googleFormUrl",
+    "questions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "unitId": {
+      "type": "string",
+      "pattern": "^S(0[1-9]|1[0-2])(?![\\s\\S])"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "googleFormUrl": {
+      "$ref": "#/$defs/googleFormUrl"
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/question"
+      },
+      "prefixItems": [
+        {
+          "properties": {
+            "id": {
+              "const": "Q01"
+            }
+          },
+          "$ref": "#/$defs/question"
+        },
+        {
+          "properties": {
+            "id": {
+              "const": "Q02"
+            }
+          },
+          "$ref": "#/$defs/question"
+        },
+        {
+          "properties": {
+            "id": {
+              "const": "Q03"
+            }
+          },
+          "$ref": "#/$defs/question"
+        },
+        {
+          "properties": {
+            "id": {
+              "const": "Q04"
+            }
+          },
+          "$ref": "#/$defs/question"
+        },
+        {
+          "properties": {
+            "id": {
+              "const": "Q05"
+            }
+          },
+          "$ref": "#/$defs/question"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "youtubeUrl": {
+      "type": "string",
+      "pattern": "^https://(?:(?:www\\.)?youtube\\.com/watch\\?(?:(?!v=)[A-Za-z0-9_.~-]+=(?:[A-Za-z0-9_.~+/-]|%[0-9A-Fa-f]{2})*&)*v=(?!(?:[xX]{11}|[yY]{11}|[zZ]{11}|0{11}|_{11}|-{11})(?:[?&#/]|$))[A-Za-z0-9_-]{11}(?:&(?!v=)[A-Za-z0-9_.~-]+=(?:[A-Za-z0-9_.~+/-]|%[0-9A-Fa-f]{2})*)*|youtu\\.be/(?!(?:[xX]{11}|[yY]{11}|[zZ]{11}|0{11}|_{11}|-{11})(?:[?&#/]|$))[A-Za-z0-9_-]{11}(?:\\?(?!v=)[A-Za-z0-9_.~-]+=(?:[A-Za-z0-9_.~+/-]|%[0-9A-Fa-f]{2})*(?:&(?!v=)[A-Za-z0-9_.~-]+=(?:[A-Za-z0-9_.~+/-]|%[0-9A-Fa-f]{2})*)*)?)(?:#[A-Za-z0-9_=.-]+)?(?![\\s\\S])"
+    },
+    "googleFormUrl": {
+      "type": "string",
+      "pattern": "^https://(?:forms\\.gle/(?!(?:[xX]+|[yY]+|[zZ]+|0+|_+|-+|[Pp][Ll][Aa][Cc][Ee][Hh][Oo][Ll][Dd][Ee][Rr]|[Ee][Xx][Aa][Mm][Pp][Ll][Ee]|YOUR_FORM_ID|FORM_ID)(?:[/?#]|$))[A-Za-z0-9_-]+|docs\\.google\\.com/forms/(?:u/[0-9]+/)?d/(?:e/)?(?!(?:[xX]+|[yY]+|[zZ]+|0+|_+|-+|[Pp][Ll][Aa][Cc][Ee][Hh][Oo][Ll][Dd][Ee][Rr]|[Ee][Xx][Aa][Mm][Pp][Ll][Ee]|YOUR_FORM_ID|FORM_ID)(?:[/?#]|$))[A-Za-z0-9_-]+/(?:viewform|edit))(?:\\?[A-Za-z0-9_.~-]+=(?:[A-Za-z0-9_.~+/-]|%[0-9A-Fa-f]{2})*(?:&[A-Za-z0-9_.~-]+=(?:[A-Za-z0-9_.~+/-]|%[0-9A-Fa-f]{2})*)*)?(?:#[A-Za-z0-9_=.-]+)?(?![\\s\\S])"
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "questionVideoUrl",
+        "explanationVideoUrl",
+        "options",
+        "correctOption"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "Q01",
+            "Q02",
+            "Q03",
+            "Q04",
+            "Q05"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "questionVideoUrl": {
+          "$ref": "#/$defs/youtubeUrl"
+        },
+        "explanationVideoUrl": {
+          "$ref": "#/$defs/youtubeUrl"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "correctOption": {
+          "type": "string",
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        "explanationText": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

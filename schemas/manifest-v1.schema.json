@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EMI Maze public allowlist v1",
+  "$comment": "Normalize titles first. Verify associated exported files and local allow-play metadata outside this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "units"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "units": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "unitId",
+          "title",
+          "file"
+        ],
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "pattern": "^S(0[1-9]|1[0-2])(?![\\s\\S])"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file": {
+            "type": "string"
+          }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "unitId": {
+                "const": "S01"
+              },
+              "file": {
+                "const": "S01.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S02"
+              },
+              "file": {
+                "const": "S02.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S03"
+              },
+              "file": {
+                "const": "S03.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S04"
+              },
+              "file": {
+                "const": "S04.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S05"
+              },
+              "file": {
+                "const": "S05.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S06"
+              },
+              "file": {
+                "const": "S06.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S07"
+              },
+              "file": {
+                "const": "S07.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S08"
+              },
+              "file": {
+                "const": "S08.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S09"
+              },
+              "file": {
+                "const": "S09.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S10"
+              },
+              "file": {
+                "const": "S10.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S11"
+              },
+              "file": {
+                "const": "S11.json"
+              }
+            }
+          },
+          {
+            "properties": {
+              "unitId": {
+                "const": "S12"
+              },
+              "file": {
+                "const": "S12.json"
+              }
+            }
+          }
+        ]
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S01"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S02"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S03"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S04"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S05"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S06"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S07"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S08"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S09"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S10"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S11"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "unitId": {
+                "const": "S12"
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    }
+  }
+}

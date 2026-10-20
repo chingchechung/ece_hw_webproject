@@ -1,0 +1,6 @@
+# Private local drafts and manual-upload deliverables are never public source.
+teacher_data/
+export/
+__pycache__/
+*.py[cod]
+test-results/
