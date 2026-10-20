@@ -2,6 +2,23 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved v2 authoring supplement — 2026-10-20
+
+The instructor approved the multi-accepted-answer revision documented in
+`docs/data-contract-v2.md`. For **v2 only**, this supersedes the v1-only answer
+and option rules below: each question has **3 or 4 options** and a nonempty,
+distinct `correctOptions` array of existing labels. The teacher uses independent
+checkboxes; the student will still select **exactly one** option and pass if
+that label is accepted. Do not require selecting all accepted answers.
+
+Keep public v1 and private draft v1 formats compatible, with explicit conversion
+to v2 rather than silent migration. Keep public manifest version 1. Incomplete
+private v2 drafts may have no accepted answers; public export may not. Preserve
+retained Q05 and removed D text/acceptance privately. Reference course content
+stays in ignored private drafts; do not invent missing URLs, translate supplied
+Chinese choices, or commit unreleased answers. The original student game has
+**not** been migrated to v2. Stop before Phase 3 pending instructor GUI review.
+
 ## 1. Priority and working method
 
 1. Preserve existing working gameplay before adding features. Inspect the repository, identify its actual entry point, and test it locally before refactoring.

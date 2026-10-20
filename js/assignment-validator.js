@@ -1,4 +1,4 @@
-/* Browser-native v1 validation; also loadable with Node for contract parity tests.
+/* Browser-native versioned v1/v2 validation; also loadable with Node for tests.
  * Load assignment-rules.js first in a browser. No fetches, DOM changes or writes.
  */
 (function (root, factory) {
@@ -53,7 +53,7 @@
     return result;
   }
 
-  function checks() {
+  function checks(schemaVersion = 1) {
     const errors = [];
     const add = (path, code, message) => errors.push({path, code, message});
     function obj(value, path, allowed) {
@@ -62,7 +62,7 @@
         return false;
       }
       for (const key of Object.keys(value).filter(key => !allowed.includes(key)).sort()) {
-        add(`${path}.${key}`, 'unknown_field', 'Unknown field in schema v1.');
+        add(`${path}.${key}`, 'unknown_field', `Unknown field in schema v${schemaVersion}.`);
       }
       return true;
     }
@@ -84,8 +84,8 @@
       return item;
     }
     function version(value, path) {
-      if (value.schemaVersion !== 1) {
-        add(`${path}.schemaVersion`, 'schema_version', 'schemaVersion must be the number 1.');
+      if (value.schemaVersion !== schemaVersion) {
+        add(`${path}.schemaVersion`, 'schema_version', `schemaVersion must be the number ${schemaVersion}.`);
       }
     }
     function unitId(value, path) {
@@ -102,8 +102,8 @@
     return {errors, add, obj, text, version, unitId, url};
   }
 
-  function validateUnit(input, filename = null) {
-    const data = normalizeUnit(input), check = checks();
+  function validateVersion(input, filename, version) {
+    const data = normalizeUnit(input), check = checks(version);
     if (!check.obj(data, '$', unitKeys)) return check.errors;
     check.version(data, '$');
     const unitId = check.unitId(data, '$');
@@ -122,7 +122,8 @@
     }
     data.questions.forEach((question, index) => {
       const path = `$.questions[${index}]`;
-      if (!check.obj(question, path, questionKeys)) return;
+      const keys = version === 1 ? questionKeys : questionKeys.map(key => key === 'correctOption' ? 'correctOptions' : key);
+      if (!check.obj(question, path, keys)) return;
       const id = check.text(question, 'id', path), expected = `Q${String(index + 1).padStart(2, '0')}`;
       if (id !== null && id !== expected) {
         check.add(`${path}.id`, 'question_id', `Expected ${expected}; question IDs must be unique and sequential.`);
@@ -132,10 +133,12 @@
         check.url(question, field, path, youtubeUrl, 'Expected a supported HTTPS YouTube video URL; replace placeholders.');
       }
       if (!Array.isArray(question.options)) {
-        check.add(`${path}.options`, 'type', 'Expected an array of four options in A-D order.');
+        const message = version === 1 ? 'Expected an array of four options in A-D order.' : 'Expected an array of three or four options in A-D order.';
+        check.add(`${path}.options`, 'type', message);
       } else {
-        if (question.options.length !== 4) {
-          check.add(`${path}.options`, 'option_count', 'Exactly four options are required in A-D order.');
+        if (!(version === 1 ? [4] : [3, 4]).includes(question.options.length)) {
+          const message = version === 1 ? 'Exactly four options are required in A-D order.' : 'Exactly three or four options are required in A-D order.';
+          check.add(`${path}.options`, 'option_count', message);
         }
         question.options.forEach((option, optionIndex) => {
           const optionPath = `${path}.options[${optionIndex}]`;
@@ -143,12 +146,60 @@
           else if (!option) check.add(optionPath, 'blank', 'Must not be blank.');
         });
       }
-      const answer = check.text(question, 'correctOption', path);
-      if (answer !== null && !['A', 'B', 'C', 'D'].includes(answer)) {
-        check.add(`${path}.correctOption`, 'answer', 'Choose exactly one of A, B, C, D.');
-      }
+      if (version === 1) {
+        const answer = check.text(question, 'correctOption', path);
+        if (answer !== null && !['A', 'B', 'C', 'D'].includes(answer)) {
+          check.add(`${path}.correctOption`, 'answer', 'Choose exactly one of A, B, C, D.');
+        }
+      } else checkAcceptedAnswers(check, question, path, question.options);
     });
     return check.errors;
+  }
+
+  function checkAcceptedAnswers(check, question, path, options) {
+    const field = `${path}.correctOptions`;
+    if (!own(question, 'correctOptions')) {
+      check.add(field, 'required', 'Required field is missing.');
+      return;
+    }
+    const answers = question.correctOptions;
+    if (!Array.isArray(answers)) {
+      check.add(field, 'type', 'Expected an array of accepted answer labels.');
+      return;
+    }
+    if (!answers.length) check.add(field, 'answer_count', 'Select at least one accepted answer.');
+    const seen = new Set();
+    answers.forEach((answer, index) => {
+      const itemPath = `${field}[${index}]`;
+      if (typeof answer !== 'string') {
+        check.add(itemPath, 'type', 'Expected a string.');
+        return;
+      }
+      if (!['A', 'B', 'C', 'D'].includes(answer)) {
+        check.add(itemPath, 'answer', 'Accepted labels must be A, B, C or D.');
+      } else if (Array.isArray(options) && 'ABCD'.indexOf(answer) >= options.length) {
+        check.add(itemPath, 'answer_range', 'Accepted label has no corresponding option.');
+      }
+      if (seen.has(answer)) check.add(itemPath, 'duplicate_answer', 'Accepted labels must be distinct.');
+      seen.add(answer);
+    });
+  }
+
+  const validateUnitV1 = (input, filename = null) => validateVersion(input, filename, 1);
+  const validateUnitV2 = (input, filename = null) => validateVersion(input, filename, 2);
+  const validateUnit = (input, filename = null) => object(input) && input.schemaVersion === 2
+    ? validateUnitV2(input, filename) : validateUnitV1(input, filename);
+
+  function acceptsAnswer(question, selected) {
+    if (!object(question) || typeof selected !== 'string' || !['A', 'B', 'C', 'D'].includes(selected)) return false;
+    const options = question.options;
+    if (!Array.isArray(options) || 'ABCD'.indexOf(selected) >= options.length) return false;
+    if (own(question, 'correctOptions')) {
+      const check = checks(2);
+      checkAcceptedAnswers(check, question, '$', options);
+      return !own(question, 'correctOption') && !check.errors.length && [3, 4].includes(options.length) && question.correctOptions.includes(selected);
+    }
+    return options.length === 4 && selected === question.correctOption;
   }
 
   function validateManifest(input) {
@@ -179,5 +230,5 @@
     return check.errors;
   }
 
-  return Object.freeze({normalizeUnit, normalizeManifest, validateUnit, validateManifest});
+  return Object.freeze({normalizeUnit, normalizeManifest, validateUnit, validateUnitV1, validateUnitV2, validateManifest, acceptsAnswer});
 }));

@@ -5,7 +5,11 @@ Read [AGENTS.md](AGENTS.md) and [Plan.md](Plan.md) before development.
 Phase 2 is available: the offline Tkinter/ttk teacher editor supports S01–S12,
 private incomplete drafts, four/five questions, local Allow Play, validated unit
 exports and a public manifest containing only allowed units with current exports.
-It reuses the Phase 1 validator. Student-game integration has not started.
+It now creates **v2** drafts with **three/four options per question** and teacher
+checkboxes for **one or more accepted answers**. Students will still choose one
+answer. V1 files remain editable in their original format; use **Convert v1 to
+v2** to create an explicit migrated copy. Student-game integration has not started;
+the current maze does **not** support v2 assignments yet.
 
 ## Teacher editor — Windows 11
 
@@ -37,6 +41,19 @@ individual draft/public unit. **Validate Unit** reports exact question/field
 errors. Select a local export folder, **Export Selected Unit JSON**, mark the
 intended units **Allow Play**, then **Export Public Manifest JSON**. Missing,
 changed or invalid exports block manifest generation.
+
+For authoring references with other filenames, use **Import Reference**. To open
+the supplied incomplete S01 reference explicitly at launch:
+
+```powershell
+py -3.12 tools\assignment_editor.py --reference "C:\path\to\S01_reference_v2_incomplete.json"
+```
+
+Its missing URLs remain empty and block public export. The supplied course
+content is private, not a public fixture or Git source. In this development
+workspace, the initial private draft is prepared at `teacher_data/S01.draft.json`
+(ignored by Git); open it with `--draft teacher_data/S01.draft.json`. Do not copy
+that private draft into `assignments/` or upload it. No authoring data auto-loads.
 
 Save and export are separate actions. Manually upload the chosen `Sxx.json`
 files **first**, then `manifest.json` **last**. There is no upload/sync function.
@@ -79,15 +96,19 @@ navigation, and writes ignored screenshots to `test-results/`.
 Phase 1 adds [the v1 data contract](docs/data-contract-v1.md), JSON Schemas,
 matching Python/browser validators, and a read-only local CLI. The prototype
 still does not load unit JSON; that remains Phase 3.
+The [v2 contract](docs/data-contract-v2.md) adds versioned multi-accepted-answer
+validation in Python and JavaScript while preserving the original v1 schema.
 
 ```sh
 python tools/validate_assignments.py tests/fixtures/manifest.json assignments/manifest.json
+python tools/validate_assignments.py tests/fixtures/v2/manifest.json
 python tests/browser_validation.py
 ```
 
 `tests/fixtures/` contains complete **test-only** S01 (four questions), S02 (five
-questions), and a test manifest. Never deploy that directory. Public
-`assignments/manifest.json` starts with an empty allowlist and no unit files.
+questions), and a test manifest. `tests/fixtures/v2/` contains separate synthetic
+v2 examples, not the supplied course reference. Never deploy these directories.
+Public `assignments/manifest.json` starts with an empty allowlist and no unit files.
 `teacher_data/` and `export/` are ignored private local directories; keep actual
 drafts outside any served web directory. Validation does not upload or export.
 
@@ -107,3 +128,4 @@ xvfb-run -a python tests/gui_smoke.py
 Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-validation.md),
 [Phase 2](docs/phase-2-results.md). Development stops at Phase 2 pending instructor
 review of the actual GUI workflow.
+See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

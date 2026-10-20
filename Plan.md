@@ -4,6 +4,13 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> Approved authoring revision, 2026-10-20: see `docs/data-contract-v2.md` and
+> `docs/phase-2-multianswer-results.md`. Public v1 remains supported. V2 permits
+> three/four options and multiple teacher-accepted labels while each student
+> chooses one. Manifest stays v1. The original four-choice/single-answer rules
+> below describe v1; v2 authoring follows the approved supplement in `AGENTS.md`.
+> This revision remains within schema/editor work; Phase 3 is still awaiting review.
+
 ## 1. Project objective
 
 Build a low-maintenance, game-based assignment website for a Digital Electronics EMI course. The game motivates students to watch **English-language question videos**, answer four-choice questions, and optionally watch English-language answer-explanation videos. The instructor uses **Google Forms**—not the game server—to receive student names/student IDs and award submission credit.

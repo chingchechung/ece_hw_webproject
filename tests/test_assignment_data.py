@@ -8,7 +8,7 @@ import unittest
 
 from tests.contract_cases import contract_cases, fixture
 from tools.assignment_data import (
-    SCHEMA_DIR, UNIT_SCHEMA, normalize_manifest, normalize_unit,
+    SCHEMA_DIR, UNIT_SCHEMA, UNIT_SCHEMA_V2, normalize_manifest, normalize_unit,
     read_json, validate_manifest, validate_unit,
 )
 from tools.validate_assignments import main, validate_path
@@ -94,13 +94,16 @@ class AssignmentContractTests(unittest.TestCase):
             self.skipTest("Optional jsonschema package unavailable; runtime validators use stdlib only")
         manifest_schema = read_json(SCHEMA_DIR / "manifest-v1.schema.json")
         validators = {}
-        for kind, schema in (("unit", UNIT_SCHEMA), ("manifest", manifest_schema)):
+        for kind, schema in (("unit", UNIT_SCHEMA), ("unit_v2", UNIT_SCHEMA_V2), ("manifest", manifest_schema)):
             Draft202012Validator.check_schema(schema)
             validators[kind] = Draft202012Validator(schema)
         for case in contract_cases():
             with self.subTest(case=case["name"]):
                 normalized = normalize_unit(case["data"]) if case["kind"] == "unit" else normalize_manifest(case["data"])
-                errors = list(validators[case["kind"]].iter_errors(normalized))
+                kind = case["kind"]
+                if kind == "unit" and isinstance(normalized, dict) and normalized.get("schemaVersion") == 2:
+                    kind = "unit_v2"
+                errors = list(validators[kind].iter_errors(normalized))
                 expected = case["valid"]
                 # A unit's filename is external context, not part of its JSON schema.
                 runtime_errors = validate_case(case)

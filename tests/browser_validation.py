@@ -11,6 +11,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tests.contract_cases import contract_cases
+from tests.contract_cases_v2 import answer_cases
 from tools.assignment_data import normalize_manifest, normalize_unit, validate_manifest, validate_unit
 
 
@@ -51,6 +52,17 @@ class BrowserValidationTests(unittest.TestCase):
                             normalized = normalize_unit(case["data"]) if unit else normalize_manifest(case["data"])
                             self.assertEqual(result, {"errors": [e.as_dict() for e in issues], "normalized": normalized})
                             self.assertEqual(not result["errors"], case["valid"])
+                    answers = answer_cases()
+                    actual = page.evaluate("items=>items.map(item=>AssignmentValidator.acceptsAnswer(item.question,item.selected))", answers)
+                    self.assertEqual(actual, [item["expected"] for item in answers])
+                    v1 = next(item["data"] for item in cases if item["kind"] == "unit" and item["valid"] and item["data"]["schemaVersion"] == 1)
+                    v2 = next(item["data"] for item in cases if item["kind"] == "unit" and item["valid"] and item["data"]["schemaVersion"] == 2)
+                    strict = page.evaluate("""([v1,v2]) => [
+                      AssignmentValidator.validateUnitV1(v1).length === 0,
+                      AssignmentValidator.validateUnitV1(v2).length > 0,
+                      AssignmentValidator.validateUnitV2(v2).length === 0,
+                      AssignmentValidator.validateUnitV2(v1).length > 0]""", [v1, v2])
+                    self.assertEqual(strict, [True]*4)
                     self.assertEqual(errors, [])
                 finally:
                     browser.close()

@@ -1,7 +1,7 @@
-"""Offline v1 publish validation. Incomplete drafts need not pass this validator.
+"""Offline versioned v1/v2 publish validation. Incomplete drafts may be saved.
 
 Validation never mutates input. Normalize ordinary text for export with
-normalize_unit(); IDs and correctOption are exact identifiers and are not changed.
+normalize_unit(); IDs and accepted-answer labels are exact and are not changed.
 No GUI, network operations, publishing or filesystem writes occur here.
 """
 from copy import deepcopy
@@ -12,6 +12,7 @@ import re
 
 SCHEMA_DIR = Path(__file__).resolve().parents[1] / "schemas"
 UNIT_SCHEMA = json.loads((SCHEMA_DIR / "assignment-v1.schema.json").read_text(encoding="utf-8"))
+UNIT_SCHEMA_V2 = json.loads((SCHEMA_DIR / "assignment-v2.schema.json").read_text(encoding="utf-8"))
 UNIT_ID = re.compile(r"^S(0[1-9]|1[0-2])$")
 YOUTUBE_URL = re.compile(UNIT_SCHEMA["$defs"]["youtubeUrl"]["pattern"])
 FORM_URL = re.compile(UNIT_SCHEMA["$defs"]["googleFormUrl"]["pattern"])
@@ -65,8 +66,9 @@ def normalize_manifest(data):
 
 
 class _Checks:
-    def __init__(self):
+    def __init__(self, schema_version=1):
         self.errors = []
+        self.schema_version = schema_version
 
     def add(self, path, code, message):
         self.errors.append(ValidationIssue(path, code, message))
@@ -76,7 +78,7 @@ class _Checks:
             self.add(path, "type", "Expected an object.")
             return False
         for key in sorted(set(value) - set(allowed)):
-            self.add(f"{path}.{key}", "unknown_field", "Unknown field in schema v1.")
+            self.add(f"{path}.{key}", "unknown_field", f"Unknown field in schema v{self.schema_version}.")
         return True
 
     def text(self, obj, key, path, required=True):
@@ -96,8 +98,8 @@ class _Checks:
 
     def version(self, obj, path):
         value = obj.get("schemaVersion")
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or value != 1:
-            self.add(f"{path}.schemaVersion", "schema_version", "schemaVersion must be the number 1.")
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value != self.schema_version:
+            self.add(f"{path}.schemaVersion", "schema_version", f"schemaVersion must be the number {self.schema_version}.")
 
     def unit_id(self, obj, path):
         value = self.text(obj, "unitId", path)
@@ -111,10 +113,9 @@ class _Checks:
             self.add(f"{path}.{key}", "url", message)
 
 
-def validate_unit(data, filename=None):
-    """Return precise publish errors; pass the basename at every file boundary."""
+def _validate_unit(data, filename, version):
     data = normalize_unit(data)
-    check = _Checks()
+    check = _Checks(version)
     if not check.obj(data, "$", UNIT_KEYS):
         return check.errors
     check.version(data, "$")
@@ -132,7 +133,8 @@ def validate_unit(data, filename=None):
         check.add("$.questions", "question_count", "A published unit needs exactly 4 or 5 questions.")
     for index, question in enumerate(questions):
         path = f"$.questions[{index}]"
-        if not check.obj(question, path, QUESTION_KEYS):
+        keys = QUESTION_KEYS if version == 1 else tuple("correctOptions" if key == "correctOption" else key for key in QUESTION_KEYS)
+        if not check.obj(question, path, keys):
             continue
         question_id = check.text(question, "id", path)
         expected = f"Q{index + 1:02}"
@@ -144,20 +146,81 @@ def validate_unit(data, filename=None):
             check.url(question, field, path, YOUTUBE_URL, "Expected a supported HTTPS YouTube video URL; replace placeholders.")
         options = question.get("options")
         if not isinstance(options, list):
-            check.add(f"{path}.options", "type", "Expected an array of four options in A-D order.")
+            message = "Expected an array of four options in A-D order." if version == 1 else "Expected an array of three or four options in A-D order."
+            check.add(f"{path}.options", "type", message)
         else:
-            if len(options) != 4:
-                check.add(f"{path}.options", "option_count", "Exactly four options are required in A-D order.")
+            if len(options) not in ((4,) if version == 1 else (3, 4)):
+                message = "Exactly four options are required in A-D order." if version == 1 else "Exactly three or four options are required in A-D order."
+                check.add(f"{path}.options", "option_count", message)
             for option_index, option in enumerate(options):
                 option_path = f"{path}.options[{option_index}]"
                 if not isinstance(option, str):
                     check.add(option_path, "type", "Expected a string.")
                 elif not option:
                     check.add(option_path, "blank", "Must not be blank.")
-        answer = check.text(question, "correctOption", path)
-        if answer is not None and answer not in ("A", "B", "C", "D"):
-            check.add(f"{path}.correctOption", "answer", "Choose exactly one of A, B, C, D.")
+        if version == 1:
+            answer = check.text(question, "correctOption", path)
+            if answer is not None and answer not in ("A", "B", "C", "D"):
+                check.add(f"{path}.correctOption", "answer", "Choose exactly one of A, B, C, D.")
+        else:
+            _check_accepted_answers(check, question, path, options)
     return check.errors
+
+
+def _check_accepted_answers(check, question, path, options):
+    field = f"{path}.correctOptions"
+    if "correctOptions" not in question:
+        check.add(field, "required", "Required field is missing.")
+        return
+    answers = question["correctOptions"]
+    if not isinstance(answers, list):
+        check.add(field, "type", "Expected an array of accepted answer labels.")
+        return
+    if not answers:
+        check.add(field, "answer_count", "Select at least one accepted answer.")
+    seen = set()
+    for index, answer in enumerate(answers):
+        item_path = f"{field}[{index}]"
+        if not isinstance(answer, str):
+            check.add(item_path, "type", "Expected a string.")
+            continue
+        if answer not in ("A", "B", "C", "D"):
+            check.add(item_path, "answer", "Accepted labels must be A, B, C or D.")
+        elif isinstance(options, list) and "ABCD".index(answer) >= len(options):
+            check.add(item_path, "answer_range", "Accepted label has no corresponding option.")
+        if answer in seen:
+            check.add(item_path, "duplicate_answer", "Accepted labels must be distinct.")
+        seen.add(answer)
+
+
+def validate_unit_v1(data, filename=None):
+    """The original strict v1 contract; never converts or accepts v2 data."""
+    return _validate_unit(data, filename, 1)
+
+
+def validate_unit_v2(data, filename=None):
+    return _validate_unit(data, filename, 2)
+
+
+def validate_unit(data, filename=None):
+    """Dispatch explicitly by schemaVersion; preserve the v1 fallback errors."""
+    if isinstance(data, dict) and data.get("schemaVersion") == 2:
+        return validate_unit_v2(data, filename)
+    return validate_unit_v1(data, filename)
+
+
+def accepts_answer(question, selected):
+    """Pure single-choice rule for future integration; does not modify gameplay."""
+    if not isinstance(question, dict) or not isinstance(selected, str) or selected not in ("A", "B", "C", "D"):
+        return False
+    options = question.get("options")
+    if not isinstance(options, list) or "ABCD".index(selected) >= len(options):
+        return False
+    if "correctOptions" in question:
+        check = _Checks(2)
+        _check_accepted_answers(check, question, "$", options)
+        return "correctOption" not in question and not check.errors and len(options) in (3, 4) and selected in question["correctOptions"]
+    return len(options) == 4 and selected == question.get("correctOption")
 
 
 def validate_manifest(data):

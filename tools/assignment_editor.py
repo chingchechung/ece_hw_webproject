@@ -80,13 +80,15 @@ class AssignmentEditor(ttk.Frame):
     def __init__(self, master, model=None):
         super().__init__(master, padding=10)
         self.pack(fill="both", expand=True)
-        self.model = model or EditorModel()
+        self.model = model or EditorModel(schema_version=2)
         self.current_id = "S01"
         self.private_dir = DEFAULT_PRIVATE_DIR
         self.export_dir = None
         self.loading = False
         self.question_fields = []
         self.answer_buttons = []
+        self.option_counts = []
+        self.option_count_boxes = []
         self.actions = {}
         self.title_font = tkfont.nametofont("TkDefaultFont").copy()
         self.title_font.configure(size=15, weight="bold")
@@ -117,6 +119,7 @@ class AssignmentEditor(ttk.Frame):
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x")
         self._button(toolbar, "Load / Import...", self.load_import, "load")
+        self._button(toolbar, "Import Reference...", lambda: self.load_import(reference=True), "reference")
         self._button(toolbar, "Open Draft Folder...", self.open_draft_folder, "open_folder")
         self._button(toolbar, "Save Draft", self.save_draft, "save")
         self._button(toolbar, "Save Draft As...", lambda: self.save_draft(save_as=True), "save_as")
@@ -141,8 +144,13 @@ class AssignmentEditor(ttk.Frame):
 
         editor = ttk.Frame(panes)
         panes.add(editor, weight=3)
-        self.unit_heading = ttk.Label(editor, font=self.heading_font)
-        self.unit_heading.pack(anchor="w")
+        heading = ttk.Frame(editor)
+        heading.pack(fill="x")
+        self.unit_heading = ttk.Label(heading, font=self.heading_font)
+        self.unit_heading.pack(side="left")
+        self.convert_button = ttk.Button(heading, text="Convert v1 to v2...", command=self.convert_to_v2)
+        self.convert_button.pack(side="right")
+        self.actions["convert"] = self.convert_button
         header = ttk.Frame(editor)
         header.pack(fill="x", pady=6)
         header.columnconfigure(1, weight=1)
@@ -214,6 +222,8 @@ class AssignmentEditor(ttk.Frame):
         return field
 
     def _question_tab(self, question):
+        version = self.model.drafts[self.current_id].unit["schemaVersion"]
+        question_index = len(self.question_fields)
         scroll = ScrollableFrame(self.notebook)
         self.notebook.add(scroll, text=question["id"])
         body = scroll.body
@@ -226,17 +236,37 @@ class AssignmentEditor(ttk.Frame):
             ("explanationVideoUrl", "English explanation YouTube URL *", False),
         )):
             fields[key] = self._field(body, row, label, question[key], multiline)
-        ttk.Label(body, text="Options A-D *\nSelect ONE correct answer").grid(row=4, column=0, sticky="nw", pady=8)
+        label = "Options A-D *\nSelect ONE correct answer (v1)" if version == 1 else "Accepted answers *\nCheck ALL accepted labels.\nStudent chooses just ONE."
+        ttk.Label(body, text=label).grid(row=4, column=0, sticky="nw", pady=8)
         options_box = ttk.Frame(body)
         options_box.grid(row=4, column=1, sticky="ew", pady=4)
         options_box.columnconfigure(1, weight=1)
-        answer = tk.StringVar(value=question["correctOption"])
-        answer.trace_add("write", self._edited)
-        fields["correctOption"] = answer
+        option_count = tk.StringVar(value=str(len(question["options"])))
+        self.option_counts.append(option_count)
+        if version == 2:
+            count_row = ttk.Frame(options_box)
+            count_row.grid(row=0, column=0, columnspan=2, sticky="w")
+            ttk.Label(count_row, text="Choices:").pack(side="left", padx=(0, 6))
+            count_box = ttk.Combobox(count_row, textvariable=option_count, values=("3", "4"), width=3, state="readonly")
+            count_box.pack(side="left")
+            count_box.bind("<<ComboboxSelected>>", lambda _event: self.change_option_count(question_index, int(option_count.get())))
+            self.option_count_boxes.append(count_box)
+            fields["correctOptions"] = []
+        else:
+            self.option_count_boxes.append(None)
+            answer = tk.StringVar(value=question["correctOption"])
+            answer.trace_add("write", self._edited)
+            fields["correctOption"] = answer
         fields["options"] = []
         buttons = []
-        for row, (letter, option) in enumerate(zip("ABCD", question["options"], strict=True)):
-            button = ttk.Radiobutton(options_box, text=letter, value=letter, variable=answer)
+        for row, (letter, option) in enumerate(zip("ABCD"[:len(question["options"])], question["options"], strict=True), start=1):
+            if version == 2:
+                accepted = tk.BooleanVar(value=letter in question["correctOptions"])
+                accepted.trace_add("write", self._edited)
+                fields["correctOptions"].append(accepted)
+                button = ttk.Checkbutton(options_box, text=letter, variable=accepted)
+            else:
+                button = ttk.Radiobutton(options_box, text=letter, value=letter, variable=answer)
             button.grid(row=row, column=0, sticky="w", padx=(0, 8), pady=4)
             buttons.append(button)
             option_field = tk.StringVar(value=option)
@@ -258,7 +288,12 @@ class AssignmentEditor(ttk.Frame):
         draft.allow_play = self.allow_play.get()
         for question, fields in zip(draft.unit["questions"], self.question_fields, strict=True):
             for key, field in fields.items():
-                question[key] = [self._value(item) for item in field] if key == "options" else self._value(field)
+                if key == "correctOptions":
+                    selected = [letter for letter, variable in zip("ABCD", field) if variable.get()]
+                    previous = question["correctOptions"]
+                    question[key] = [letter for letter in previous if letter in selected] + [letter for letter in selected if letter not in previous]
+                else:
+                    question[key] = [self._value(item) for item in field] if key == "options" else self._value(field)
 
     def _edited(self, *_args):
         if not self.loading:
@@ -273,7 +308,8 @@ class AssignmentEditor(ttk.Frame):
             state = self.model.export_state(unit_id, self.export_dir) if self.export_dir else "-"
             self.tree.item(unit_id, values=(draft.unit["title"], saved + completeness, "Yes" if draft.allow_play else "No", state))
         draft = self.model.drafts[self.current_id]
-        self.unit_heading.configure(text=f"{self.current_id} - {'Unsaved changes' if draft.dirty else ('Saved draft' if draft.path else 'New draft')}")
+        self.unit_heading.configure(text=f"{self.current_id} | v{draft.unit['schemaVersion']} | {'Unsaved changes' if draft.dirty else ('Saved' if draft.path else 'New')}")
+        self.convert_button.configure(state="normal" if draft.unit["schemaVersion"] == 1 else "disabled")
 
     def show_unit(self, unit_id):
         self.loading = True
@@ -287,6 +323,8 @@ class AssignmentEditor(ttk.Frame):
             self.draft_path.set(f"Private draft: {draft.path or 'not saved yet'}")
             self.question_fields = []
             self.answer_buttons = []
+            self.option_counts = []
+            self.option_count_boxes = []
             for tab in self.notebook.tabs():
                 self.notebook.nametowidget(tab).destroy()
             for question in draft.unit["questions"]:
@@ -331,6 +369,30 @@ class AssignmentEditor(ttk.Frame):
         self.show_unit(self.current_id)
         self.report("Q05 is retained privately when choosing four questions and restored when choosing five. It is excluded from four-question exports.")
 
+    def change_option_count(self, question_index, count):
+        self.flush()
+        self.model.drafts[self.current_id].set_option_count(question_index, count)
+        self.show_unit(self.current_id)
+        self.notebook.select(question_index)
+        self.report("Option D text and acceptance are retained privately when choosing three choices, then restored when choosing four. A removed D is not an active accepted answer.")
+
+    def convert_to_v2(self):
+        self.flush()
+        draft = self.model.drafts[self.current_id]
+        if draft.unit["schemaVersion"] != 1:
+            return False
+        if not messagebox.askyesno("Convert v1 to v2?", "Create an unsaved v2 copy? Each existing correctOption becomes a one-item correctOptions list.\n\nThe loaded v1 file stays unchanged. Save the converted draft to a new filename to keep both versions.", parent=self):
+            return False
+        try:
+            converted = draft.converted_to_v2()
+        except (OSError, ValueError) as error:
+            self._show_error(error)
+            return False
+        self.model.install(converted)
+        self.show_unit(self.current_id)
+        self.report("Converted in memory to v2. Existing v1 files were not changed. Save Draft As to a new private filename, then re-export units and manifest when ready.")
+        return True
+
     def _show_error(self, error):
         self.report(str(error))
         summary = f"{len(error.messages)} issues. See the Validation and messages panel." if isinstance(error, ValidationError) else str(error)
@@ -370,12 +432,13 @@ class AssignmentEditor(ttk.Frame):
         choice = messagebox.askyesnocancel("Replace unsaved draft?", f"Save changes to {unit_id} before replacing it?\n\nYes: save first. No: discard these unsaved changes. Cancel: keep editing.", parent=self)
         return choice is not None and (not choice or self.save_draft(unit_id))
 
-    def load_import(self):
-        filename = filedialog.askopenfilename(parent=self, title="Load private draft or import Sxx.json", initialdir=str(self.private_dir if self.private_dir.exists() else Path.home()), filetypes=[("JSON", "*.json"), ("All files", "*")])
+    def load_import(self, reference=False):
+        title = "Import authoring reference (not a published unit)" if reference else "Load private draft or import Sxx.json"
+        filename = filedialog.askopenfilename(parent=self, title=title, initialdir=str(self.private_dir if self.private_dir.exists() else Path.home()), filetypes=[("JSON", "*.json"), ("All files", "*")])
         if not filename:
             return False
         try:
-            draft = load_document(filename)
+            draft = load_document(filename, allow_reference_filename=reference)
             unit_id = draft.unit["unitId"]
             if not self._may_replace(unit_id):
                 return False
@@ -421,7 +484,8 @@ class AssignmentEditor(ttk.Frame):
 
     def new_unit(self):
         if self._may_replace(self.current_id):
-            self.model.install(UnitDraft.new(self.current_id))
+            version = self.model.drafts[self.current_id].unit["schemaVersion"]
+            self.model.install(UnitDraft.new(self.current_id, int(version)))
             self.show_unit(self.current_id)
             self.report(f"New blank {self.current_id} draft. Previous saved files were not removed.")
 
@@ -497,13 +561,30 @@ class AssignmentEditor(ttk.Frame):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args(argv)
+    files = parser.add_mutually_exclusive_group()
+    files.add_argument("--draft", type=Path, help="Explicitly open a local private draft or Sxx.json")
+    files.add_argument("--reference", type=Path, help="Import local authoring JSON with any filename, without publishing")
+    args = parser.parse_args(argv)
+    model = EditorModel(schema_version=2)
+    loaded = None
+    if args.draft or args.reference:
+        try:
+            loaded = load_document(args.draft or args.reference, allow_reference_filename=args.reference is not None)
+            model.install(loaded)
+        except (OSError, ValueError) as error:
+            print(f"Cannot load authoring data: {error}", file=sys.stderr)
+            return 2
     try:
         root = tk.Tk()
     except tk.TclError as error:
         print(f"Cannot open the editor display: {error}\nRun on your desktop with Python Tcl/Tk installed.", file=sys.stderr)
         return 1
-    AssignmentEditor(root)
+    editor = AssignmentEditor(root, model)
+    if loaded:
+        editor.show_unit(loaded.unit["unitId"])
+        if loaded.path:
+            editor.private_dir = loaded.path.parent
+        editor.report("Opened the explicitly selected local authoring data. Validate before export; Allow Play and exports remain separate local actions.")
     root.mainloop()
     return 0
 

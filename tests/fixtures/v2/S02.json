@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 2,
+  "unitId": "S02",
+  "title": "TEST ONLY v2 - TEST ONLY — 5 questions",
+  "googleFormUrl": "https://forms.gle/AbCdEf1234567890",
+  "questions": [
+    {
+      "id": "Q01",
+      "title": "TEST ONLY — Question 1",
+      "prompt": "Dummy content for validation tests; not a course assignment. 測試",
+      "questionVideoUrl": "https://www.youtube.com/watch?v=xDARFvArIpc",
+      "explanationVideoUrl": "https://youtu.be/ChtmE09BSy0",
+      "options": [
+        "Dummy A",
+        "Dummy B",
+        "Dummy C"
+      ],
+      "explanationText": "TEST ONLY; no educational claim.",
+      "correctOptions": [
+        "A"
+      ]
+    },
+    {
+      "id": "Q02",
+      "title": "TEST ONLY — Question 2",
+      "prompt": "Dummy content for validation tests; not a course assignment. 測試",
+      "questionVideoUrl": "https://www.youtube.com/watch?v=xDARFvArIpc",
+      "explanationVideoUrl": "https://youtu.be/ChtmE09BSy0",
+      "options": [
+        "Dummy A",
+        "Dummy B",
+        "Dummy C",
+        "Dummy D"
+      ],
+      "explanationText": "TEST ONLY; no educational claim.",
+      "correctOptions": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "Q03",
+      "title": "TEST ONLY — Question 3",
+      "prompt": "Dummy content for validation tests; not a course assignment. 測試",
+      "questionVideoUrl": "https://www.youtube.com/watch?v=xDARFvArIpc",
+      "explanationVideoUrl": "https://youtu.be/ChtmE09BSy0",
+      "options": [
+        "Dummy A",
+        "Dummy B",
+        "Dummy C"
+      ],
+      "explanationText": "TEST ONLY; no educational claim.",
+      "correctOptions": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "Q04",
+      "title": "TEST ONLY — Question 4",
+      "prompt": "Dummy content for validation tests; not a course assignment. 測試",
+      "questionVideoUrl": "https://www.youtube.com/watch?v=xDARFvArIpc",
+      "explanationVideoUrl": "https://youtu.be/ChtmE09BSy0",
+      "options": [
+        "Dummy A",
+        "Dummy B",
+        "Dummy C",
+        "Dummy D"
+      ],
+      "explanationText": "TEST ONLY; no educational claim.",
+      "correctOptions": [
+        "A"
+      ]
+    },
+    {
+      "id": "Q05",
+      "title": "TEST ONLY — Question 5",
+      "prompt": "Dummy content for validation tests; not a course assignment. 測試",
+      "questionVideoUrl": "https://www.youtube.com/watch?v=xDARFvArIpc",
+      "explanationVideoUrl": "https://youtu.be/ChtmE09BSy0",
+      "options": [
+        "Dummy A",
+        "Dummy B",
+        "Dummy C"
+      ],
+      "explanationText": "TEST ONLY; no educational claim.",
+      "correctOptions": [
+        "B",
+        "C"
+      ]
+    }
+  ]
+}

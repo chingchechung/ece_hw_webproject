@@ -171,4 +171,5 @@ def contract_cases():
     data = fixture("manifest.json")
     data["units"][1] = dict(data["units"][0], title="Other title")
     add("duplicate unit with other title", data, kind="manifest")
-    return cases
+    from tests.contract_cases_v2 import v2_contract_cases
+    return cases + v2_contract_cases()

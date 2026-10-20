@@ -1,6 +1,6 @@
 """Offline authoring state and local-only file operations, independent of Tk.
 
-The private draft envelope is separate from the unchanged public v1 schema.
+Private draft envelopes are versioned separately from public v1/v2 schemas.
 All publish decisions reuse assignment_data; there is no second publish validator.
 """
 from copy import deepcopy
@@ -40,19 +40,25 @@ class FileConflict(EditorError):
     pass
 
 
-def blank_question(index):
-    return {
+def blank_question(index, schema_version=1):
+    question = {
         "id": f"Q{index:02}", "title": "", "prompt": "",
         "questionVideoUrl": "", "explanationVideoUrl": "",
         "options": ["", "", "", ""], "correctOption": "", "explanationText": "",
     }
+    if schema_version == 2:
+        del question["correctOption"]
+        question["correctOptions"] = []
+    return question
 
 
-def blank_unit(unit_id):
+def blank_unit(unit_id, schema_version=1):
     if unit_id not in UNIT_IDS:
         raise EditorError("Select a unit from S01 through S12.")
-    return {"schemaVersion": 1, "unitId": unit_id, "title": "", "googleFormUrl": "",
-            "questions": [blank_question(i) for i in range(1, 5)]}
+    if type(schema_version) is not int or schema_version not in (1, 2):
+        raise EditorError("Choose assignment schema version 1 or 2.")
+    return {"schemaVersion": schema_version, "unitId": unit_id, "title": "", "googleFormUrl": "",
+            "questions": [blank_question(i, schema_version) for i in range(1, 5)]}
 
 
 def digest(path):
@@ -135,16 +141,21 @@ def editable_unit(raw):
     if not isinstance(raw, dict) or raw.get("unitId") not in UNIT_IDS:
         raise EditorError("Imported unit must identify S01 through S12.")
     result = deepcopy(raw)
-    defaults = blank_unit(raw["unitId"])
+    version = result.get("schemaVersion")
+    if isinstance(version, bool) or version not in (1, 2):
+        raise EditorError("Unsupported assignment schemaVersion; expected 1 or 2.")
+    defaults = blank_unit(raw["unitId"], int(version))
     for key in UNIT_KEYS:
         if key not in result and key not in ("schemaVersion", "unitId"):
             result[key] = deepcopy(defaults[key])
     if isinstance(result.get("questions"), list):
         for index, question in enumerate(result["questions"]):
             if isinstance(question, dict):
-                for key, value in blank_question(index + 1).items():
+                for key, value in blank_question(index + 1, int(version)).items():
                     question.setdefault(key, deepcopy(value))
     structural_codes = {"type", "unknown_field", "schema_version", "unit_id", "question_id", "question_count", "option_count"}
+    if version == 2:
+        structural_codes.update(("answer", "answer_range", "duplicate_answer"))
     errors = [issue for issue in validate_unit(result) if issue.code in structural_codes]
     if errors:
         raise ValidationError([f"{result['unitId']} {issue.path}: {issue.message}" for issue in errors])
@@ -157,18 +168,23 @@ class UnitDraft:
     allow_play: bool = False
     parked_question: dict | None = None
     path: Path | None = None
+    parked_options: dict = field(default_factory=dict)
     _saved_document: dict | None = field(default=None, repr=False)
     _disk_digest: str | None = field(default=None, repr=False)
 
     @classmethod
-    def new(cls, unit_id):
-        draft = cls(blank_unit(unit_id))
+    def new(cls, unit_id, schema_version=1):
+        draft = cls(blank_unit(unit_id, schema_version))
         draft._saved_document = deepcopy(draft.document())
         return draft
 
     def document(self):
-        return {"draftVersion": 1, "allowPlay": self.allow_play,
-                "unit": deepcopy(self.unit), "parkedQuestion": deepcopy(self.parked_question)}
+        version = int(self.unit["schemaVersion"])
+        document = {"draftVersion": version, "allowPlay": self.allow_play,
+                    "unit": deepcopy(self.unit), "parkedQuestion": deepcopy(self.parked_question)}
+        if version == 2:
+            document["parkedOptions"] = deepcopy(self.parked_options)
+        return document
 
     @property
     def dirty(self):
@@ -181,8 +197,48 @@ class UnitDraft:
         if count == 4 and len(questions) == 5:
             self.parked_question = questions.pop()
         elif count == 5 and len(questions) == 4:
-            questions.append(deepcopy(self.parked_question) if self.parked_question is not None else blank_question(5))
+            questions.append(deepcopy(self.parked_question) if self.parked_question is not None else blank_question(5, self.unit["schemaVersion"]))
             self.parked_question = None
+
+    def set_option_count(self, question_index, count):
+        if self.unit["schemaVersion"] != 2:
+            raise EditorError("Convert this v1 draft to v2 before changing option count.")
+        if count not in (3, 4):
+            raise EditorError("Choose three or four options.")
+        question = self.unit["questions"][question_index]
+        question_id = question["id"]
+        if count == 3 and len(question["options"]) == 4:
+            answers = question["correctOptions"]
+            self.parked_options[question_id] = {
+                "text": question["options"].pop(), "accepted": "D" in answers,
+                "position": answers.index("D") if "D" in answers else None,
+            }
+            question["correctOptions"] = [answer for answer in answers if answer != "D"]
+        elif count == 4 and len(question["options"]) == 3:
+            parked = self.parked_options.pop(question_id, {"text": "", "accepted": False, "position": None})
+            question["options"].append(parked["text"])
+            if parked["accepted"]:
+                question["correctOptions"].insert(min(parked["position"], len(question["correctOptions"])), "D")
+
+    def converted_to_v2(self):
+        """Explicit migration creates an unsaved copy and never overwrites v1 source."""
+        if self.unit["schemaVersion"] != 1:
+            raise EditorError("Only v1 drafts can be converted to v2.")
+        unit = deepcopy(self.unit)
+        questions = unit["questions"]
+        parked = deepcopy(self.parked_question)
+        if parked is not None:
+            questions.append(parked)
+        for question in questions:
+            answer = question["correctOption"]
+            if answer not in ("", "A", "B", "C", "D"):
+                raise EditorError(f"{question['id']}: fix the v1 correctOption before conversion.")
+            question["correctOptions"] = [answer] if answer else []
+            del question["correctOption"]
+        unit["schemaVersion"] = 2
+        if parked is not None:
+            parked = questions.pop()
+        return UnitDraft(unit, allow_play=self.allow_play, parked_question=parked)
 
     def validate(self):
         return validate_unit(self.unit, f"{self.unit['unitId']}.json")
@@ -200,21 +256,27 @@ class UnitDraft:
         self._saved_document = deepcopy(document)
 
 
-def load_document(path):
-    """Read a private draft or import a public v1 unit; no model changes on error."""
+def load_document(path, *, allow_reference_filename=False):
+    """Read a v1/v2 draft/unit; reference filenames require explicit authoring import."""
     path = Path(path)
     source_digest = digest(path)
     raw = read_json(path)
     if digest(path) != source_digest:
         raise FileConflict("The source file changed while loading. Try loading it again.")
     if isinstance(raw, dict) and "draftVersion" in raw:
-        if type(raw["draftVersion"]) is not int or raw["draftVersion"] != 1:
-            raise EditorError("Unsupported private draftVersion; expected 1.")
-        if set(raw) != {"draftVersion", "allowPlay", "unit", "parkedQuestion"}:
-            raise EditorError("Private draft fields are draftVersion, allowPlay, unit, parkedQuestion.")
+        version = raw["draftVersion"]
+        if type(version) is not int or version not in (1, 2):
+            raise EditorError("Unsupported private draftVersion; expected 1 or 2.")
+        keys = {"draftVersion", "allowPlay", "unit", "parkedQuestion"}
+        if version == 2:
+            keys.add("parkedOptions")
+        if set(raw) != keys:
+            raise EditorError(f"Private draft v{version} fields must be exactly: {', '.join(sorted(keys))}.")
         if type(raw["allowPlay"]) is not bool:
             raise EditorError("Private allowPlay must be a checkbox boolean.")
         draft = UnitDraft(editable_unit(raw["unit"]), raw["allowPlay"])
+        if draft.unit["schemaVersion"] != version:
+            raise EditorError("draftVersion and unit schemaVersion must match; use explicit conversion for migration.")
         parked = raw["parkedQuestion"]
         if parked is not None:
             if len(draft.unit["questions"]) != 4:
@@ -222,21 +284,47 @@ def load_document(path):
             test_unit = deepcopy(draft.unit)
             test_unit["questions"].append(parked)
             draft.parked_question = editable_unit(test_unit)["questions"][4]
+        if version == 2:
+            draft.parked_options = _read_parked_options(raw["parkedOptions"], draft)
         draft.path = path
         draft._disk_digest = source_digest
         draft._saved_document = deepcopy(draft.document())
+        if allow_reference_filename:
+            # Explicit reference import copies content, never private release intent.
+            draft.allow_play = False
+            draft.path = None
+            draft._disk_digest = None
+            draft._saved_document = None
         return draft
     unit = editable_unit(raw)
     filename_errors = [issue for issue in validate_unit(unit, path.name) if issue.code == "filename"]
-    if filename_errors:
+    if filename_errors and not allow_reference_filename:
         raise EditorError(filename_errors[0].message)
     # Imports never adopt a public file as the private save target or allow play.
     return UnitDraft(unit)
 
 
+def _read_parked_options(value, draft):
+    if not isinstance(value, dict):
+        raise EditorError("parkedOptions must be an object.")
+    questions = draft.unit["questions"] + ([draft.parked_question] if draft.parked_question else [])
+    by_id = {question["id"]: question for question in questions}
+    for question_id, option in value.items():
+        if question_id not in by_id or len(by_id[question_id]["options"]) != 3:
+            raise EditorError("Retained D requires an existing three-option question (active or retained Q05).")
+        if not isinstance(option, dict) or set(option) != {"text", "accepted", "position"}:
+            raise EditorError("Retained D requires text, accepted and position fields.")
+        if not isinstance(option["text"], str) or type(option["accepted"]) is not bool:
+            raise EditorError("Retained D text must be a string and accepted must be boolean.")
+        position = option["position"]
+        if (option["accepted"] and (type(position) is not int or position not in range(4))) or (not option["accepted"] and position is not None):
+            raise EditorError("Retained D position must be 0-3 when accepted, otherwise null.")
+    return deepcopy(value)
+
+
 class EditorModel:
-    def __init__(self):
-        self.drafts = {unit_id: UnitDraft.new(unit_id) for unit_id in UNIT_IDS}
+    def __init__(self, schema_version=1):
+        self.drafts = {unit_id: UnitDraft.new(unit_id, schema_version) for unit_id in UNIT_IDS}
 
     def install(self, draft):
         self.drafts[draft.unit["unitId"]] = draft

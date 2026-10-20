@@ -1,4 +1,4 @@
-"""Read-only offline validation CLI. No export, upload, network or writes."""
+"""Read-only offline v1/v2 unit and v1 manifest validation. No uploads or writes."""
 import argparse
 from pathlib import Path
 import sys

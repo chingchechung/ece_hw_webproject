@@ -7,6 +7,7 @@ All generated draft/export content is synthetic and confined to a temp folder.
 from copy import deepcopy
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import tkinter as tk
@@ -20,16 +21,19 @@ from tools import assignment_editor as gui
 from tools.assignment_editor_model import UNIT_IDS, UnitDraft, load_document
 from tools.assignment_data import read_json, validate_manifest, validate_unit
 from tests.contract_cases import fixture
+from tests.contract_cases_v2 import fixture_v2
 
 
-class GuiSmokeTests(unittest.TestCase):
+class GuiTestSupport(unittest.TestCase):
+    schema_version = 1
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.directory = Path(self.temp.name)
         self.root = tk.Tk()
         self.callback_errors = []
         self.root.report_callback_exception = lambda *error: self.callback_errors.append(error)
-        self.app = gui.AssignmentEditor(self.root)
+        self.app = gui.AssignmentEditor(self.root, gui.EditorModel(schema_version=self.schema_version))
         self.root.update()
         for module, name, value in (
             (gui.messagebox, "askyesnocancel", None),
@@ -79,6 +83,10 @@ class GuiSmokeTests(unittest.TestCase):
         self.root.update()
         self.assertEqual(self.app.export_dir, folder)
         return folder
+
+
+class GuiSmokeTests(GuiTestSupport):
+    """Preserve the complete original Phase 2 regression suite in v1 mode."""
 
     def test_edit_save_reload_unicode_fifth_question_and_single_radio_answer(self):
         self.assertEqual(tuple(self.app.tree.get_children()), UNIT_IDS)
@@ -275,6 +283,196 @@ class GuiSmokeTests(unittest.TestCase):
             return  # Screenshot capture alone is optional; Tk test already ran.
         (ROOT / "test-results").mkdir(exist_ok=True)
         ImageGrab.grab(bbox=(20, 20, 1300, 900)).save(ROOT / "test-results/phase-2-editor.png")
+
+
+class GuiV2SmokeTests(GuiTestSupport):
+    schema_version = 2
+
+    def import_v2(self, five=False):
+        name = "S02.json" if five else "S01.json"
+        self.askopenfilename.return_value = str(ROOT / "tests/fixtures/v2" / name)
+        self.assertTrue(self.app.load_import())
+        self.root.update()
+
+    def choices(self, question_index, count):
+        box = self.app.option_count_boxes[question_index]
+        box.set(str(count))
+        box.event_generate("<<ComboboxSelected>>")
+        self.root.update()
+
+    def test_independent_checkboxes_and_retained_d_roundtrip_with_three_choice_q05(self):
+        self.import_v2(five=True)
+        self.assertEqual(len(self.app.question_fields), 5)
+        self.assertEqual(len(self.app.question_fields[4]["options"]), 3)
+        self.assertEqual(len(self.app.answer_buttons[4]), 3)
+        self.app.answer_buttons[0][2].invoke()
+        self.assertEqual(self.app.model.drafts["S02"].unit["questions"][0]["correctOptions"], ["A", "C"])
+        self.assertEqual(sum("selected" in button.state() for button in self.app.answer_buttons[0]), 2)
+        self.choices(0, 4)
+        self.app.question_fields[0]["options"][3].set("Retained D 中文")
+        self.app.answer_buttons[0][3].invoke()
+        self.choices(0, 3)
+        self.assertEqual(len(self.app.answer_buttons[0]), 3)
+        draft = self.app.model.drafts["S02"]
+        self.assertTrue(draft.parked_options["Q01"]["accepted"])
+        path = self.directory / "S02.draft.json"
+        self.asksaveasfilename.return_value = str(path)
+        self.assertTrue(self.app.save_draft())
+        self.app.actions["new"].invoke()
+        self.assertEqual(self.app.model.drafts["S02"].unit["schemaVersion"], 2)
+        self.askopenfilename.return_value = str(path)
+        self.assertTrue(self.app.load_import())
+        self.choices(0, 4)
+        self.assertEqual(self.app.question_fields[0]["options"][3].get(), "Retained D 中文")
+        self.assertTrue(self.app.question_fields[0]["correctOptions"][3].get())
+        self.assertTrue(self.app.question_fields[0]["correctOptions"][0].get())
+        self.assertTrue(self.app.question_fields[0]["correctOptions"][2].get())
+        self.app.notebook.select(4)
+        self.root.geometry("1280x880+20+20")
+        self.root.update()
+        try:
+            from PIL import ImageGrab
+        except ImportError:
+            return
+        (ROOT / "test-results").mkdir(exist_ok=True)
+        ImageGrab.grab(bbox=(20, 20, 1300, 900)).save(ROOT / "test-results/editor-v2.png")
+
+    def test_empty_accepted_answers_are_savable_and_block_public_export(self):
+        self.assertEqual(self.app.model.drafts["S01"].unit["schemaVersion"], 2)
+        self.assertEqual(self.app.model.drafts["S01"].unit["questions"][0]["correctOptions"], [])
+        path = self.directory / "S01.draft.json"
+        self.app.unit_title.set("未完成的 v2 🧪")
+        self.asksaveasfilename.return_value = str(path)
+        self.assertTrue(self.app.save_draft())
+        self.assertEqual(read_json(path)["draftVersion"], 2)
+        self.assertEqual(read_json(path)["unit"]["questions"][0]["correctOptions"], [])
+        self.select_export_folder()
+        self.assertFalse(self.app.export_selected())
+        self.assertIn("correctOptions", self.app.output.get("1.0", "end"))
+        self.app.answer_buttons[0][0].invoke()
+        self.app.answer_buttons[0][1].invoke()
+        self.assertTrue(self.app.save_draft())
+        self.assertEqual(read_json(path)["unit"]["questions"][0]["correctOptions"], ["A", "B"])
+
+    def test_v1_conversion_requires_confirmation_and_keeps_source_unchanged(self):
+        source = self.directory / "S01.draft.json"
+        legacy = UnitDraft(fixture(), allow_play=True)
+        legacy.save(source)
+        before = source.read_bytes()
+        self.askopenfilename.return_value = str(source)
+        self.assertTrue(self.app.load_import())
+        self.assertEqual(self.app.model.drafts["S01"].unit["schemaVersion"], 1)
+        self.assertFalse(self.app.convert_to_v2())
+        self.assertEqual(self.app.model.drafts["S01"].unit["schemaVersion"], 1)
+        self.askyesno.return_value = True
+        self.app.actions["convert"].invoke()
+        self.root.update()
+        converted = self.app.model.drafts["S01"]
+        self.assertEqual(converted.unit["schemaVersion"], 2)
+        self.assertIsNone(converted.path)
+        self.assertTrue(converted.dirty)
+        self.assertEqual(converted.unit["questions"][0]["correctOptions"], [fixture()["questions"][0]["correctOption"]])
+        self.assertTrue(all(button.winfo_class() == "TCheckbutton" for button in self.app.answer_buttons[0]))
+        self.assertEqual(source.read_bytes(), before)
+        self.assertIn("disabled", self.app.convert_button.state())
+
+    def test_v2_export_manifest_and_checkbox_change_staleness(self):
+        self.import_v2()
+        folder = self.select_export_folder()
+        self.app.allow_button.invoke()
+        self.assertTrue(self.app.export_selected())
+        self.assertTrue(self.app.export_manifest())
+        unit = read_json(folder / "S01.json")
+        self.assertEqual(unit["schemaVersion"], 2)
+        self.assertEqual(len(unit["questions"][0]["options"]), 3)
+        self.assertNotIn("correctOption", unit["questions"][0])
+        self.assertEqual(read_json(folder / "manifest.json")["schemaVersion"], 1)
+        self.app.answer_buttons[0][2].invoke()
+        self.assertFalse(self.app.export_manifest())
+        self.assertIn("Stale", self.app.output.get("1.0", "end"))
+        self.askyesno.return_value = True
+        self.assertTrue(self.app.export_selected())
+        self.assertTrue(self.app.export_manifest())
+        self.assertEqual(read_json(folder / "S01.json")["questions"][0]["correctOptions"], ["A", "C"])
+
+    def test_explicit_reference_import_keeps_urls_empty_and_chinese_text_unmodified(self):
+        data = fixture_v2("S02.json")
+        data["unitId"] = "S01"
+        data["googleFormUrl"] = ""
+        for question in data["questions"]:
+            question["questionVideoUrl"] = question["explanationVideoUrl"] = ""
+        data["questions"][3]["options"] = ["未翻譯測試一", "未翻譯測試二", "未翻譯測試三", "未翻譯測試四"]
+        path = self.directory / "S01_reference_v2_incomplete.json"
+        path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        self.askopenfilename.return_value = str(path)
+        self.assertFalse(self.app.load_import())
+        self.app.actions["reference"].invoke()
+        self.root.update()
+        self.app.flush()
+        self.assertEqual(self.app.model.drafts["S01"].unit, data)
+        self.assertFalse(self.app.allow_play.get())
+        self.assertEqual(len(self.app.answer_buttons[4]), 3)
+        self.assertFalse(self.app.validate_selected())
+        self.assertEqual(len(self.app.model.drafts["S01"].validate()), 11)
+        private = self.directory / "S01.draft.json"
+        UnitDraft(data, allow_play=True).save(private)
+        self.askopenfilename.return_value = str(private)
+        self.askyesnocancel.return_value = False
+        self.app.actions["reference"].invoke()
+        self.assertFalse(self.app.allow_play.get())
+        self.assertIsNone(self.app.model.drafts["S01"].path)
+
+    def test_v2_switching_keeps_multiple_selections_independent(self):
+        self.app.answer_buttons[0][0].invoke()
+        self.app.answer_buttons[0][2].invoke()
+        self.askyesnocancel.return_value = False
+        self.assertTrue(self.app.request_switch("S02"))
+        self.app.answer_buttons[0][1].invoke()
+        self.assertTrue(self.app.request_switch("S01"))
+        self.assertEqual(self.app.model.drafts["S01"].unit["questions"][0]["correctOptions"], ["A", "C"])
+        self.assertEqual(self.app.model.drafts["S02"].unit["questions"][0]["correctOptions"], ["B"])
+        self.assertTrue(self.app.question_fields[0]["correctOptions"][0].get())
+        self.assertFalse(self.app.question_fields[0]["correctOptions"][1].get())
+        self.assertTrue(self.app.question_fields[0]["correctOptions"][2].get())
+
+    def test_authoring_reference_order_is_not_changed_by_render_or_flush(self):
+        data = fixture_v2()
+        data["questions"][0]["correctOptions"] = ["C", "A"]
+        self.app.model.install(UnitDraft(data))
+        self.app.show_unit("S01")
+        self.root.update()
+        self.app.flush()
+        self.assertEqual(self.app.model.drafts["S01"].unit, data)
+
+    def test_real_entrypoint_explicit_reference_and_private_draft_startup(self):
+        data = fixture_v2()
+        reference = self.directory / "authoring-reference.json"
+        reference.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        private = self.directory / "S01.draft.json"
+        UnitDraft(data).save(private)
+        # Run the real command parser and mainloop in a separate interpreter.
+        # Auto-close only after verifying the instantiated editor's source data.
+        script = """
+import json, sys, tkinter as tk
+from pathlib import Path
+from tools.assignment_editor import main
+source=json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
+expected=source['unit'] if 'draftVersion' in source else source
+original=tk.Tk.mainloop
+def smoke(root, *args):
+    editor=root.winfo_children()[0]
+    assert editor.current_id == 'S01'
+    assert editor.model.drafts['S01'].unit == expected
+    assert not editor.model.drafts['S01'].allow_play
+    assert len(editor.answer_buttons[0]) == len(expected['questions'][0]['options'])
+    root.after(100,root.destroy)
+    return original(root,*args)
+tk.Tk.mainloop=smoke
+raise SystemExit(main(sys.argv[1:]))
+"""
+        for flag, path in (("--reference", reference), ("--draft", private)):
+            result = subprocess.run([sys.executable, "-c", script, flag, str(path)], cwd=ROOT, capture_output=True, text=True, timeout=15)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

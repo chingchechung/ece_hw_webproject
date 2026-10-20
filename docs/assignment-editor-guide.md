@@ -6,6 +6,11 @@ Tkinter/ttk is sufficient. Keep the complete `tools/` and `schemas/` directories
 together. There are no pip dependencies, remote connections, accounts, upload
 credentials or server settings in the application.
 
+New authoring sessions create v2 drafts. The [v2 contract](data-contract-v2.md)
+supports three/four options with one or more teacher-accepted labels. Existing
+v1 files stay v1 until explicitly converted. This changes the editor only: the
+student maze still uses its original demo questions and has not gained v2 support.
+
 ## Private folders and first launch
 
 Start with an empty in-memory set of S01–S12. Nothing is loaded, saved or exported
@@ -41,15 +46,24 @@ status, Allow Play state and export status. Double-click the Allow column to
 toggle that unit; the selected unit's checkbox is the main control.
 
 Each question has a notebook tab and scrollable form: optional title and prompt,
-required English question/explanation YouTube URLs, four options in A–D order,
-one correct-answer radio group and optional explanation text. An untouched draft
-can have no selected answer; selecting a radio button chooses exactly one A–D.
+required English question/explanation YouTube URLs, options in their original
+order and optional explanation text. In v2, select three or four options per
+question and independently check every accepted label. A single-correct question
+uses one checked box. Students will choose just one label; any checked label
+will pass once gameplay integration is approved. Empty acceptance is savable
+privately but blocks public export. Legacy v1 editing keeps its original four
+options and one-answer radio group.
 The explanation URL is required for export although viewing remains optional.
 
 Use the count selector to add Q05. Changing back to four questions retains Q05
 privately, including its options/answer, and switching to five restores it.
 Saved private drafts preserve this retained question. Four-question public
 exports contain only Q01–Q04; no retained question or local metadata is exported.
+Changing a v2 question from four options to three similarly retains D's text,
+accepted flag and original answer-list position privately. D is removed from
+active `correctOptions`; switching back restores it. Retained D can survive
+alongside a retained Q05 and survives save/reopen. An originally three-option
+reference is loaded with exactly three options; no fourth option is invented.
 
 Tab/Shift+Tab navigate fields, arrow keys work in the native radio group, and
 focused controls scroll into view. Use the mouse wheel or scrollbar for long
@@ -66,6 +80,17 @@ entries. Ctrl+S saves the selected draft; Ctrl+Shift+S opens Save Draft As.
   drafts restore Allow Play and retained Q05. Public imports start as unsaved
   private drafts with Allow Play unchecked; they never adopt the public file
   as the private save target. Public filenames must match the unit ID.
+- **Import Reference** deliberately accepts other authoring JSON filenames,
+  such as `S01_reference_v2_incomplete.json`. It creates an unsaved private draft
+  with Allow Play off; it does not relax the final export filename or validation
+  rules. It preserves source language, choice order, accepted labels and empty
+  URLs. Use `--reference <file>` to request this import explicitly at startup,
+  or `--draft <file>` to open a saved private draft. Neither option auto-exports.
+- **Convert v1 to v2** asks for confirmation, then creates an unsaved v2 copy.
+  Existing `correctOption` becomes a one-item `correctOptions`; a blank v1
+  draft answer becomes `[]`. Retained Q05 is converted too. Original files are
+  untouched. Save to a new filename to keep both versions; v1 exports become
+  stale relative to a converted source until deliberately re-exported.
 - **Open Draft Folder** reads all `S01.draft.json` through `S12.draft.json`
   present in that folder. It reads/checks every file before installing any;
   malformed input or a canceled replacement installs none. Units absent from
@@ -90,7 +115,9 @@ filename, or load the external file after saving your work separately.
 
 ## Validate and export
 
-**Validate Unit** uses the unchanged Phase 1 validator. Errors identify the
+**Validate Unit** uses the versioned shared validator. Strict v1 rules are
+preserved; v2 checks nonempty/distinct accepted labels against actual options.
+Errors identify the
 unit, question and exact JSON field, for example
 `S01 / Q03 - $.questions[2].explanationVideoUrl`. Drafts need not pass; final
 public exports must. See `data-contract-v1.md` for the recognized URL formats.
@@ -140,10 +167,13 @@ guarantee against every filesystem/power-loss failure. Use a normal local
 filesystem; unsupported atomic operations fail visibly with edits retained.
 There is no automatic backup, autosave or remote synchronization.
 
-Private draft format is versioned separately as `draftVersion: 1` with exactly
+Legacy private draft format remains `draftVersion: 1` with exactly
 `allowPlay`, `unit` (the editable unit), and `parkedQuestion` (null or retained
 Q05). This envelope and all of its answers stay private. It is not a new public
-schema version. The public unit remains `schemaVersion: 1`.
+schema version. V2 uses private `draftVersion: 2`, unit `schemaVersion: 2`, and
+adds `parkedOptions` for retained D metadata. Mismatched versions/unknown fields
+are rejected; migration never happens implicitly. Public manifest remains v1
+and can describe valid current exports of either unit version.
 
 ## Manual release and desktop checklist
 
@@ -157,10 +187,13 @@ whether submissions are accepted; the editor does not inspect responses.
 Before relying on the editor on Windows 11 (and separately on macOS):
 
 1. Launch with your Python/Tk installation; check window sizing, display scaling,
-   Unicode font rendering, tabs, keyboard navigation, radio keys and mouse wheel.
+   Unicode font rendering, tabs, keyboard navigation, checkbox/radio keys and wheel.
 2. Enter an incomplete unit with multiline/Unicode text. Save/reload it; exercise
    switch Yes/No/Cancel, load replacement, new unit and close cancellation.
 3. Edit Q05, choose four, save/reload, then choose five and verify Q05 is restored.
+   For v2, select several accepted labels; remove D by choosing three options,
+   save/reopen and restore four. Check that text and the D acceptance flag return.
+   Clear all accepted labels and verify drafts save but public export is blocked.
 4. In a disposable test folder, import the synthetic test units or your own
    locally stored content; validate and export both four- and five-question units.
 5. Allow one unit, export its manifest, then edit its answer and confirm manifest
@@ -170,6 +203,11 @@ Before relying on the editor on Windows 11 (and separately on macOS):
    draft externally and ensure Save refuses it while Save Draft As recovers edits.
 7. Validate final exports with `python tools/validate_assignments.py` and review
    video/form content before manually uploading anything.
+8. Load a v1 draft, decline conversion once, then explicitly convert a copy.
+   Verify that its original file stays v1, including retained Q05. Import the
+   supplied S01 reference with Import Reference; preserve its Chinese choices,
+   three-option Q05 and empty URLs. Confirm the 11 missing-link errors before
+   entering instructor-supplied URLs. Q03 wording remains for instructor review.
 
 The cloud smoke suite uses real Linux Tk widgets under Xvfb but substitutes
 native file/message dialogs. It verifies workflow logic, not Windows/macOS native
