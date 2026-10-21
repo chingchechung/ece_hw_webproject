@@ -196,6 +196,7 @@ Python compilation, Node syntax checks and whitespace checks:
 
 ```sh
 PLAYWRIGHT_BROWSERS_PATH=/tmp/emi-phase5a2-playwright DISPLAY=:97 python tests/run_ci.py
+PLAYWRIGHT_BROWSERS_PATH=/tmp/emi-phase5a2-playwright python tests/browser_atmosphere.py
 python -m compileall -q tools tests
 node --check student/js/game.js
 node --check student/js/rpg-renderer.js
@@ -215,6 +216,21 @@ The unchanged GitHub workflow runs the same full runner, now including the
 atmosphere suite, and uploads all generated evidence on success/failure. The
 delivery message supplies the verified post-push run URL/status; the table
 above records local results and does not infer hosted success.
+
+The first hosted run ([39560552631](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39560552631),
+Python 3.12.15 / Playwright Chromium 151.0.7922.34) passed 118/119 tests and
+uploaded its evidence. Its sole failure inspected a mid-sequence reduced-motion
+change immediately after the browser protocol response while the fake clock
+was paused. Media-query change delivery can require the next rendering
+opportunity. The test now advances just 32 ms, verifies the preference actually
+changed and requires the question to open within those two frames, rather than
+waiting for the remaining 500 ms animation. It also verifies that a sequence
+was pending first. This corrects test scheduling without changing gameplay or
+loosening the normal 460/600 ms reveal checks. All three focused immediate,
+freeze/timing and cancellation tests passed after this correction. The final
+complete atmosphere rerun also passed all ten tests, including video and
+benchmarks, in 117.5 seconds. The final push runs all 119 tests again on GitHub;
+its verified result is supplied with delivery.
 
 ## Measured performance
 

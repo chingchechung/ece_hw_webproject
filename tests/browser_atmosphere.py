@@ -198,8 +198,19 @@ class AtmosphereTests(VisualHarness):
             if drive:self.page.keyboard.press('v')
         # A preference change during a pending animation must not wait on a skipped effect.
         self.approach();self.page.keyboard.press('e');self.page.clock.run_for(100)
+        self.assertIsNotNone(self.snapshot()['pending'])
+        changed_at=self.snapshot()['now']
         self.page.emulate_media(reduced_motion='reduce')
-        self.assertTrue(self.snapshot()['modal']);self.assertIsNone(self.snapshot()['pending'])
+        self.assertTrue(self.page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches"))
+        # Chromium may deliver the media-query change on its next rendering
+        # opportunity after the protocol response. The fake clock is paused;
+        # permit two frames, rather than waiting out the remaining 500 ms cue.
+        self.page.clock.run_for(32)
+        state=self.snapshot()
+        self.assertTrue(state['modal']);self.assertIsNone(state['pending'])
+        question=self.page.evaluate("atmosphereTest.events.filter(e=>e.event==='question').at(-1)")
+        self.assertGreaterEqual(question['time'],changed_at)
+        self.assertLessEqual(question['time']-changed_at,32)
 
     def test_matched_modes_viewports_and_accessible_controls(self):
         self.prepare()
