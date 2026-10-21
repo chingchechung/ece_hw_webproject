@@ -19,8 +19,9 @@ stays in ignored private drafts; do not invent missing URLs, translate supplied
 Chinese choices, or commit unreleased answers. The original prototype remains
 the immutable baseline. Phase 2/v2 GUI review is approved, including instructor
 Windows 11 question-editing verification.
-Phase 3 integration is in `student/`; see `docs/phase-3-results.md`. Stop for
-instructor review before Phase 4. Do not start visual improvements.
+Phase 3 has been approved. Phase 4 integration and control-driven validation
+are in `student/` and `docs/phase-4-results.md`. Stop for instructor review
+before Phase 5. Do not start visual improvements.
 
 ## 1. Priority and working method
 
@@ -109,7 +110,7 @@ Contract checks:
 
 - Load relative public `assignments/manifest.json` and only load `Sxx.json` explicitly named by an allowed manifest entry. Do not probe unreleased filenames.
 - Handle absent/invalid JSON and fetch errors gracefully. Ensure relative paths work under `https://host/~user/subdirectory/`.
-- On each unit selection: reset answers, maze, player/drive state and teacher-map allowance, then use that unit's JSON. Avoid carrying prior unit's data into the next.
+- Opening the unit selector and refreshing its manifest pause the active attempt without discarding it. Offer cancel/return. Warn and require confirmation before replacing an active attempt; only commit the reset after the new unit validates. Failed/canceled switches preserve the loaded attempt. Confirmed successful loading resets answers, maze, player/drive state and teacher-map allowance.
 - Replace hardcoded v1.2 `QUESTIONS`, `FORM_URL`, and `MAX_QUESTS` carefully. Maze station generation must handle 4 **and** 5 questions on every existing maze size, including the smallest map.
 - Use safe DOM text and escaped strings. Avoid inline execution of teacher-authored text. Open external URLs via standard anchor clicks in a new tab using `rel="noopener noreferrer"`.
 - Modal open/browser blur must stop driving speed and directional input. Do not change the play experience unexpectedly.

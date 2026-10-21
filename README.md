@@ -9,7 +9,8 @@ It now creates **v2** drafts with **three/four options per question** and teache
 checkboxes for **one or more accepted answers**. Students choose one answer;
 any accepted label passes. V1 files remain editable in their original format;
 use **Convert v1 to v2** to create an explicit migrated copy. Phase 3 provides a static
-student site supporting both versions. Phase 4 awaits instructor review.
+student site supporting both versions. Phase 4 gameplay validation is complete;
+Phase 5 awaits instructor review.
 
 ## Teacher editor — Windows 11
 
@@ -65,13 +66,18 @@ Linux/Xvfb GUI regressions passed. The instructor also reports successful
 question editing on Windows 11; other native GUI workflows/macOS still need
 manual verification.
 
-## Student site — Phase 3
+## Student site — Phase 4
 
 The deployable website is **`student/` only**. It loads the relative
 `assignments/manifest.json`, lists only explicitly published S01–S12 entries,
 and validates the selected v1/v2 file before starting a fresh attempt. Published
 older units remain selectable for practice. Use the HUD unit button to return
 to selection; **重新整理清單** refreshes the public manifest without a cache purge.
+Opening or refreshing the selector pauses your attempt. Use **返回目前挑戰**,
+**取消，返回目前挑戰**, or Escape to resume with the same maze/progress/map time.
+Loading a unit while playing requires confirmation; your current attempt is
+replaced only after the selected file passes validation. A failed load can safely
+return to the current attempt.
 
 ```sh
 python -m http.server 8000 --bind 127.0.0.1 --directory student
@@ -89,9 +95,10 @@ or use `index.html`.
 Four/five-question state, actual three/four options and v2 accepted-label arrays
 are retained. One answer button submits one label using the existing validator
 helper. Both 2D and driving views, V/E/WASD/arrows, 150%/175% zoom and cumulative
-30-second map allowance remain available. Selection, refresh and reloading start
-fresh attempts; answers, position, driving state and map allowance do not persist
-between units. Errors leave the selector available for retry or refresh.
+30-second map allowance remain available. Confirmed successful unit loading and
+browser reload start fresh attempts. Selector cancel/manifest refresh preserve
+the current attempt, while stopping movement and pausing map time. No student
+progress is stored across browser reloads. Errors offer retry or safe return.
 
 No build, backend, upload, login or form-management service is needed. Public
 JSON is readable by students; it is not secure answer storage. The canonical
@@ -101,14 +108,20 @@ drift. The original prototype remains unchanged below.
 
 ```sh
 python tests/browser_student.py
+python tests/browser_gameplay.py
 ```
 
 This optional Playwright/Chromium suite creates temporary static sites, copies
 synthetic fixtures there, tests directory/index URLs and cacheable static JSON,
 and removes them afterward. Test hooks exist only in intercepted test responses.
 No fixtures or browser-testing infrastructure are included in `student/`.
-See [Phase 3 results and changed files](docs/phase-3-results.md). Stop for review
-before Phase 4; no visual-polish phase has started.
+Phase 4 adds deterministic routes using actual keyboard events and movement
+updates, without teleporting. It saves synthetic screenshots, Playwright traces,
+state/error logs and placement metrics in ignored `test-results/phase-4/`.
+See [Phase 3](docs/phase-3-results.md) and [Phase 4 results/changed files](docs/phase-4-results.md).
+Stop for review before Phase 5; no visual-polish phase has started. WebKit could
+not be installed because its download hosts return HTTP 403 under the cloud
+network policy; Chromium results do not establish Safari compatibility.
 
 ## Original student prototype
 
@@ -174,6 +187,6 @@ xvfb-run -a python tests/gui_smoke.py
 ```
 
 Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-validation.md),
-[Phase 2](docs/phase-2-results.md), [Phase 3](docs/phase-3-results.md).
-Phase 2/v2 were approved; development now stops for review before Phase 4.
+[Phase 2](docs/phase-2-results.md), [Phase 3](docs/phase-3-results.md),
+[Phase 4](docs/phase-4-results.md). Development stops for review before Phase 5.
 See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

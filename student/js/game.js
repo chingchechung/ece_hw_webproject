@@ -3,7 +3,7 @@
   var CHARACTER_SHEET='data:image/png;base64,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';
   var TILE=28, DRIVE_SCALE=12, DRIVE_TILE=14, DRIVE_TOP_SPEED=590, MAZE_SIZES=[[25,19],[21,15],[17,13],[13,9]], MAX_QUESTS=0, gameZoom=1.5;
   // Keep the validated public unit intact, including v2 accepted-label arrays.
-  var assignment=null, FORM_URL='', QUESTIONS=[];
+  var assignment=null, assignmentPaused=false, FORM_URL='', QUESTIONS=[];
   var el=function(id){return document.getElementById(id)};
   var canvas=el('maze'),ctx=canvas.getContext('2d'),mini=el('minimap'),mctx=mini.getContext('2d');
   var current=null, failures=0, done=[], pressed={}, modalOpen=false, activeQuestion=-1, showMap=false, nearItem=null;
@@ -129,7 +129,7 @@
   function fitCamera(){if(!current)return;var cw=current.width*2*TILE,ch=current.height*2*TILE,view=visibleWorld();camera.x=cameraAxis(current.player.x,cw,view.w);camera.y=cameraAxis(current.player.y,ch,view.h)}
   function passable(x,y){if(!current)return false;var xx=Math.floor(x/TILE),yy=Math.floor(y/TILE);return yy>=0&&yy<current.grid.length&&xx>=0&&xx<current.grid[0].length&&current.grid[yy][xx]===0}
   function canStand(x,y){var r=10;return passable(x-r,y-r)&&passable(x+r,y-r)&&passable(x-r,y+r)&&passable(x+r,y+r)&&passable(x,y-r)&&passable(x,y+r)&&passable(x-r,y)&&passable(x+r,y)}
-  function update(dt){if(modalOpen||el('sidePanel').classList.contains('open')||!current)return;
+  function update(dt){if(assignmentPaused||modalOpen||el('sidePanel').classList.contains('open')||!current)return;
     if(gameMode==='drive'){updateDrive(dt);findNearby();return;}
     var dx=0,dy=0;if(pressed.arrowup||pressed.w)dy--;if(pressed.arrowdown||pressed.s)dy++;if(pressed.arrowleft||pressed.a)dx--;if(pressed.arrowright||pressed.d)dx++;
     var p=current.player;p.moving=!!(dx||dy);if(dx||dy){if(Math.abs(dx)>Math.abs(dy))p.dir=dx>0?'right':'left';else p.dir=dy>0?'down':'up';var len=Math.sqrt(dx*dx+dy*dy);dx=dx/len*175*dt;dy=dy/len*175*dt;if(canStand(p.x+dx,p.y))p.x+=dx;if(canStand(p.x,p.y+dy))p.y+=dy;p.walk=(p.walk||0)+dt*10}else p.walk=0;
@@ -299,7 +299,7 @@
     if(mapLastTick===null){mapLastTick=now;return}
     var elapsed=Math.max(0,now-mapLastTick);mapLastTick=now;
     // Only time that the map can actually be viewed counts.
-    if(showMap&&!document.hidden&&!modalOpen&&!el('sidePanel').classList.contains('open')){
+    if(showMap&&!assignmentPaused&&!document.hidden&&!modalOpen&&!el('sidePanel').classList.contains('open')){
       mapRemainingMs=Math.max(0,mapRemainingMs-elapsed);
       if(mapRemainingMs===0){setMapVisible(false);notify('老師視角 30 秒已使用完畢，地圖已自動關閉。')}
     }
@@ -550,7 +550,7 @@
   }
   function interact(){if(modalOpen||!nearItem)return;if(gameMode==='drive'&&Math.abs(driveSpeed)>25){notify('請先減速停車，再按 E 開啟題目。');return;}if(nearItem.type==='question')openQuestion(nearItem.index);else finish()}
   function isTyping(elm){return elm&&['INPUT','TEXTAREA','SELECT'].includes(elm.tagName)}
-  window.addEventListener('keydown',function(e){var key=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown','w','a','s','d','e','v',' '].includes(key)&&!isTyping(document.activeElement))e.preventDefault();if(isTyping(document.activeElement)||!current)return;if(el('sidePanel').classList.contains('open')){if(key==='escape')togglePanel(false);return}if(modalOpen){if(key==='escape'){if(el('dialogClose'))hideDialog();else if(el('continueMaze'))hideDialog()}return}if(key==='v'){toggleMode();return}if(key==='e'||key===' ')interact();else pressed[key]=true});
+  window.addEventListener('keydown',function(e){var key=e.key.toLowerCase();if(isTyping(document.activeElement)||assignmentPaused||!current)return;if(['arrowleft','arrowright','arrowup','arrowdown','w','a','s','d','e','v',' '].includes(key)&&!isTyping(document.activeElement))e.preventDefault();if(el('sidePanel').classList.contains('open')){if(key==='escape')togglePanel(false);return}if(modalOpen){if(key==='escape'){if(el('dialogClose'))hideDialog();else if(el('continueMaze'))hideDialog()}return}if(key==='v'){toggleMode();return}if(key==='e'||key===' ')interact();else pressed[key]=true});
   window.addEventListener('keyup',function(e){pressed[e.key.toLowerCase()]=false});window.addEventListener('blur',function(){pressed={};driveSpeed=0});
   canvas.addEventListener('click',function(){if(gameMode==='2d')interact();canvas.focus()});
   function togglePanel(visible){
@@ -591,7 +591,15 @@
     el('interactTip').classList.remove('show');el('status').textContent='請選擇單元';
     el('tripValue').textContent='0.00';el('speedValue').textContent='0';
   }
-  var loader=AssignmentLoader.create({onReset:resetAssignment,onReady:function(unit){
+  var loader=AssignmentLoader.create({
+    hasAssignment:function(){return assignment!==null;},
+    activeUnitId:function(){return assignment&&assignment.unitId;},
+    onPause:function(){
+      if(!assignmentPaused)updateMapBudget(performance.now());
+      assignmentPaused=true;pressed={};driveSpeed=0;
+    },
+    onResume:function(){assignmentPaused=false;pressed={};driveSpeed=0;mapLastTick=performance.now();},
+    onReset:resetAssignment,onReady:function(unit){
     assignment=unit;QUESTIONS=unit.questions;FORM_URL=unit.googleFormUrl;MAX_QUESTS=QUESTIONS.length;
     el('unitLabel').textContent=unit.unitId;
     var unitTitle=document.createElement('span');unitTitle.className='unit-title';

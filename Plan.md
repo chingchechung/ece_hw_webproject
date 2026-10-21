@@ -9,8 +9,9 @@
 > three/four options and multiple teacher-accepted labels while each student
 > chooses one. Manifest stays v1. The original four-choice/single-answer rules
 > below describe v1; v2 authoring follows the approved supplement in `AGENTS.md`.
-> Phase 2/v2 review is approved. Phase 3 student loading is now implemented in
-> `student/`; see `docs/phase-3-results.md`. Stop for review before Phase 4.
+> Phase 2/v2 and Phase 3 reviews are approved. Phase 4 gameplay and end-to-end
+> validation are complete in `student/`; see `docs/phase-4-results.md`. Stop for
+> instructor review before Phase 5 visual improvements.
 
 ## 1. Project objective
 
@@ -167,7 +168,7 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 - Show **S01–S12** identification; only entries in the public manifest can be launched. Do not fetch data for unlisted units or infer their URLs. Unreleased unit titles need not be displayed.
 - When selected, fetch the selected unit JSON (based on manifest's `file`), validate it, then initialize a **fresh** maze attempt with question progress at 0 and teacher-map time at 30 seconds.
 - Handle `404`, malformed JSON, unsupported schema, empty/invalid manifest, network failure, and file mismatch with a friendly error and retry/back action—not a blank screen.
-- Refreshing and switching units may reset in-memory question/game progress; no server persistence. No tracking students. Preserve the 30-second teacher-map gameplay semantics per new attempt and protect against accidentally carrying over question passes between units.
+- Opening selection and refreshing the manifest pause and preserve the active attempt; offer cancel/return. Warn and confirm before replacing it. Only a successfully validated new unit commits the reset; failed/canceled switches preserve current progress, position and map time. Browser reload starts fresh; no persistent student tracking.
 - Read all strings via safe text APIs/escaping; do not insert untrusted JSON fields as unescaped HTML. Open external links with `target="_blank"` and `rel="noopener noreferrer"`.
 
 ### Gameplay integration
@@ -219,13 +220,13 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 
 ### Phase 4 — Full gameplay integration
 
-- [ ] Four-question and five-question units complete in **both** display modes.
-- [ ] Randomized station placement remains distributed and reachable on **every** maze size.
-- [ ] Answer wrong → all reset, smaller maze, teacher-map budget restored to 30s.
-- [ ] Manual restart → full-size initial maze and teacher-map budget 30s.
-- [ ] 150%/175% 2D zoom; no page scroll; `E`/`V` controls; new-tab video links.
-- [ ] Finish → correct unit-specific Google Form link; no submission tracking.
-- [ ] Re-open S01 for review even when newer units exist; Google Form closed/open is handled outside the app.
+- [x] Four-question and five-question units complete in **both** display modes.
+- [x] Randomized station placement remains distributed and reachable on **every** maze size.
+- [x] Answer wrong → all reset, smaller maze, teacher-map budget restored to 30s.
+- [x] Manual restart → full-size initial maze and teacher-map budget 30s.
+- [x] 150%/175% 2D zoom; no page scroll; `E`/`V` controls; new-tab video links.
+- [x] Finish → correct unit-specific Google Form link; no submission tracking.
+- [x] Re-open S01 for review even when newer units exist; Google Form closed/open is handled outside the app.
 
 ### Phase 5 — Art/performance follow-up
 

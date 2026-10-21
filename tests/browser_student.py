@@ -22,7 +22,7 @@ HOOK = """
 window.studentTest = {
  state:()=>({assignment,current,done,failures,mode:gameMode,speed:driveSpeed,
    distance:driveDistance,turn:driveTurn,pressed,remaining:mapRemainingMs,
-   showMap,modal:modalOpen,zoom:gameZoom,scale:DRIVE_SCALE}),
+   showMap,paused:assignmentPaused,modal:modalOpen,zoom:gameZoom,scale:DRIVE_SCALE}),
  generate:generateMaze,
  park(point){Object.assign(current.player,worldCenter(point.x,point.y));
    driveSpeed=0;pressed={};findNearby();},
@@ -64,7 +64,7 @@ class StaticHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-class StudentBrowserTests(unittest.TestCase):
+class StudentBrowserHarness(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pw = sync_playwright().start()
@@ -130,9 +130,14 @@ class StudentBrowserTests(unittest.TestCase):
         self.page.goto(self.url + ('index.html' if index else ''))
         self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('正在讀取')")
 
+    def click_load(self):
+        self.page.click('#loadUnit')
+        if self.page.is_visible('#switchWarning'):
+            self.page.click('#confirmSwitch')
+
     def load(self, unit='S01'):
         self.page.select_option('#unitSelect', unit)
-        self.page.click('#loadUnit')
+        self.click_load()
         self.page.wait_for_function("document.querySelector('#assignmentPanel').hidden")
 
     def state(self):
@@ -148,6 +153,7 @@ class StudentBrowserTests(unittest.TestCase):
         self.assertTrue(self.page.evaluate('document.documentElement.scrollHeight<=innerHeight && document.documentElement.scrollWidth<=innerWidth'))
         self.assertEqual(self.page.evaluate('[scrollX,scrollY]'), [0, 0])
 
+class StudentBrowserTests(StudentBrowserHarness):
     def test_empty_production_bundle_and_relative_assets_without_hooks(self):
         self.open(hooks=False)
         self.assertIn('沒有已發布', self.page.inner_text('#assignmentStatus'))
@@ -169,7 +175,7 @@ class StudentBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator('#unitSelect option').evaluate_all('(xs)=>xs.map(x=>x.value)'), ['S01', 'S02'])
         self.assertFalse(any(u.endswith('/S01.json') or u.endswith('/S02.json') for u in self.requests))
         self.page.evaluate("document.querySelector('#unitSelect').add(new Option('Unlisted','S03'));document.querySelector('#unitSelect').value='S03'")
-        self.page.click('#loadUnit')
+        self.click_load()
         self.assertIsNone(self.state()['assignment'])
         self.assertFalse(any(u.endswith('/S03.json') for u in self.requests))
         self.load('S02')
@@ -248,7 +254,8 @@ class StudentBrowserTests(unittest.TestCase):
         self.assertLess(self.state()['remaining'], 21000)
         self.page.click('#unitLabel')
         self.page.keyboard.up('w')
-        self.assertIsNone(self.state()['current'])
+        self.assertEqual(self.state()['assignment']['unitId'], 'S01')
+        self.assertTrue(self.state()['paused'])
         self.load('S02')
         state = self.state()
         self.assertEqual(state['assignment']['unitId'], 'S02')
@@ -273,6 +280,7 @@ class StudentBrowserTests(unittest.TestCase):
         broken['questions'][0]['correctOptions'] = []
         invalid.append(broken)
         for data in invalid:
+            previous = self.state()['assignment']
             with self.subTest(data=str(data)[:60]):
                 if data is None:
                     (self.assignment_dir / 'S01.json').unlink()
@@ -280,10 +288,9 @@ class StudentBrowserTests(unittest.TestCase):
                     (self.assignment_dir / 'S01.json').write_text(data)
                 else:
                     self.write('S01.json', data)
-                self.page.click('#loadUnit')
+                self.click_load()
                 self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('可重試')")
-                self.assertIsNone(self.state()['current'])
-                self.assertIsNone(self.state()['assignment'])
+                self.assertEqual(self.state()['assignment'], previous)
                 self.assertTrue(self.page.is_visible('#assignmentPanel'))
                 self.write('S01.json', valid)
                 self.load()
@@ -310,7 +317,7 @@ class StudentBrowserTests(unittest.TestCase):
                 self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('請重新整理')")
                 self.assertTrue(self.page.is_disabled('#loadUnit'))
                 self.assertEqual(self.page.locator('#unitSelect option').count(), 0)
-                self.assertIsNone(self.state()['assignment'])
+                self.assertEqual(self.state()['assignment'], valid)
         self.publish(valid)
         self.page.click('#refreshManifest')
         self.page.wait_for_function("!document.querySelector('#unitSelect').disabled")
@@ -360,24 +367,24 @@ class StudentBrowserTests(unittest.TestCase):
         self.publish(fixture(1, 'S01'), fixture(2, 'S02'))
         self.server.delays[self.prefix + 'assignments/S01.json'] = .6
         self.open()
-        self.page.click('#loadUnit')
+        self.click_load()
         self.page.select_option('#unitSelect', 'S02')
-        self.page.click('#loadUnit')
+        self.click_load()
         self.page.wait_for_function("studentTest.state().assignment?.unitId==='S02'")
         self.page.wait_for_timeout(750)
         self.assertEqual(self.state()['assignment']['unitId'], 'S02')
         self.page.click('#unitLabel')
         self.page.select_option('#unitSelect', 'S01')
-        self.page.click('#loadUnit')
+        self.click_load()
         self.publish(fixture(2, 'S02'))
         self.page.click('#refreshManifest')
         self.page.wait_for_function("document.querySelector('#unitSelect').value==='S02'")
         self.page.wait_for_timeout(750)
-        self.assertIsNone(self.state()['assignment'])
+        self.assertEqual(self.state()['assignment']['unitId'], 'S02')
         self.page.route('**/assignments/S02.json', lambda route: route.abort('failed'))
-        self.page.click('#loadUnit')
+        self.click_load()
         self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('檢查連線')")
-        self.assertIsNone(self.state()['current'])
+        self.assertEqual(self.state()['assignment']['unitId'], 'S02')
         self.page.unroute('**/assignments/S02.json')
         self.load('S02')
 

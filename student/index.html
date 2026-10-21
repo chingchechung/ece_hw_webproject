@@ -279,6 +279,11 @@
     <p id="assignmentStatus" role="status" aria-live="polite">正在讀取公開單元清單…</p>
     <label for="unitSelect">已發布單元</label>
     <select id="unitSelect" disabled></select>
+    <div id="switchWarning" hidden>
+      <p id="switchMessage" role="alert"></p>
+      <div class="modalbuttons"><button class="btn warn" id="confirmSwitch" type="button">確定開始新挑戰</button><button class="btn" id="cancelSwitch" type="button">取消，返回目前挑戰</button></div>
+    </div>
+    <div class="modalbuttons"><button class="btn" id="returnToMaze" type="button" hidden>返回目前挑戰</button></div>
     <div class="modalbuttons"><button class="btn primary" id="loadUnit" type="button" disabled>載入單元</button><button class="btn" id="refreshManifest" type="button">重新整理清單</button></div>
   </div>
 </div>
