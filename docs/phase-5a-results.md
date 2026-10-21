@@ -96,6 +96,16 @@ visual suite through that runner and uploads its outputs with the other test
 evidence, including when a suite fails. Actual post-push workflow completion
 must be checked on GitHub; it is not inferred from this local run or YAML.
 
+The first hosted run ([39530531667](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39530531667))
+passed the existing 98 tests and four new visual tests, but exposed a resize
+race in the new V/viewport test. A queued browser resize could run during the
+temporary driving toolbar layout, changing the captured camera by less than
+one world pixel. The harness now awaits fonts and two animation frames after
+viewport changes before capturing state. Exact camera/state equality remains
+required; no production code or tolerance was changed. Failure evidence was
+successfully uploaded by the workflow. The corrective push is verified
+separately on GitHub.
+
 Existing coverage continues to exercise synthetic v1/v2 assignments, four/five
 questions, multiple accepted labels with one student selection, published-unit
 allowlisting, invalid JSON, manifest refresh, nested relative paths, switching

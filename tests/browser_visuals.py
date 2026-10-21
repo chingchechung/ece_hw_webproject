@@ -33,8 +33,18 @@ class VisualTests(StudentBrowserHarness):
         self.page.goto(self.url)
         self.page.wait_for_function("!document.querySelector('#unitSelect').disabled")
         self.load('S02')
+        self.settle_layout()
         self.page.evaluate('visualTest.ready()')
         self.page.evaluate('visualTest.overview()')
+
+    def settle_layout(self):
+        # A CDP viewport update can return before Chromium delivers its resize
+        # event. Flush that event before snapshotting camera/viewport state;
+        # otherwise it can land while V temporarily changes toolbar geometry.
+        self.page.evaluate('''async () => {
+            await document.fonts.ready;
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        }''')
 
     def prepare(self):
         self.artifact_directory.mkdir(parents=True,exist_ok=True)
@@ -91,6 +101,7 @@ class VisualTests(StudentBrowserHarness):
             self.page.select_option('#zoomSelect',zoom)
             for width,height in [(1366,768),(1024,768),(390,844)]:
                 self.page.set_viewport_size({'width':width,'height':height})
+                self.settle_layout()
                 self.page.evaluate('visualTest.overview()');self.assert_no_scroll()
                 state=self.page.evaluate('visualTest.state()')
                 self.page.keyboard.press('v');self.page.evaluate('visualTest.draw(1)')
