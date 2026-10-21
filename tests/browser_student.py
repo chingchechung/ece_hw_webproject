@@ -62,6 +62,8 @@ class StaticHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         if self.path.endswith('.json'):
             self.send_header('Cache-Control', 'public, max-age=3600')
+        if getattr(self.server, 'cache_scripts', False) and urlsplit(self.path).path.endswith('.js'):
+            self.send_header('Cache-Control', 'public, max-age=3600')
         super().end_headers()
 
 
@@ -136,7 +138,7 @@ class StudentBrowserHarness(unittest.TestCase):
                                                  HOOK + '  sizeCanvas();requestAnimationFrame(frame);loader.start();')
                 self.assertIn('window.studentTest', source)
                 route.fulfill(response=response, body=source)
-            self.page.route('**/js/game.js', inject)
+            self.page.route('**/js/game.js*', inject)
         self.page.goto(self.url + ('index.html' if index else ''))
         self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('正在讀取')")
 

@@ -9,8 +9,8 @@
   var directionRows={down:0,left:1,right:2,up:3};
   var atmospheres={
     off:{shade:0,radius:0,scale:0,reveal:0},
-    normal:{shade:.33,radius:190,scale:1.1,prepare:.04,slashEnd:.34,impactStart:.26,impactEnd:.42,reveal:.46},
-    strong:{shade:.5,radius:150,scale:1.5,prepare:.08,slashEnd:.45,impactStart:.3,impactEnd:.5,reveal:.6}
+    normal:{shade:.33,radius:190,scale:1.1,prepare:.04,slashEnd:.44,impactStart:.3,impactEnd:.45,reveal:.46},
+    strong:{shade:.5,radius:150,scale:1.5,prepare:.05,slashEnd:.55,impactStart:.4,impactEnd:.58,reveal:.6}
   };
   var ink='#253e50',teal='#217f83',mint='#85d5b2',gold='#f1bd62';
   var glyphs={Q:['111','101','101','111','001'],1:['010','110','010','010','111'],
@@ -165,22 +165,28 @@
     var c=canvas(96*8,96),g=c.getContext('2d');
     var points=[[3,-16],[9,-14],[15,-10],[19,-5],[20,1],[18,8],[13,13],[6,16]];
     function ribbon(first,last,offset,alpha){
-      g.save();g.globalAlpha=alpha;
+      var pixels=[];g.save();g.globalAlpha=alpha;
       for(var i=first;i<last;i++){
         var a=points[i],b=points[i+1],steps=Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));
         for(var n=0;n<=steps;n++){
           var x=Math.round(a[0]+(b[0]-a[0])*n/steps)*2+offset,y=Math.round(a[1]+(b[1]-a[1])*n/steps)*2;
-          rect(g,x-4,y-4,9,9,'#76e7e7a0');rect(g,x-1,y-1,3,3,'#f4fff5');
+          pixels.push([x,y]);
         }
       }
+      // Paint whole layers, so adjacent outline pixels cannot erase the white
+      // core of the preceding point and turn the arc into a striped chain.
+      [[5,11,'#21566c'],[4,9,'#52e5f3'],[2,5,'#f4fff5']].forEach(function(layer){
+        pixels.forEach(function(p){rect(g,p[0]-layer[0],p[1]-layer[0],layer[1],layer[1],layer[2]);});
+      });
       g.restore();
     }
     for(var frame=0;frame<8;frame++){
       g.save();g.translate(frame*96+48,48);
-      var first=Math.max(0,frame-3),last=Math.min(7,2+frame*2);
+      var last=Math.min(7,frame+1),first=Math.max(0,last-2);
       // Cached short trailing ribbon, followed by the bright sweeping front.
       ribbon(Math.max(0,first-1),Math.max(1,last-1),-6,.22);
       ribbon(first,last,0,1);
+      if(frame<4){g.save();g.globalAlpha=.7*(1-frame/4);rect(g,8,-2,10,4,'#52e5f3');rect(g,9,-1,7,2,'#f4fff5');g.restore();}
       var tip=points[last];rect(g,tip[0]*2-1,tip[1]*2-1,3,3,'#ffe5a3');g.restore();
     }
     return c;
@@ -190,12 +196,13 @@
     var characters=makeCharacterAtlas(),tiles=makeTiles(tile),stations=[[],[]],exits=[makeExit(false),makeExit(true)];
     for(var state=0;state<2;state++)for(var q=0;q<5;q++)stations[state][q]=makeStation(q,!!state);
     var opening=makeLightOpening(),glow=makeActivationGlow(),swipes=makeSwipeAtlas();
-    var light=canvas(1,1),lightX=null,lightY=null,lightRadius=null,lightMode='',interaction=null,atmosphere='strong';
+    var light=canvas(1,1),lightX=null,lightY=null,lightRadius=null,lightMode='',slash=null,activation=null,atmosphere='strong';
     var reducedMotion=root.matchMedia('(prefers-reduced-motion: reduce)');
     var scene=null,sceneMaze=null;
     function prepare(maze){
       if(sceneMaze===maze)return;
-      if(interaction&&interaction.maze!==maze)interaction=null;
+      if(slash&&slash.maze!==maze)slash=null;
+      if(activation&&activation.maze!==maze)activation=null;
       sceneMaze=maze;scene=canvas(maze.grid[0].length*tile,maze.grid.length*tile);
       var g=scene.getContext('2d');g.imageSmoothingEnabled=false;
       for(var y=0;y<maze.grid.length;y++)for(var x=0;x<maze.grid[0].length;x++){
@@ -265,37 +272,51 @@
       g.save();g.setTransform(dpr,0,0,dpr,0,0);g.imageSmoothingEnabled=true;
       g.globalAlpha=mapOpen ? .35 : 1;g.drawImage(light,0,0,w*4,h*4);g.restore();
     }
-    function beginInteraction(maze,index,time){
+    function beginSlash(maze,time){
       var settings=atmospheres[atmosphere];
       if(reducedMotion.matches||!settings.reveal)return 0;
-      interaction={maze:maze,index:index,x:maze.player.x,y:maze.player.y,dir:maze.player.dir,start:time,settings:settings};
+      slash={maze:maze,dir:maze.player.dir,start:time,settings:settings};
       return settings.reveal;
     }
-    function clearInteraction(){interaction=null;}
+    function activateStation(maze,index,time){
+      if(slash&&slash.maze===maze&&maze.stations[index]){
+        activation={maze:maze,index:index,start:time,settings:slash.settings};
+      }
+    }
+    function clearInteraction(){slash=null;activation=null;}
+    function isSlashing(time){return !!(slash&&time-slash.start<slash.settings.slashEnd);}
     function setAtmosphere(value){
       if(!Object.prototype.hasOwnProperty.call(atmospheres,value))return false;
       atmosphere=value;clearInteraction();return true;
     }
     function drawInteraction(g,maze,time){
-      if(!interaction||interaction.maze!==maze)return;
-      if(reducedMotion.matches){interaction=null;return;}
-      var age=time-interaction.start,settings=interaction.settings;
-      if(age>=settings.reveal){interaction=null;return;}
-      if(age<0)return;
-      var s=maze.stations[interaction.index],sx=(s.x*2+1)*tile,sy=(s.y*2+1)*tile;
-      if(age>=settings.impactStart&&age<settings.impactEnd){
-        var impact=Math.sin(Math.PI*(age-settings.impactStart)/(settings.impactEnd-settings.impactStart));
-        g.save();g.globalAlpha=impact*.9;g.beginPath();g.rect(sx-28,sy-25,56,45);g.clip();
-        g.drawImage(glow,sx-48,sy-44);g.strokeStyle='#f4fff5';g.lineWidth=2;g.strokeRect(sx-14,sy-25,28,17);g.restore();
+      if(reducedMotion.matches){clearInteraction();return;}
+      if(activation&&activation.maze===maze){
+        var impactAge=time-activation.start,impactSettings=activation.settings;
+        if(impactAge>=impactSettings.reveal)activation=null;
+        else if(impactAge>=impactSettings.impactStart&&impactAge<impactSettings.impactEnd){
+          var s=maze.stations[activation.index],sx=(s.x*2+1)*tile,sy=(s.y*2+1)*tile;
+          var impact=Math.sin(Math.PI*(impactAge-impactSettings.impactStart)/(impactSettings.impactEnd-impactSettings.impactStart));
+          g.save();g.globalAlpha=impact*.9;g.beginPath();g.rect(sx-28,sy-25,56,45);g.clip();
+          g.drawImage(glow,sx-48,sy-44);g.strokeStyle='#f4fff5';g.lineWidth=2;g.strokeRect(sx-14,sy-25,28,17);g.restore();
+        }
       }
-      if(age>=settings.slashEnd)return;
+      if(!slash||slash.maze!==maze)return;
+      var age=time-slash.start,settings=slash.settings;
+      if(age>=settings.slashEnd){slash=null;return;}
+      if(age<0)return;
       var phase=Math.max(0,(age-settings.prepare)/(settings.slashEnd-settings.prepare));
       var frame=Math.min(7,Math.floor(phase*8)),size=96*settings.scale;
-      g.save();g.globalAlpha=age<settings.prepare ? .65 : 1-phase*.45;
-      // Preserve the station's opaque question sign for every facing direction.
-      g.beginPath();g.rect(interaction.x-90,interaction.y-97,180,180);g.rect(sx-13,sy-42,26,16);g.clip('evenodd');
-      g.translate(Math.round(interaction.x),Math.round(interaction.y-7));
-      g.rotate(({right:0,down:Math.PI/2,left:Math.PI,up:-Math.PI/2})[interaction.dir]||0);
+      var x=maze.player.x,y=maze.player.y;
+      g.save();g.globalAlpha=age<settings.prepare ? .8 : 1-phase*.25;
+      // Follow the moving player, while leaving all nearby Q signs readable.
+      g.beginPath();g.rect(x-100,y-107,200,200);
+      maze.stations.forEach(function(station){
+        var sx=(station.x*2+1)*tile,sy=(station.y*2+1)*tile;
+        if(Math.abs(sx-x)<115&&Math.abs(sy-y)<145)g.rect(sx-13,sy-42,26,16);
+      });
+      g.clip('evenodd');g.translate(Math.round(x),Math.round(y-7));
+      g.rotate(({right:0,down:Math.PI/2,left:Math.PI,up:-Math.PI/2})[slash.dir]||0);
       g.drawImage(swipes,frame*96,0,96,96,-size/2,-size/2,size,size);g.restore();
     }
     function render(g,maze,passed,camera,zoom,viewport,time,near,mapOpen){
@@ -321,8 +342,9 @@
       drawCharacter(g,maze.player,time);drawInteraction(g,maze,time);g.restore();
     }
     return Object.freeze({render:render,drawCharacter:drawCharacter,drawStation:drawStation,drawExit:drawExit,
-      beginInteraction:beginInteraction,clearInteraction:clearInteraction,setAtmosphere:setAtmosphere,
+      beginSlash:beginSlash,activateStation:activateStation,isSlashing:isSlashing,
+      clearInteraction:clearInteraction,setAtmosphere:setAtmosphere,
       getAtmosphere:function(){return atmosphere;}});
   }
-  root.MazeRpgVisuals=Object.freeze({create:create});
+  root.MazeRpgVisuals=Object.freeze({create:create,release:'5a3-1'});
 }(globalThis));

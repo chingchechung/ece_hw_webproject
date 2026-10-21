@@ -22,7 +22,7 @@ class RefinementTests(VisualHarness):
                 route.fulfill(body=PRIOR, content_type='application/javascript')
             else:
                 route.continue_()
-        self.page.route('**/js/rpg-renderer.js', renderer)
+        self.page.route('**/js/rpg-renderer.js*', renderer)
         super().open(hooks, index)
 
     def resize(self, width, height):

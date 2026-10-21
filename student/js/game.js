@@ -1,12 +1,13 @@
 (function(){
   'use strict';
+  var RELEASE='5a3-1';document.documentElement.dataset.gameRelease=RELEASE;
   var TILE=28, DRIVE_SCALE=12, DRIVE_TILE=14, DRIVE_TOP_SPEED=590, MAZE_SIZES=[[25,19],[21,15],[17,13],[13,9]], MAX_QUESTS=0, gameZoom=1.5;
   // Keep the validated public unit intact, including v2 accepted-label arrays.
   var assignment=null, assignmentPaused=false, FORM_URL='', QUESTIONS=[];
   var el=function(id){return document.getElementById(id)};
   var canvas=el('maze'),ctx=canvas.getContext('2d'),mini=el('minimap'),mctx=mini.getContext('2d');
   var current=null, failures=0, done=[], pressed={}, modalOpen=false, activeQuestion=-1, showMap=false, nearItem=null;
-  var pendingInteraction=null,interactionFrame=0,atmosphereMode='strong',ATMOSPHERE_KEY='emi-maze.atmosphere';
+  var pendingInteraction=null,interactionFrame=0,lastSlashAt=-Infinity,atmosphereMode='strong',ATMOSPHERE_KEY='emi-maze.atmosphere';
   var motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
   try{var savedAtmosphere=localStorage.getItem(ATMOSPHERE_KEY);if(['off','normal','strong'].includes(savedAtmosphere))atmosphereMode=savedAtmosphere;}catch(ignore){}
   var MAP_LIMIT_MS=30000, mapRemainingMs=MAP_LIMIT_MS, mapLastTick=null;
@@ -153,23 +154,27 @@
   }
   // END 2D VISUALS
   function clearInteractionCue(){
-    var wasPending=!!pendingInteraction;pendingInteraction=null;
+    var now=performance.now(),wasPending=!!pendingInteraction;
+    var wasSlashing=rpgVisuals&&rpgVisuals.isSlashing&&rpgVisuals.isSlashing(now/1000);
+    pendingInteraction=null;lastSlashAt=-Infinity;
     if(interactionFrame)cancelAnimationFrame(interactionFrame);interactionFrame=0;
     if(rpgVisuals&&rpgVisuals.clearInteraction)rpgVisuals.clearInteraction();
-    if(wasPending){pressed={};driveSpeed=0;mapLastTick=performance.now();if(current&&gameMode==='2d')render(performance.now()/1000);}
+    if(wasPending){pressed={};driveSpeed=0;mapLastTick=now;}
+    if((wasPending||wasSlashing)&&current&&gameMode==='2d')render(now/1000);
   }
   function validPending(p){
     return pendingInteraction===p&&current===p.maze&&assignment===p.unit&&gameMode==='2d'&&
-      !assignmentPaused&&!modalOpen&&!document.hidden&&!done[p.index];
+      !assignmentPaused&&!modalOpen&&!document.hidden&&(p.index===null?done.every(Boolean):!done[p.index]);
   }
   function revealPending(p){
     if(pendingInteraction!==p)return;
-    var valid=validPending(p);clearInteractionCue();if(valid)openQuestion(p.index);
+    var valid=validPending(p);clearInteractionCue();if(valid){if(p.index===null)finish();else openQuestion(p.index);}
   }
   function presentInteraction(index){
     var start=performance.now();
-    var duration=rpgVisuals&&rpgVisuals.beginInteraction?rpgVisuals.beginInteraction(current,index,start/1000):0;
-    if(typeof duration!=='number'||duration<=0){openQuestion(index);return;}
+    var duration=beginSlash(start);
+    if(typeof duration!=='number'||duration<=0){if(index===null)finish();else openQuestion(index);return;}
+    if(index!==null)rpgVisuals.activateStation(current,index,start/1000);
     updateMapBudget(start);pressed={};driveSpeed=0;
     var pending={maze:current,unit:assignment,index:index,start:start,revealAt:start+duration*1000};
     pendingInteraction=pending;render(start/1000);
@@ -181,6 +186,17 @@
       render(t/1000);interactionFrame=requestAnimationFrame(animate);
     }
     interactionFrame=requestAnimationFrame(animate);
+  }
+  function beginSlash(now){
+    var duration=rpgVisuals&&rpgVisuals.beginSlash?rpgVisuals.beginSlash(current,now/1000):0;
+    if(duration>0)lastSlashAt=now;
+    return duration;
+  }
+  function freeSlash(){
+    var now=performance.now();
+    // A deliberate press can retrigger after 180 ms; a held E is filtered below.
+    if(now-lastSlashAt<180)return;
+    if(beginSlash(now)>0)render(now/1000);
   }
   function setAtmosphere(value,persist){
     if(!['off','normal','strong'].includes(value))return;
@@ -258,7 +274,8 @@
     el('modeToggle').textContent=gameMode==='drive'?'🚶 返回 2D（V）':'🚗 切換駕駛（V）';
     el('drawerModeToggle').textContent=gameMode==='drive'?'🚶 返回 2D':'🚗 進入駕駛視角';
     el('driveDashboard').hidden=gameMode!=='drive';
-    el('controlsFoot').innerHTML=gameMode==='drive'?'駕駛 <kbd>W</kbd> 油門 <kbd>S</kbd> 煞車 <kbd>A</kbd><kbd>D</kbd> 轉向　停車互動 <kbd>E</kbd>　切換 <kbd>V</kbd>':'移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　互動 <kbd>E</kbd>　視角 <kbd>V</kbd>';
+    el('controlsFoot').innerHTML=gameMode==='drive'?'駕駛 <kbd>W</kbd> 油門 <kbd>S</kbd> 煞車 <kbd>A</kbd><kbd>D</kbd> 轉向　停車互動 <kbd>E</kbd>　切換 <kbd>V</kbd>':'移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　能量 / 答題 <kbd>E</kbd>　視角 <kbd>V</kbd>';
+    el('touchInteract').textContent=gameMode==='drive'?'互動 / 答題':'能量 / 答題';
     notify(gameMode==='drive'?'已進入雙線道迷宮駕駛模式（W 加速，A/D 轉彎）':'已返回 2D 迷宮，位置與題目進度都保留。');
     canvas.focus({preventScroll:true});findNearby();
   }
@@ -468,16 +485,20 @@
     el('again').addEventListener('click',function(){newRound(true)});el('closeFinish').addEventListener('click',hideDialog);
   }
   function interact(){
-    if(modalOpen||pendingInteraction||assignmentPaused||!nearItem)return;
+    if(modalOpen||pendingInteraction||assignmentPaused||!current||el('sidePanel').classList.contains('open'))return;
+    if(gameMode==='2d'&&(!nearItem||(nearItem.type==='finish'&&!done.every(Boolean)))){
+      freeSlash();if(nearItem)finish();return;
+    }
+    if(!nearItem)return;
     if(gameMode==='drive'&&Math.abs(driveSpeed)>25){notify('請先減速停車，再按 E 開啟題目。');return;}
     if(nearItem.type==='question'){
       if(gameMode==='2d')presentInteraction(nearItem.index);else openQuestion(nearItem.index);
-    }else finish();
+    }else if(gameMode==='2d')presentInteraction(null);else finish();
   }
   function isTyping(elm){return elm&&['INPUT','TEXTAREA','SELECT'].includes(elm.tagName)}
   window.addEventListener('keydown',function(e){
     var key=e.key.toLowerCase();
-    if(pendingInteraction&&key==='escape'){e.preventDefault();clearInteractionCue();return;}
+    if(key==='escape'&&(pendingInteraction||(rpgVisuals&&rpgVisuals.isSlashing&&rpgVisuals.isSlashing(performance.now()/1000)))){e.preventDefault();clearInteractionCue();return;}
     if(isTyping(document.activeElement)||assignmentPaused||!current)return;
     if(['arrowleft','arrowright','arrowup','arrowdown','w','a','s','d','e','v',' '].includes(key))e.preventDefault();
     if(el('sidePanel').classList.contains('open')){if(key==='escape')togglePanel(false);return;}
@@ -500,7 +521,10 @@
   el('modeToggle').addEventListener('click',toggleMode);el('drawerModeToggle').addEventListener('click',function(){togglePanel(false);toggleMode()});
   el('atmosphereSelect').addEventListener('change',function(){setAtmosphere(this.value,true);canvas.focus({preventScroll:true});});
   el('drawerAtmosphereSelect').addEventListener('change',function(){setAtmosphere(this.value,true);});
-  motionPreference.addEventListener('change',function(){if(motionPreference.matches&&pendingInteraction)revealPending(pendingInteraction);});
+  motionPreference.addEventListener('change',function(){
+    if(!motionPreference.matches)return;
+    if(pendingInteraction)revealPending(pendingInteraction);else clearInteractionCue();
+  });
   el('zoomSelect').addEventListener('change',function(){
     var next=Number(this.value);if([1.5,1.75].indexOf(next)<0)return;
     gameZoom=next;fitCamera();notify('迷宮鏡頭已調整為 '+Math.round(gameZoom*100)+'%（網頁介面不變）');canvas.focus({preventScroll:true});

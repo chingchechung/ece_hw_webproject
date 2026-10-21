@@ -14,6 +14,9 @@
 > and interaction refinement; see `docs/phase-5a-refinement-results.md`.
 > Phase 5A.2 adds adjustable atmosphere and an unobstructed pending interaction
 > sequence; see `docs/phase-5a2-results.md`.
+> The instructor approved its lighting on real devices. Phase 5A.3 decouples
+> the 2D slash from question proximity while preserving that lighting; see
+> `docs/phase-5a3-results.md`.
 > Stop for instructor review before Phase 5B driving
 > visuals. Preserve all approved gameplay and the existing driving renderer.
 
@@ -240,6 +243,7 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 - [x] Visual review artifacts and regression/CI integration.
 - [x] Reviewed-art refinement: subtle player focus light, directional interaction cue and state feedback.
 - [x] Phase 5A.2: Off/Normal/Strong preference, stronger light/arc, explicit pending/cancellation and temporal evidence.
+- [x] Phase 5A.3: Free E-key slash, shared contextual animation, unchanged approved lighting and versioned static scripts.
 - [ ] Instructor approval of 2D graphics before Phase 5B.
 
 ### Phase 5B — Driving visual follow-up (not started)

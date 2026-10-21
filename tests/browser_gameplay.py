@@ -25,7 +25,7 @@ class GameplayTests(BrowserSupport):
             source="window.__mazeSeed=104729;\n"+source.replace('Date.now()+Math.floor(Math.random()*999999)', 'window.__mazeSeed+250000')
             self.assertIn('window.gameplayTest',source)
             route.fulfill(response=response,body=source)
-        self.page.route('**/js/game.js',inject)
+        self.page.route('**/js/game.js*',inject)
         self.page.goto(self.url+('index.html' if index else ''))
         self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('正在讀取')")
 

@@ -244,7 +244,7 @@
         <button class="btn" id="resetBtn" type="button">重新開始</button>
       </div>
       <div class="gamearea" id="gamearea">
-        <canvas id="maze" tabindex="0" aria-label="方向鍵或 WASD 移動；靠近題目按 E"></canvas>
+        <canvas id="maze" tabindex="0" aria-label="方向鍵或 WASD 移動；E 能量揮擊，靠近題目時答題"></canvas>
         <div class="corner" id="status">方向鍵 / WASD 移動</div>
         <div id="driveDashboard" aria-label="駕駛速度與操作提示" class="drive-dashboard" hidden><span class="drive-label">MAZE DRIVE · 2 LANES · 12× DISTANCE</span><span class="drive-speed"><b id="speedValue">0</b> <small>km/h</small></span><span class="drive-label" style="color:#e2d8a4">行駛 <b id="tripValue">0.00</b> km</span><span class="drive-keys">W 油門　S 煞車　A/D 轉向　E 停車答題　V 切換</span></div>
         <div class="map-timer" id="mapTimer" aria-label="老師視角剩餘時間"><div class="map-timer-row"><span>🧭 地圖剩餘時間</span><strong id="mapSeconds">30s</strong></div><div class="map-timer-track"><span id="mapTimeFill"></span></div></div>
@@ -253,10 +253,10 @@
         <div class="toast" id="toast"></div>
       </div>
       <div class="game-foot">
-        <span id="controlsFoot">移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　互動 <kbd>E</kbd>　視角 <kbd>V</kbd></span>
+        <span id="controlsFoot">移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　能量 / 答題 <kbd>E</kbd>　視角 <kbd>V</kbd></span>
         <span class="legend"><span><span class="dot q"></span>未完成題目</span><span><span class="dot done"></span>已完成</span><span><span class="dot end"></span>終點</span></span>
       </div>
-      <div class="mobile-controls" aria-label="手機觸控操作"><div class="dpad"><button class="up" data-key="arrowup" aria-label="上">↑</button><button class="left" data-key="arrowleft" aria-label="左">←</button><button class="down" data-key="arrowdown" aria-label="下">↓</button><button class="right" data-key="arrowright" aria-label="右">→</button></div><button class="btn primary" id="touchInteract" style="margin-left:15px">互動 / 答題</button></div>
+      <div class="mobile-controls" aria-label="手機觸控操作"><div class="dpad"><button class="up" data-key="arrowup" aria-label="上">↑</button><button class="left" data-key="arrowleft" aria-label="左">←</button><button class="down" data-key="arrowdown" aria-label="下">↓</button><button class="right" data-key="arrowright" aria-label="右">→</button></div><button class="btn primary" id="touchInteract" style="margin-left:15px">能量 / 答題</button></div>
     </section>
     <div class="panel-scrim" id="panelScrim"></div>
     <aside class="panel panel-drawer" id="sidePanel" aria-label="作業進度與操作說明" aria-hidden="true">
@@ -278,7 +278,7 @@
       <div class="hr"></div>
       <div>
         <div class="section-title">HOW TO PLAY / 遊戲說明</div>
-        <ol class="steps"><li>按 <b>V</b> 可隨時切換 2D 走迷宮與迷宮駕駛視角；兩者使用<b>同一張地圖與題目位置</b>。</li><li>駕駛時 W 加速、S 煞車／倒車、A/D 轉向，<b>車速接近 0</b> 且靠近題目時按 E 答題。</li><li>駕駛模式是輕量 2.5D Canvas 畫法，不需 WebGL 或外部程式庫。</li><li>沿著寬敞迷宮通道探索，尋找 <b style="color:var(--gold)">Q1–Q4／Q5</b>。每輪題目位置與題號分布都會變化。</li><li>靠近題目按 <b>E</b>，點選影片在 <b>新的 YouTube 分頁</b> 開啟。</li><li>回到迷宮，從 A–C 或 A–D 選擇一個答案；答對可自由觀看英文解答影片。</li><li><b>答錯任何一題</b>，全部題目歸零，但下一輪迷宮縮小。</li><li>答對全部題目，再找到紫色終點。</li></ol>
+        <ol class="steps"><li>按 <b>V</b> 可隨時切換 2D 走迷宮與迷宮駕駛視角；兩者使用<b>同一張地圖與題目位置</b>。</li><li>駕駛時 W 加速、S 煞車／倒車、A/D 轉向，<b>車速接近 0</b> 且靠近題目時按 E 答題。</li><li>駕駛模式是輕量 2.5D Canvas 畫法，不需 WebGL 或外部程式庫。</li><li>沿著寬敞迷宮通道探索，尋找 <b style="color:var(--gold)">Q1–Q4／Q5</b>。每輪題目位置與題號分布都會變化。</li><li>2D 按 <b>E</b> 可施放能量弧；靠近未通過題目時才會答題。氣氛 Off 不播放動畫。點選影片在 <b>新的 YouTube 分頁</b> 開啟。</li><li>回到迷宮，從 A–C 或 A–D 選擇一個答案；答對可自由觀看英文解答影片。</li><li><b>答錯任何一題</b>，全部題目歸零，但下一輪迷宮縮小。</li><li>答對全部題目，再找到紫色終點。</li></ol>
         <div class="desc">上方「鏡頭」只調整 2D 迷宮放大倍率，建議保持瀏覽器 100% 縮放；本版提供 150% 與 175% 兩種視野。</div><div class="desc">每個單元有四或五題，各題選擇一個答案。已發布的單元可再次練習；表單是否接受回覆由 Google Forms 管理。</div>
 
       </div>
@@ -304,8 +304,8 @@
 <script src="./js/assignment-rules.js"></script>
 <script src="./js/assignment-validator.js"></script>
 <script src="./js/assignment-loader.js"></script>
-<script src="./js/rpg-renderer.js"></script>
-<script src="./js/game.js"></script>
+<script src="./js/rpg-renderer.js?v=5a3-1"></script>
+<script src="./js/game.js?v=5a3-1"></script>
 
 </body>
 </html>

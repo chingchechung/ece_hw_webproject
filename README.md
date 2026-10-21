@@ -133,25 +133,34 @@ no image downloads, build step or third-party art assets are needed. Include thi
 new JavaScript file when manually updating the complete `student/` directory.
 Gameplay, HUD dimensions and the first-person renderer are preserved.
 
-Phase 5A.2 provides **Off / Normal / Strong** atmosphere. Strong is the default
+Phase 5A.3 preserves the approved **Off / Normal / Strong** atmosphere. Strong is the default
 unless you saved another choice. Use the compact **氣氛** selector on desktop
 or **2D 氣氛 / Atmosphere** in the progress/help panel on narrower screens.
 Only this cosmetic preference is stored locally; assignment progress and
 answers are never saved.
 
 Off restores the original bright Phase 5A artwork and immediate question opening.
-Normal and Strong add approximately 33% and 50% distant shading, larger energy
-arcs and restrained station/finish glows. E pauses movement and map time while
-the unobstructed cue plays; the actual question opens after 460 ms in Normal or
-600 ms in Strong. Escape, restart, switching units/view/modes, blur or hiding the
-page safely cancel the cue. Reduced motion skips the animation and delay.
-The teacher map stays clear and softens scene shading. Driving interaction
-remains immediate.
+Normal and Strong retain the approved 33% and 50% distant shading, spotlight
+radii and restrained station/finish glows. In 2D, E plays an energy arc anywhere,
+including empty corridors and passed stations. Free slashes follow the player
+while walking and do not pause exploration or change progress. Deliberate presses
+can retrigger after 180 ms; holding E does not repeat. Space, canvas clicks and
+the touch button use the same action.
+
+Only a nearby incomplete question starts a pending question interaction. It
+pauses movement/map time and opens the actual dialog after 460 ms in Normal or
+600 ms in Strong. An unlocked finish uses the same delay before offering its
+Google Form; a locked finish stays locked. Escape, restart, switching units/view/
+modes, blur or hiding the page safely cancel the cue. Off and reduced motion
+skip the animation and delay. The teacher map stays clear and softens scene
+shading. Free E has no map-time charge; an open map counts normal viewing time.
+Driving interaction remains immediate and has no slash.
 
 ![Matched Off, Normal and Strong views](docs/images/phase-5a2-modes.png)
 
 [Character directions and animation sheet](docs/images/phase-5a-character.png) ·
-[Actual E +250 ms preview](docs/images/phase-5a2-interaction.png) ·
+[Current real E close-up](docs/images/phase-5a3-slash.png) ·
+[Phase 5A.3 results, evidence, changed files and deployment checks](docs/phase-5a3-results.md) ·
 [Phase 5A.2 results, performance, changed files and limits](docs/phase-5a2-results.md) ·
 [Previous refinement report](docs/phase-5a-refinement-results.md) ·
 [Original Phase 5A report](docs/phase-5a-results.md)
@@ -160,6 +169,7 @@ remains immediate.
 python tests/browser_visuals.py
 python tests/browser_refinement.py
 python tests/browser_atmosphere.py
+python tests/browser_slash.py
 ```
 
 The visual suite uses synthetic S02 data and fixed maze seeds. It generates
@@ -186,6 +196,20 @@ a separate live-clock test checks actual reveal latency. Video recording uses
 development-only Playwright FFmpeg, installed with
 `python -m playwright install chromium`; no video dependency is deployed with the
 student website.
+
+Phase 5A.3 adds `test-results/phase-5a3/`: actual E-input frames for all four
+directions, close-ups, lighting parity and stale-cache tests, and
+`explore-slash-question.webm`. The recording shows repeated free slashes, walking
+while slashing and approaching Q1 through real movement before its dialog opens.
+It uses synthetic assignments only and is included in the same CI artifact.
+
+For a manual static update, upload the complete changed `student/` files
+together. The HTML requests `./js/game.js?v=5a3-1` and
+`./js/rpg-renderer.js?v=5a3-1`. Open `index.html?v=5a3-1` after updating to avoid
+an older cached entry page. In DevTools Network, verify both versioned requests
+succeed. In the console, `document.documentElement.dataset.gameRelease` and
+`MazeRpgVisuals.release` must both be `5a3-1`. See the phase report for the full
+cache check; this does not inspect or deploy to the instructor's Apache server.
 
 ## Automated checks on GitHub Actions
 
@@ -324,6 +348,6 @@ Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-valid
 [Phase 2](docs/phase-2-results.md), [Phase 3](docs/phase-3-results.md),
 [Phase 4](docs/phase-4-results.md), [Phase 5A](docs/phase-5a-results.md),
 [Phase 5A refinement](docs/phase-5a-refinement-results.md),
-[Phase 5A.2](docs/phase-5a2-results.md).
+[Phase 5A.2](docs/phase-5a2-results.md), [Phase 5A.3](docs/phase-5a3-results.md).
 Development stops for review before Phase 5B.
 See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

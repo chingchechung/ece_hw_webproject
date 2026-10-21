@@ -1,4 +1,8 @@
 /* Test-response-only visual staging and pixel measurements. Never deployed. */
+function beginVisualAction(renderer,maze,index,time){
+  if(renderer.beginSlash){const duration=renderer.beginSlash(maze,time);renderer.activateStation(maze,index,time);return duration;}
+  return renderer.beginInteraction(maze,index,time);
+}
 const focusMaze={grid:Array.from({length:38},()=>Array(50).fill(0)),stations:[],
   exit:{x:1000,y:1000},player:{x:260,y:200,dir:'right',moving:false,walk:0}};
 const priorVisuals=PreviousPhase5aVisuals.create(TILE);
@@ -25,7 +29,7 @@ window.refineTest={
    refinedVisuals.setAtmosphere('strong');
    const maze={...focusMaze,stations:[{x:1000,y:1000}],player:{x:300,y:240,dir,moving:false,walk:0}};
    refinedVisuals.clearInteraction();const before=probeCanvas(refinedVisuals,maze,10);
-   const started=refinedVisuals.beginInteraction(maze,0,10),during=probeCanvas(refinedVisuals,maze,10.25);
+   const started=beginVisualAction(refinedVisuals,maze,0,10),during=probeCanvas(refinedVisuals,maze,10.25);
    const expired=probeCanvas(refinedVisuals,maze,10.7);
    refinedVisuals.clearInteraction();const clean=probeCanvas(refinedVisuals,maze,10.7);
    const a=before.getContext('2d').getImageData(0,0,600,420).data,b=during.getContext('2d').getImageData(0,0,600,420).data;
@@ -46,7 +50,7 @@ window.refineTest={
      Object.assign(current.player,{x:p.x+d[0],y:p.y+d[1],dir,moving:false,walk:0});
    }
    clearTimeout(toastTimer);el('toast').classList.remove('show');
-   fitCamera();findNearby();rpgVisuals.beginInteraction(current,index,10);render(10.25);
+   fitCamera();findNearby();beginVisualAction(rpgVisuals,current,index,10);render(10.25);
  },
  states(){
    const c=document.createElement('canvas');c.width=96;c.height=96;const g=c.getContext('2d');
@@ -60,7 +64,7 @@ window.refineTest={
  labelCheck(){
    const maze={...focusMaze,stations:[{x:6,y:4}],player:{...focusMaze.player,x:180,y:210}};
    refinedVisuals.clearInteraction();const before=probeCanvas(refinedVisuals,maze,10);
-   refinedVisuals.beginInteraction(maze,0,10);const after=probeCanvas(refinedVisuals,maze,10.08);
+   beginVisualAction(refinedVisuals,maze,0,10);const after=probeCanvas(refinedVisuals,maze,10.08);
    const label=c=>Array.from(c.getContext('2d').getImageData(378,197,36,20).data);
    refinedVisuals.clearInteraction();return {before:label(before),after:label(after)};
  },
@@ -76,7 +80,7 @@ window.refineTest={
      function sample(t){
        camera.x=baseX+Math.sin(costs.length*.04)*28;camera.y=baseY+Math.cos(costs.length*.04)*18;
        const start=performance.now();
-       if(interactions&&costs.length%30===0)rpgVisuals.beginInteraction(current,0,t/1000);
+       if(interactions&&costs.length%30===0)beginVisualAction(rpgVisuals,current,0,t/1000);
        render(t/1000);costs.push(performance.now()-start);timestamps.push(t);
        if(costs.length<120)requestAnimationFrame(sample);else resolve();
      }

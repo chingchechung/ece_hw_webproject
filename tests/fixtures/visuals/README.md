@@ -13,3 +13,10 @@ prototype separately.
 SHA-256: `0c9e484cabace70fbde80b5e815f38906a9b5ea8f66dc08fa1f7096e6bf17afd`.
 Phase 5A.2 uses it for paired performance measurements. It is also test-only
 original artwork with no assignment data.
+
+`phase-5a2-renderer.js` is the instructor-approved lighting renderer from
+`625fd1219407430047417177038f25851eca1004`.
+SHA-256: `d990d4b61faefb942aafffe90a086f711798b46c343fd27a09e01faaf98c27af`.
+Phase 5A.3 compares its actual Canvas pixels at all three viewport sizes, both
+zooms, all modes and map states to ensure the approved light/artwork is unchanged
+when no slash is active. It is never deployed and contains no assignment data.

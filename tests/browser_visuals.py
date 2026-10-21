@@ -29,7 +29,7 @@ class VisualHarness(StudentBrowserHarness):
             source=source.replace('Date.now()+Math.floor(Math.random()*999999)','104729+250000')
             source=source.replace('  sizeCanvas();requestAnimationFrame(frame);loader.start();',getattr(self,'bridge',BRIDGE)+'  sizeCanvas();loader.start();')
             route.fulfill(body=source,content_type='application/javascript')
-        self.page.route('**/js/game.js',inject)
+        self.page.route('**/js/game.js*',inject)
         self.page.goto(self.url)
         self.page.wait_for_function("!document.querySelector('#unitSelect').disabled")
         self.load('S02')
