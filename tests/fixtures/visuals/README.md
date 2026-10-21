@@ -20,3 +20,12 @@ SHA-256: `d990d4b61faefb942aafffe90a086f711798b46c343fd27a09e01faaf98c27af`.
 Phase 5A.3 compares its actual Canvas pixels at all three viewport sizes, both
 zooms, all modes and map states to ensure the approved light/artwork is unchanged
 when no slash is active. It is never deployed and contains no assignment data.
+
+`phase-5a3-drive.js` freezes the approved driving drawing functions from
+`b5626bdbc962c98e6aaf10effa148d1d4ed8bc54`, before Phase 5B artwork changes.
+SHA-256: `01bfa3e151cdadf1b8166c97ed2e462600fe0f5f855535fa8ff148e34b3eafc2`.
+Browser tests evaluate it only in a synthetic response closure sharing the
+unchanged physics/road state. It supports matched screenshots, state/control
+comparisons and performance measurements. No assignment data is present; never
+deploy this reference or any test bridge. Phase 5B separately hashes all
+approved gameplay blocks and the entire unchanged Phase 5A.3 2D renderer.

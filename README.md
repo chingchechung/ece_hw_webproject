@@ -10,8 +10,9 @@ checkboxes for **one or more accepted answers**. Students choose one answer;
 any accepted label passes. V1 files remain editable in their original format;
 use **Convert v1 to v2** to create an explicit migrated copy. Phase 3 provides a static
 student site supporting both versions. Phase 5A adds original laboratory-themed
-2D pixel artwork and adjustable atmosphere/interaction feedback; stop for
-instructor review before Phase 5B driving visuals.
+approved 2D pixel artwork and atmosphere/interaction feedback. Phase 5B enhances
+the first-person driving artwork while preserving the shared gameplay and physics.
+Stop after Phase 5B for instructor review.
 
 ## Teacher editor — Windows 11
 
@@ -67,7 +68,7 @@ Linux/Xvfb GUI regressions passed. The instructor also reports successful
 question editing on Windows 11; other native GUI workflows/macOS still need
 manual verification.
 
-## Student site — Phase 5A
+## Student site — Phase 5B
 
 The deployable website is **`student/` only**. It loads the relative
 `assignments/manifest.json`, lists only explicitly published S01–S12 entries,
@@ -120,7 +121,8 @@ Phase 4 adds deterministic routes using actual keyboard events and movement
 updates, without teleporting. It saves synthetic screenshots, Playwright traces,
 state/error logs and placement metrics in ignored `test-results/phase-4/`.
 See [Phase 3](docs/phase-3-results.md) and [Phase 4 results/changed files](docs/phase-4-results.md).
-Phase 5A changes 2D artwork only; driving visuals remain unchanged. WebKit could
+Phase 5B adds laboratory-themed driving artwork; the approved 2D renderer is
+unchanged. WebKit could
 not be installed because its download hosts return HTTP 403 under the cloud
 network policy; Chromium results do not establish Safari compatibility.
 
@@ -131,7 +133,7 @@ connected walls, oscilloscope terminals and a purple locked/unlocked exit.
 Character and tile atlases are generated locally by `student/js/rpg-renderer.js`;
 no image downloads, build step or third-party art assets are needed. Include this
 new JavaScript file when manually updating the complete `student/` directory.
-Gameplay, HUD dimensions and the first-person renderer are preserved.
+The approved 2D renderer, gameplay and HUD dimensions are preserved in Phase 5B.
 
 Phase 5A.3 preserves the approved **Off / Normal / Strong** atmosphere. Strong is the default
 unless you saved another choice. Use the compact **氣氛** selector on desktop
@@ -174,7 +176,7 @@ python tests/browser_slash.py
 
 The visual suite uses synthetic S02 data and fixed maze seeds. It generates
 before/after viewport screenshots, character/object sheets, station and exit
-states, an intersection and unchanged driving comparison in `test-results/phase-5a/`.
+states, an intersection and the frozen/current driving comparison in `test-results/phase-5a/`.
 Its `performance.json` records three paired camera-sweep trials at 1366×768,
 1024×768 and 390×844. Traces/screenshots are included by the existing CI artifact
 upload. Timing measures headless browser scheduling and JavaScript drawing-call
@@ -203,13 +205,50 @@ directions, close-ups, lighting parity and stale-cache tests, and
 while slashing and approaching Q1 through real movement before its dialog opens.
 It uses synthetic assignments only and is included in the same CI artifact.
 
-For a manual static update, upload the complete changed `student/` files
-together. The HTML requests `./js/game.js?v=5a3-1` and
-`./js/rpg-renderer.js?v=5a3-1`. Open `index.html?v=5a3-1` after updating to avoid
-an older cached entry page. In DevTools Network, verify both versioned requests
-succeed. In the console, `document.documentElement.dataset.gameRelease` and
-`MazeRpgVisuals.release` must both be `5a3-1`. See the phase report for the full
-cache check; this does not inspect or deploy to the instructor's Apache server.
+## First-person driving review — Phase 5B
+
+Driving uses continuous steel-blue panel walls, a world-anchored pavement surface,
+cyan edge channels on actual road boundaries, and restrained depth lighting.
+Q1–Q5 electronics terminals retain their identifiers after passing: amber marks
+incomplete terminals and mint/check marks completed ones. A transparent EXIT
+gantry distinguishes locked/unlocked finish states. Stop near a station and press
+E as before; passing a checkpoint never opens a question automatically.
+
+The lower cockpit has slimmer pillars, steering feedback, a speed strip and an
+N/D/R indicator. Reduced motion disables optional bobbing, wheel animation and
+status-light pulses. The vehicle model, 12× virtual-distance scale, widened road
+mask, collision geometry and roughly 30 FPS driving-render cap are unchanged.
+All approved 2D art, atmosphere settings/persistence and free E-key slash remain
+unchanged, including their reduced-motion behavior.
+
+![Driving checkpoint](docs/images/phase-5b-driving.png)
+
+[Before/after comparison](docs/images/phase-5b-before-after.png) ·
+[Checkpoint and finish states](docs/images/phase-5b-checkpoints.png) ·
+[Full Phase 5B report, results, performance and changed files](docs/phase-5b-results.md)
+
+```sh
+python tests/browser_drive.py
+```
+
+`test-results/phase-5b/` contains matched frozen/current views of straight roads,
+left/right turns, corners, T/four-way junctions, walls, checkpoints/finish states
+and mobile layouts. It also contains control-replay/road-mask/depth results,
+three-viewport performance trials, traces/error logs and
+`driving-keyboard-demo.webm`. The live browser recording follows real driving
+updates under scripted W/S/A/D keyboard events, then Playwright V/E/Escape input;
+it shows acceleration, a turn, braking, Q1 interaction and return to driving.
+Its initial pose uses a deterministic synthetic route. The existing Phase 4
+tests still navigate complete assignments from start using actual controls.
+
+For a manual static update, upload `student/js/game.js` first and
+`student/index.html` last, keeping the complete `student/` bundle together.
+Open **`index.html?v=5b-1`** to avoid a stale entry page. Network requests must use
+`./js/game.js?v=5b-1` and the unchanged `./js/rpg-renderer.js?v=5a3-1`.
+In DevTools, `document.documentElement.dataset.gameRelease` must be **`5b-1`**;
+`MazeRpgVisuals.release` stays **`5a3-1`** because its approved source is unchanged.
+These are the compatible asset versions for this release. See the report for
+upload checks and real-device review. No automatic deployment/server sync is added.
 
 ## Automated checks on GitHub Actions
 
@@ -223,7 +262,8 @@ and performs no deployment, uploads of course data or server synchronization.
 
 The job runs all Python/schema/model tests, Tk GUI tests, original browser tests,
 browser validator parity, student loading tests, Phase 4 walking/driving tests,
-Phase 5A visual, refinement and atmosphere checks
+Phase 5A visual, refinement, atmosphere and slash checks, Phase 5B preservation,
+driving visual/control/recording/performance checks
 and the assignment CLI. All required dependencies are checked; skipped tests fail
 the CI runner. Independent suites continue after a failure so logs are retained.
 
@@ -279,7 +319,7 @@ as an optional job; Tk native GUI testing on macOS is a separate desktop check.
 Playwright WebKit is not Safari. Even a passing macOS/WebKit run would still need
 manual checks in actual Safari (focus, new tabs, input, display scaling and driving)
 before claiming Safari compatibility. No macOS/WebKit success is claimed by the
-Ubuntu/Chromium workflow. Phase 5B driving enhancements have not started.
+Ubuntu/Chromium workflow. Phase 5B now stops for instructor review before further work.
 
 ## Original student prototype
 
@@ -348,6 +388,7 @@ Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-valid
 [Phase 2](docs/phase-2-results.md), [Phase 3](docs/phase-3-results.md),
 [Phase 4](docs/phase-4-results.md), [Phase 5A](docs/phase-5a-results.md),
 [Phase 5A refinement](docs/phase-5a-refinement-results.md),
-[Phase 5A.2](docs/phase-5a2-results.md), [Phase 5A.3](docs/phase-5a3-results.md).
-Development stops for review before Phase 5B.
+[Phase 5A.2](docs/phase-5a2-results.md), [Phase 5A.3](docs/phase-5a3-results.md),
+[Phase 5B](docs/phase-5b-results.md).
+Development stops after Phase 5B for instructor review.
 See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

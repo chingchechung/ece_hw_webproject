@@ -219,14 +219,14 @@ class SlashTests(VisualHarness):
         for name in paths:(self.site/'js'/name).write_bytes((ROOT/'student/js'/name).read_bytes())
         cached=self.page.evaluate("async paths=>Promise.all(paths.map(async name=>(await fetch('./js/'+name+'?v=5a2-old')).text()))",paths)
         self.assertEqual(cached,old)
-        self.page.goto(self.url+'index.html?v=5a3-1')
+        self.page.goto(self.url+'index.html?v=5b-1')
         self.page.wait_for_function("!document.querySelector('#unitSelect').disabled")
         self.load('S01')
         versions=self.page.evaluate("({game:document.documentElement.dataset.gameRelease,renderer:MazeRpgVisuals.release,scripts:Array.from(document.scripts,s=>s.getAttribute('src'))})")
-        self.assertEqual(versions['game'],'5a3-1');self.assertEqual(versions['renderer'],'5a3-1')
-        for name in paths:
-            self.assertIn('./js/'+name+'?v=5a3-1',versions['scripts'])
-            self.assertTrue(any(u.endswith('/js/'+name+'?v=5a3-1') for u in self.requests))
+        self.assertEqual(versions['game'],'5b-1');self.assertEqual(versions['renderer'],'5a3-1')
+        for name,version in [('game.js','5b-1'),('rpg-renderer.js','5a3-1')]:
+            self.assertIn('./js/'+name+'?v='+version,versions['scripts'])
+            self.assertTrue(any(u.endswith('/js/'+name+'?v='+version) for u in self.requests))
         self.assert_no_scroll();self.save('deployment-cache.json',versions)
 
     def test_real_keyboard_exploration_video(self):

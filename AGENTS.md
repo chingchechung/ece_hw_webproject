@@ -28,8 +28,12 @@ Only the cosmetic atmosphere preference may persist in localStorage.
 Phase 5A.2 lighting is approved after instructor real-device testing. Phase
 5A.3 authorizes a separate, always-available 2D slash and versioned static
 assets; preserve the approved lighting exactly. See `docs/phase-5a3-results.md`.
-Stop for instructor review before Phase 5B. Preserve the driving renderer,
-physics, gameplay, authoring and validation contracts.
+The instructor has approved all Phase 5A features, including the slash in a
+local browser; remote-desktop visibility was not a confirmed gameplay defect.
+Phase 5B authorizes first-person driving artwork enhancements while preserving
+all approved 2D visuals and the driving physics/gameplay/authoring contracts.
+See `docs/phase-5b-results.md`. Stop after Phase 5B for instructor review; do not
+merge into `main` or begin another refinement/release phase.
 
 ## 1. Priority and working method
 

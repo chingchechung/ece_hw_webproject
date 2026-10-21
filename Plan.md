@@ -17,8 +17,9 @@
 > The instructor approved its lighting on real devices. Phase 5A.3 decouples
 > the 2D slash from question proximity while preserving that lighting; see
 > `docs/phase-5a3-results.md`.
-> Stop for instructor review before Phase 5B driving
-> visuals. Preserve all approved gameplay and the existing driving renderer.
+> Phase 5A is approved, including the slash in a local browser. Phase 5B updates
+> first-person artwork while preserving the approved 2D visuals and all driving
+> physics/gameplay; see `docs/phase-5b-results.md`. Stop after Phase 5B for review.
 
 ## 1. Project objective
 
@@ -244,11 +245,13 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 - [x] Reviewed-art refinement: subtle player focus light, directional interaction cue and state feedback.
 - [x] Phase 5A.2: Off/Normal/Strong preference, stronger light/arc, explicit pending/cancellation and temporal evidence.
 - [x] Phase 5A.3: Free E-key slash, shared contextual animation, unchanged approved lighting and versioned static scripts.
-- [ ] Instructor approval of 2D graphics before Phase 5B.
+- [x] Instructor approval of 2D graphics, atmosphere and locally tested slash before Phase 5B.
 
-### Phase 5B — Driving visual follow-up (not started)
+### Phase 5B — Driving visual enhancement
 
-- [ ] Polish driving scenes while preserving approved 2D artwork and tested behavior.
+- [x] Lab pavement/panel walls, readable checkpoints/finish and restrained motion feedback with frozen-reference comparisons.
+- [x] Preserve approved 2D artwork and tested physics; record synthetic driving screenshots/video and three-viewport benchmarks.
+- [ ] Instructor review of Phase 5B before any further refinement or Phase 6.
 - [ ] Smoke test Chrome/Edge Windows 11 and Chrome/Safari macOS (or explicitly record untested real-device platforms).
 - [ ] Verify acceptable responsiveness on ordinary integrated-GPU laptops; no external network dependency except YouTube/Google Form.
 

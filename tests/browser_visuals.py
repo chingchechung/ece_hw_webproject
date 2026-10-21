@@ -7,6 +7,7 @@ import statistics
 import unittest
 
 from browser_student import StudentBrowserHarness, fixture, ROOT
+from drive_reference import DRIVE_BRIDGE
 
 ORIGINAL=(ROOT/'emi_maze_dualview_v1.2/index.html').read_text()
 BASELINE_DRAW=ORIGINAL[ORIGINAL.index('  function roundedRect('):ORIGINAL.index('  function readMapBudget(')]
@@ -114,15 +115,15 @@ class VisualTests(VisualHarness):
                 self.assertEqual(after,before)
         self.shot('small-screen-175.png')
 
-    def test_first_person_pixels_identical_to_phase4(self):
-        self.publish(fixture(2,'S02'));images=[]
-        self.artifact_directory.mkdir(parents=True,exist_ok=True)
-        for baseline in [True,False]:
-            self.baseline=baseline;self.open()
-            self.page.keyboard.press('v');self.page.evaluate('visualTest.draw(1)')
-            images.append(self.page.evaluate('visualTest.pixels()'))
-            self.shot('drive-before.png' if baseline else 'drive-unchanged.png')
-        self.assertEqual(images[0],images[1])
+    def test_driving_art_changes_without_writing_shared_state(self):
+        self.bridge=BRIDGE+DRIVE_BRIDGE
+        self.prepare();self.page.keyboard.press('v')
+        state=self.page.evaluate('visualTest.state()')
+        self.page.evaluate('approvedDriveRender(1)');before=self.page.evaluate('visualTest.pixels()')
+        self.shot('drive-before.png');self.assertEqual(self.page.evaluate('visualTest.state()'),state)
+        self.page.evaluate('visualTest.draw(1)');after=self.page.evaluate('visualTest.pixels()')
+        self.shot('drive-phase5b.png')
+        self.assertNotEqual(before,after);self.assertEqual(self.page.evaluate('visualTest.state()'),state)
 
     def test_paired_performance_and_before_after_views(self):
         self.artifact_directory.mkdir(parents=True,exist_ok=True)
