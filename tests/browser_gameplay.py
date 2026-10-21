@@ -50,6 +50,7 @@ class GameplayTests(BrowserSupport):
     def interact(self):
         self.page.locator('#maze').focus()
         self.page.keyboard.press('e')
+        self.page.wait_for_function('!gameplayTest.state().pending')
 
     def popup(self,expected):
         anchor=self.page.locator('#dialog a')

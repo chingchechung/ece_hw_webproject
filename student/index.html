@@ -77,12 +77,6 @@
     .toast.show{display:block}
     .veil{position:fixed;inset:0;background:#030a14ca;z-index:8;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
     .veil.show{display:flex}
-    /* Brief 2D energy cue; question DOM and modal input pause remain immediate. */
-    #veil.interaction-cue{animation:interactionBackdrop .16s step-end}
-    #veil.interaction-cue .dialog{animation:interactionDialog .16s step-end}
-    @keyframes interactionBackdrop{from{background:transparent;backdrop-filter:none}to{background:#030a14ca;backdrop-filter:blur(5px)}}
-    @keyframes interactionDialog{from{opacity:0}to{opacity:1}}
-    @media(prefers-reduced-motion:reduce){#veil.interaction-cue,#veil.interaction-cue .dialog{animation:none}}
     .dialog{background:linear-gradient(160deg,#1a304a,#101e32);border:1px solid #466889;width:min(100%,560px);max-height:90vh;overflow-y:auto;border-radius:17px;box-shadow:0 30px 100px #000b;padding:25px}
     .modalhead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
     .chip{font-size:11px;color:#041b25;font-weight:900;background:var(--gold);border-radius:99px;padding:6px 10px;display:inline-block}
@@ -140,6 +134,10 @@
     .zoom-control{display:inline-flex;align-items:center;gap:6px;padding:4px 7px;border:1px solid #425877;border-radius:8px;background:#152a42;font-size:12px;white-space:nowrap;color:#dcecfb}
     .zoom-control select{background:#213b59;color:#fff;border:1px solid #6685a4;border-radius:6px;padding:5px 20px 5px 7px;font:inherit;font-weight:750;cursor:pointer}
     .zoom-control select:focus-visible{outline:2px solid #ffce70;outline-offset:2px}
+    .atmosphere-control{flex:none}
+    .atmosphere-control select{padding-right:5px}
+    .drawer-atmosphere{margin:8px 0;justify-content:space-between}
+    @media(max-width:1100px){.atmosphere-hud{display:none}}
     .gamearea{flex:1 1 auto;height:auto;min-height:0;overflow:hidden}
     .game-foot{flex:0 0 auto;min-height:38px;padding:8px 12px;gap:8px;flex-wrap:nowrap;font-size:11px}
     .game-foot .legend{gap:12px;flex-wrap:nowrap}
@@ -234,6 +232,11 @@
             <option value="1.75">175%</option>
           </select>
         </label>
+        <label class="zoom-control atmosphere-control atmosphere-hud" for="atmosphereSelect" title="2D atmosphere / 迷宮氣氛">
+          <span>氣氛</span><select id="atmosphereSelect" aria-label="2D atmosphere">
+            <option value="off">Off</option><option value="normal">Normal</option><option value="strong" selected>Strong</option>
+          </select>
+        </label>
         <div class="grow"></div>
         <button class="btn primary" id="modeToggle" type="button" title="按 V 切換 2D／駕駛視角">🚗 切換駕駛（V）</button>
         <button class="btn" id="panelToggle" type="button" aria-controls="sidePanel" aria-expanded="false">☰ 進度／說明</button>
@@ -259,6 +262,11 @@
     <aside class="panel panel-drawer" id="sidePanel" aria-label="作業進度與操作說明" aria-hidden="true">
       <div class="drawer-head"><strong>作業進度與遊戲說明</strong><button class="btn" id="panelClose" type="button">✕ 關閉</button></div>
       <div class="drawer-mobile-tools"><button class="btn" id="drawerModeToggle" type="button">🚗 進入駕駛視角</button><button class="btn" id="drawerMapToggle" type="button">老師視角：30秒</button><button class="btn" id="drawerResetBtn" type="button">重新開始</button></div>
+      <label class="zoom-control atmosphere-control drawer-atmosphere" for="drawerAtmosphereSelect">
+        <span>2D 氣氛 / Atmosphere</span><select id="drawerAtmosphereSelect" aria-label="2D atmosphere in progress panel">
+          <option value="off">Off</option><option value="normal">Normal</option><option value="strong" selected>Strong</option>
+        </select>
+      </label>
       <p class="desc">老師視角每輪可使用 <b>30 秒</b>；開啟時倒數，關閉時暫停。同一輪用完後不能再開啟；<b>答錯進入下一輪</b>或按下<b>重新開始</b>都會重置為 30 秒。切換單元或重新載入單元會開始新的挑戰。</p>
 
       <div class="quest-column">

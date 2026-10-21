@@ -13,6 +13,7 @@ function luminanceAt(c,x,y){
 }
 window.refineTest={
  focus(zoom,x,y,camera,map=false){
+   refinedVisuals.setAtmosphere('normal');
    Object.assign(focusMaze.player,{x,y});
    const before=probeCanvas(priorVisuals,focusMaze,0,zoom,camera),after=probeCanvas(refinedVisuals,focusMaze,0,zoom,camera,map);
    const cx=x*zoom-Math.round(camera.x*zoom),cy=(y-8)*zoom-Math.round(camera.y*zoom);
@@ -21,11 +22,12 @@ window.refineTest={
    return {center:[cx,cy],near:ratio(cx+45,cy+35),far:ratio(...corners[0]),left:ratio(165,225),right:ratio(495,225)};
  },
  swipe(dir){
+   refinedVisuals.setAtmosphere('strong');
    const maze={...focusMaze,stations:[{x:1000,y:1000}],player:{x:300,y:240,dir,moving:false,walk:0}};
    refinedVisuals.clearInteraction();const before=probeCanvas(refinedVisuals,maze,10);
-   const started=refinedVisuals.beginInteraction(maze,0,10),during=probeCanvas(refinedVisuals,maze,10.08);
-   const expired=probeCanvas(refinedVisuals,maze,10.25);
-   refinedVisuals.clearInteraction();const clean=probeCanvas(refinedVisuals,maze,10.25);
+   const started=refinedVisuals.beginInteraction(maze,0,10),during=probeCanvas(refinedVisuals,maze,10.25);
+   const expired=probeCanvas(refinedVisuals,maze,10.7);
+   refinedVisuals.clearInteraction();const clean=probeCanvas(refinedVisuals,maze,10.7);
    const a=before.getContext('2d').getImageData(0,0,600,420).data,b=during.getContext('2d').getImageData(0,0,600,420).data;
    let sx=0,sy=0,n=0;
    for(let i=0;i<a.length;i+=4)if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]){
@@ -44,7 +46,7 @@ window.refineTest={
      Object.assign(current.player,{x:p.x+d[0],y:p.y+d[1],dir,moving:false,walk:0});
    }
    clearTimeout(toastTimer);el('toast').classList.remove('show');
-   fitCamera();findNearby();rpgVisuals.beginInteraction(current,index,10);render(10.08);
+   fitCamera();findNearby();rpgVisuals.beginInteraction(current,index,10);render(10.25);
  },
  states(){
    const c=document.createElement('canvas');c.width=96;c.height=96;const g=c.getContext('2d');
@@ -62,7 +64,7 @@ window.refineTest={
    const label=c=>Array.from(c.getContext('2d').getImageData(378,197,36,20).data);
    refinedVisuals.clearInteraction();return {before:label(before),after:label(after)};
  },
- modal(){return {open:modalOpen,active:activeQuestion,cue:el('veil').classList.contains('interaction-cue'),
+ modal(){return {open:modalOpen,active:activeQuestion,cue:!!pendingInteraction,pendingIndex:pendingInteraction?.index,
    opacity:getComputedStyle(el('dialog')).opacity,pressed:{...pressed},speed:driveSpeed,paused:assignmentPaused};},
  map(value){setMapVisible(value);render(0);},
  screenPlayer(){return {x:(current.player.x-camera.x)*gameZoom,y:(current.player.y-8-camera.y)*gameZoom};},
@@ -85,11 +87,10 @@ window.refineTest={
    return {viewport:[innerWidth,innerHeight],zoom:gameZoom,maze:[current.width,current.height],
      meanRenderMs:costs.reduce((a,b)=>a+b,0)/costs.length,p95RenderMs:sorted[Math.floor(costs.length*.95)],
      observedFps:(timestamps.length-1)*1000/(timestamps.at(-1)-timestamps[0]),
-     workload:interactions?'camera sweep + repeated 0.2s interactions':'camera sweep + nearby incomplete station'};
+     workload:interactions?'camera sweep + repeated interactions':'camera sweep + nearby incomplete station'};
  }
 };
-// Observe the real keyboard handler in the same event turn, before a slow
-// screenshot or host scheduling can consume the 160ms presentation cue.
+// Observe the real keyboard handler in the same event turn.
 window.addEventListener('keydown',event=>{
   if(event.key.toLowerCase()==='e')refineTest.keyModal=refineTest.modal();
 });

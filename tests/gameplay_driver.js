@@ -79,7 +79,7 @@ function testDriveTo(point) {
   if(Math.hypot(target.x-p.x,target.y-p.y)>1)throw Error('Driver missed waypoint');
 }
 window.gameplayTest={
-  state:()=>({unit:assignment,done,failures,mode:gameMode,player:current?.player,
+  state:()=>({unit:assignment,done,failures,mode:gameMode,pending:!!pendingInteraction,player:current?.player,
     stations:current?.stations,exit:current?.exit,width:current?.width,height:current?.height,
     speed:driveSpeed,angle:driveAngle,remaining:mapRemainingMs,map:showMap,paused:assignmentPaused,
     camera:{...camera},zoom:gameZoom,distance:driveDistance,pressed:{...pressed}}),

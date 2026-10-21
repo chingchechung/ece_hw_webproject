@@ -92,7 +92,11 @@ class StudentBrowserHarness(unittest.TestCase):
         self.origin = f'http://127.0.0.1:{self.server.server_port}'
         self.prefix = '/~teacher/course/maze/'
         self.url = self.origin + self.prefix
-        self.context = self.browser.new_context(viewport={'width': 1366, 'height': 768})
+        context_options = {'viewport': {'width': 1366, 'height': 768}}
+        if getattr(self, 'record_video_directory', None):
+            context_options.update(record_video_dir=str(self.record_video_directory),
+                                   record_video_size={'width': 1366, 'height': 768})
+        self.context = self.browser.new_context(**context_options)
         self.context.route('https://**/*', lambda route: route.fulfill(
             status=200, content_type='text/html', body='<title>External test stub</title>'))
         self.context.tracing.start(screenshots=True, snapshots=True, sources=True)
@@ -443,6 +447,7 @@ class StudentBrowserTests(StudentBrowserHarness):
             self.page.keyboard.press('v')
         self.page.evaluate('studentTest.park(studentTest.state().current.stations[1])')
         self.page.click('#touchInteract')
+        self.page.wait_for_selector('[data-answer]')
         self.assertEqual(self.page.locator('[data-answer]').count(), 4)
         self.page.click('#dialogClose')
         self.page.set_viewport_size({'width': 1366, 'height': 768})

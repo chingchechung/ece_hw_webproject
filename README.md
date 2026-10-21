@@ -10,7 +10,7 @@ checkboxes for **one or more accepted answers**. Students choose one answer;
 any accepted label passes. V1 files remain editable in their original format;
 use **Convert v1 to v2** to create an explicit migrated copy. Phase 3 provides a static
 student site supporting both versions. Phase 5A adds original laboratory-themed
-2D pixel artwork and subtle focus lighting/interaction feedback; stop for
+2D pixel artwork and adjustable atmosphere/interaction feedback; stop for
 instructor review before Phase 5B driving visuals.
 
 ## Teacher editor — Windows 11
@@ -133,22 +133,33 @@ no image downloads, build step or third-party art assets are needed. Include thi
 new JavaScript file when manually updating the complete `student/` directory.
 Gameplay, HUD dimensions and the first-person renderer are preserved.
 
-The 2D refinement adds a broad, gentle light around the avatar, a short
-directional cyan energy swipe when interacting with an incomplete station, and
-restrained proximity/unlocked-exit glows. The question pauses gameplay
-immediately and appears after a 160 ms visual cue. Reduced-motion preferences
-skip the swipe/reveal animation. The teacher map softens the scene shading.
+Phase 5A.2 provides **Off / Normal / Strong** atmosphere. Strong is the default
+unless you saved another choice. Use the compact **氣氛** selector on desktop
+or **2D 氣氛 / Atmosphere** in the progress/help panel on narrower screens.
+Only this cosmetic preference is stored locally; assignment progress and
+answers are never saved.
 
-![Synthetic refined Phase 5A laboratory maze](docs/images/phase-5a-refinement-maze.png)
+Off restores the original bright Phase 5A artwork and immediate question opening.
+Normal and Strong add approximately 33% and 50% distant shading, larger energy
+arcs and restrained station/finish glows. E pauses movement and map time while
+the unobstructed cue plays; the actual question opens after 460 ms in Normal or
+600 ms in Strong. Escape, restart, switching units/view/modes, blur or hiding the
+page safely cancel the cue. Reduced motion skips the animation and delay.
+The teacher map stays clear and softens scene shading. Driving interaction
+remains immediate.
+
+![Matched Off, Normal and Strong views](docs/images/phase-5a2-modes.png)
 
 [Character directions and animation sheet](docs/images/phase-5a-character.png) ·
-[Interaction preview](docs/images/phase-5a-refinement-swipe.png) ·
-[Refinement results, performance, changed files and limits](docs/phase-5a-refinement-results.md) ·
+[Actual E +250 ms preview](docs/images/phase-5a2-interaction.png) ·
+[Phase 5A.2 results, performance, changed files and limits](docs/phase-5a2-results.md) ·
+[Previous refinement report](docs/phase-5a-refinement-results.md) ·
 [Original Phase 5A report](docs/phase-5a-results.md)
 
 ```sh
 python tests/browser_visuals.py
 python tests/browser_refinement.py
+python tests/browser_atmosphere.py
 ```
 
 The visual suite uses synthetic S02 data and fixed maze seeds. It generates
@@ -160,12 +171,21 @@ upload. Timing measures headless browser scheduling and JavaScript drawing-call
 cost; it is not a laptop hardware or Safari performance guarantee.
 
 The refinement suite adds light-position/readability checks, four-direction
-swipe/expiry checks, immediate modal/cancellation/reduced-motion coverage,
+swipe/expiry checks, pending modal/cancellation/reduced-motion coverage,
 updated review images and comparisons against the frozen reviewed Phase 5A
 renderer. Outputs are in `test-results/phase-5a-refinement/`, included in the
 same CI artifact. Its performance data includes both normal exploration and a
 stress workload with repeated interactions; the archived comparison renderer
 stays in `tests/fixtures/visuals/`, outside the student site.
+
+Phase 5A.2 additionally saves matched mode views at all three sizes, real E-input
+frames at 0/100/250/400/650 ms, timing/pause/cancellation logs, a short Playwright
+WebM video and mode/effect benchmarks in `test-results/phase-5a2/`. The temporal
+screenshots advance the browser's clock through the production animation path;
+a separate live-clock test checks actual reveal latency. Video recording uses
+development-only Playwright FFmpeg, installed with
+`python -m playwright install chromium`; no video dependency is deployed with the
+student website.
 
 ## Automated checks on GitHub Actions
 
@@ -179,7 +199,7 @@ and performs no deployment, uploads of course data or server synchronization.
 
 The job runs all Python/schema/model tests, Tk GUI tests, original browser tests,
 browser validator parity, student loading tests, Phase 4 walking/driving tests,
-Phase 5A visual and refinement checks
+Phase 5A visual, refinement and atmosphere checks
 and the assignment CLI. All required dependencies are checked; skipped tests fail
 the CI runner. Independent suites continue after a failure so logs are retained.
 
@@ -303,6 +323,7 @@ xvfb-run -a python tests/gui_smoke.py
 Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-validation.md),
 [Phase 2](docs/phase-2-results.md), [Phase 3](docs/phase-3-results.md),
 [Phase 4](docs/phase-4-results.md), [Phase 5A](docs/phase-5a-results.md),
-[Phase 5A refinement](docs/phase-5a-refinement-results.md).
+[Phase 5A refinement](docs/phase-5a-refinement-results.md),
+[Phase 5A.2](docs/phase-5a2-results.md).
 Development stops for review before Phase 5B.
 See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

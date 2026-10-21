@@ -8,3 +8,8 @@ The refinement browser suite substitutes it in test HTTP responses for paired
 performance/lighting comparisons. Keep this fixed baseline out of `student/`;
 it is never deployed. The original Phase 4 comparison still uses the immutable
 prototype separately.
+
+`phase-5a1-renderer.js` is the previous subtle refinement from `f80e0e1`.
+SHA-256: `0c9e484cabace70fbde80b5e815f38906a9b5ea8f66dc08fa1f7096e6bf17afd`.
+Phase 5A.2 uses it for paired performance measurements. It is also test-only
+original artwork with no assignment data.
