@@ -19,9 +19,10 @@ stays in ignored private drafts; do not invent missing URLs, translate supplied
 Chinese choices, or commit unreleased answers. The original prototype remains
 the immutable baseline. Phase 2/v2 GUI review is approved, including instructor
 Windows 11 question-editing verification.
-Phase 3 has been approved. Phase 4 integration and control-driven validation
-are in `student/` and `docs/phase-4-results.md`. Stop for instructor review
-before Phase 5. Do not start visual improvements.
+Phase 4 and CI are reviewed, including instructor-reported real-computer play.
+Phase 5A authorizes 2D visual improvements only; see `docs/phase-5a-results.md`.
+Stop for instructor review before Phase 5B. Preserve the driving renderer,
+physics, gameplay, authoring and validation contracts.
 
 ## 1. Priority and working method
 

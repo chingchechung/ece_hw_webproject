@@ -9,8 +9,8 @@ It now creates **v2** drafts with **three/four options per question** and teache
 checkboxes for **one or more accepted answers**. Students choose one answer;
 any accepted label passes. V1 files remain editable in their original format;
 use **Convert v1 to v2** to create an explicit migrated copy. Phase 3 provides a static
-student site supporting both versions. Phase 4 gameplay validation is complete;
-Phase 5 awaits instructor review.
+student site supporting both versions. Phase 5A adds original laboratory-themed
+2D pixel artwork; stop for instructor review before Phase 5B driving visuals.
 
 ## Teacher editor — Windows 11
 
@@ -66,7 +66,7 @@ Linux/Xvfb GUI regressions passed. The instructor also reports successful
 question editing on Windows 11; other native GUI workflows/macOS still need
 manual verification.
 
-## Student site — Phase 4
+## Student site — Phase 5A
 
 The deployable website is **`student/` only**. It loads the relative
 `assignments/manifest.json`, lists only explicitly published S01–S12 entries,
@@ -119,9 +119,35 @@ Phase 4 adds deterministic routes using actual keyboard events and movement
 updates, without teleporting. It saves synthetic screenshots, Playwright traces,
 state/error logs and placement metrics in ignored `test-results/phase-4/`.
 See [Phase 3](docs/phase-3-results.md) and [Phase 4 results/changed files](docs/phase-4-results.md).
-Stop for review before Phase 5; no visual-polish phase has started. WebKit could
+Phase 5A changes 2D artwork only; driving visuals remain unchanged. WebKit could
 not be installed because its download hosts return HTTP 403 under the cloud
 network policy; Chromium results do not establish Safari compatibility.
+
+## 2D artwork review — Phase 5A
+
+The 2D maze now uses an original lab-coat character, calm laboratory floors,
+connected walls, oscilloscope terminals and a purple locked/unlocked exit.
+Character and tile atlases are generated locally by `student/js/rpg-renderer.js`;
+no image downloads, build step or third-party art assets are needed. Include this
+new JavaScript file when manually updating the complete `student/` directory.
+Gameplay, HUD dimensions and the first-person renderer are preserved.
+
+![Synthetic Phase 5A laboratory maze](docs/images/phase-5a-maze.png)
+
+[Character directions and animation sheet](docs/images/phase-5a-character.png) ·
+[Results, performance, changed files and limits](docs/phase-5a-results.md)
+
+```sh
+python tests/browser_visuals.py
+```
+
+The visual suite uses synthetic S02 data and fixed maze seeds. It generates
+before/after viewport screenshots, character/object sheets, station and exit
+states, an intersection and unchanged driving comparison in `test-results/phase-5a/`.
+Its `performance.json` records three paired camera-sweep trials at 1366×768,
+1024×768 and 390×844. Traces/screenshots are included by the existing CI artifact
+upload. Timing measures headless browser scheduling and JavaScript drawing-call
+cost; it is not a laptop hardware or Safari performance guarantee.
 
 ## Automated checks on GitHub Actions
 
@@ -134,7 +160,7 @@ requirements. The workflow has only `contents: read`, uses no repository secrets
 and performs no deployment, uploads of course data or server synchronization.
 
 The job runs all Python/schema/model tests, Tk GUI tests, original browser tests,
-browser validator parity, student loading tests, Phase 4 walking/driving tests
+browser validator parity, student loading tests, Phase 4 walking/driving tests, Phase 5A visual checks
 and the assignment CLI. All required dependencies are checked; skipped tests fail
 the CI runner. Independent suites continue after a failure so logs are retained.
 
@@ -190,7 +216,7 @@ as an optional job; Tk native GUI testing on macOS is a separate desktop check.
 Playwright WebKit is not Safari. Even a passing macOS/WebKit run would still need
 manual checks in actual Safari (focus, new tabs, input, display scaling and driving)
 before claiming Safari compatibility. No macOS/WebKit success is claimed by the
-Ubuntu/Chromium workflow, and Phase 5 visual work has not started.
+Ubuntu/Chromium workflow. Phase 5B driving enhancements have not started.
 
 ## Original student prototype
 
@@ -257,5 +283,6 @@ xvfb-run -a python tests/gui_smoke.py
 
 Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-validation.md),
 [Phase 2](docs/phase-2-results.md), [Phase 3](docs/phase-3-results.md),
-[Phase 4](docs/phase-4-results.md). Development stops for review before Phase 5.
+[Phase 4](docs/phase-4-results.md), [Phase 5A](docs/phase-5a-results.md).
+Development stops for review before Phase 5B.
 See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

@@ -9,9 +9,9 @@
 > three/four options and multiple teacher-accepted labels while each student
 > chooses one. Manifest stays v1. The original four-choice/single-answer rules
 > below describe v1; v2 authoring follows the approved supplement in `AGENTS.md`.
-> Phase 2/v2 and Phase 3 reviews are approved. Phase 4 gameplay and end-to-end
-> validation are complete in `student/`; see `docs/phase-4-results.md`. Stop for
-> instructor review before Phase 5 visual improvements.
+> Phases 0–4 and CI are reviewed. Phase 5A enhances 2D artwork only; see
+> `docs/phase-5a-results.md`. Stop for instructor review before Phase 5B driving
+> visuals. Preserve all approved gameplay and the existing driving renderer.
 
 ## 1. Project objective
 
@@ -228,9 +228,17 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 - [x] Finish → correct unit-specific Google Form link; no submission tracking.
 - [x] Re-open S01 for review even when newer units exist; Google Form closed/open is handled outside the app.
 
-### Phase 5 — Art/performance follow-up
+### Phase 5A — 2D RPG art and performance
 
-- [ ] Polish 2D and driving scenes while preserving tested behavior.
+- [x] Original procedural character, four directions, idle/walking frames and crisp sprites.
+- [x] Readable laboratory floor/wall artwork, terminals and locked/unlocked exit.
+- [x] Cached static scenery and three-viewport paired Phase 4 performance measurements.
+- [x] Visual review artifacts and regression/CI integration.
+- [ ] Instructor approval of 2D graphics before Phase 5B.
+
+### Phase 5B — Driving visual follow-up (not started)
+
+- [ ] Polish driving scenes while preserving approved 2D artwork and tested behavior.
 - [ ] Smoke test Chrome/Edge Windows 11 and Chrome/Safari macOS (or explicitly record untested real-device platforms).
 - [ ] Verify acceptable responsiveness on ordinary integrated-GPU laptops; no external network dependency except YouTube/Google Form.
 

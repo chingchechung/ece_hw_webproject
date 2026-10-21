@@ -1,6 +1,5 @@
 (function(){
   'use strict';
-  var CHARACTER_SHEET='data:image/png;base64,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';
   var TILE=28, DRIVE_SCALE=12, DRIVE_TILE=14, DRIVE_TOP_SPEED=590, MAZE_SIZES=[[25,19],[21,15],[17,13],[13,9]], MAX_QUESTS=0, gameZoom=1.5;
   // Keep the validated public unit intact, including v2 accepted-label arrays.
   var assignment=null, assignmentPaused=false, FORM_URL='', QUESTIONS=[];
@@ -11,7 +10,6 @@
   var viewport={w:850,h:560}, camera={x:0,y:0}, lastFrame=0, toastTimer=null, seedCounter=0;
   var gameMode='2d', driveAngle=Math.PI/2, driveSpeed=0, driveDistance=0, driveRenderAt=0, driveTurn=0;
   var driveSurface=document.createElement('canvas'),dctx=driveSurface.getContext('2d',{alpha:false});
-  var playerSheet=new Image();playerSheet.src=CHARACTER_SHEET;
   function randomizer(seed){var a=seed>>>0;return function(){a^=a<<13;a^=a>>>17;a^=a<<5;return (a>>>0)/4294967296}}
   function shuffle(items,rnd){for(var i=items.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=items[i];items[i]=items[j];items[j]=t}return items}
   function generateMaze(w,h){
@@ -143,135 +141,14 @@
     nearItem=nearest;var tip=el('interactTip');if(nearest){tip.textContent=nearest.type==='finish'?(done.every(Boolean)?'★ 終點已解鎖：按 E 完成作業':'🔒 終點需通過全部 '+MAX_QUESTS+' 題才能啟用'):'● 找到 Q'+(nearest.index+1)+'：按 E 或點擊題目';tip.classList.add('show')}else tip.classList.remove('show');
     el('status').textContent=gameMode==='drive'?(nearest?'接近 '+(nearest.type==='finish'?'終點':'Q'+(nearest.index+1))+' · 停車按 E':'迷宮駕駛 · W 加速、A/D 轉向、V 切換'): (nearest?(nearest.type==='finish'?'已抵達終點':'已找到 Q'+(nearest.index+1)):'方向鍵 / WASD 移動 · 按 E 互動');
   }
-  function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
-  function drawShadow(x,y,rx,ry,color){ctx.fillStyle=color||'#0007';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}
-  // Pixel-art tile renderer: brighter, warmer campus-style palette.
-  function drawFloorTile(px,py,x,y){
-    var variant=(x*73+y*31)%7;
-    ctx.fillStyle=(variant===0?'#8b9d91':variant===1?'#95a79a':'#91a397');ctx.fillRect(px,py,TILE,TILE);
-    ctx.fillStyle='#9caea0';ctx.fillRect(px+1,py+1,26,25);
-    ctx.fillStyle='#80978b';ctx.fillRect(px+1,py+25,26,3);
-    ctx.fillStyle='#b1beb1';ctx.fillRect(px+2,py+2,24,2);
-    ctx.fillStyle='#9faf9f';ctx.fillRect(px+3,py+6,22,14);
-    ctx.fillStyle='#8b9d91';ctx.fillRect(px+4,py+12,21,1);
-    if(variant===2 || variant===5){
-      ctx.fillStyle='#7c9c90';ctx.fillRect(px+5,py+5,5,2);ctx.fillRect(px+17,py+19,6,2);
-    }
-    if((x*17+y*13)%23===0){
-      ctx.fillStyle='#618c84';ctx.fillRect(px+11,py+11,7,2);ctx.fillRect(px+17,py+11,2,8);
-      ctx.fillStyle='#bfe0c5';ctx.fillRect(px+16,py+17,4,3);
-    }
-  }
-  function drawWallTile(px,py,x,y){
-    var below=current.grid[y+1]&&current.grid[y+1][x]===0;
-    var left=current.grid[y]&&current.grid[y][x-1]===0;
-    var right=current.grid[y]&&current.grid[y][x+1]===0;
-    ctx.fillStyle='#47667a';ctx.fillRect(px,py,28,28);
-    ctx.fillStyle='#7795a1';ctx.fillRect(px+1,py+1,26,11);
-    ctx.fillStyle='#90aab0';ctx.fillRect(px+2,py+2,24,3);
-    ctx.fillStyle='#638494';ctx.fillRect(px+3,py+7,22,4);
-    ctx.fillStyle='#344e67';ctx.fillRect(px+1,py+12,26,14);
-    ctx.fillStyle='#3e5a70';ctx.fillRect(px+3,py+14,22,8);
-    ctx.fillStyle='#21394d';ctx.fillRect(px,py+26,28,2);
-    ctx.fillStyle='#20374b';ctx.fillRect(px+26,py,2,26);
-    ctx.fillStyle='#a7c1be';ctx.fillRect(px+3,py+2,6,2);
-    ctx.fillStyle='#526c81';ctx.fillRect(px+8,py+16,10,1);
-    if((x+2*y)%4===0){ctx.fillStyle='#b4c9c2';ctx.fillRect(px+19,py+4,4,2)}
-    if(below){
-      ctx.fillStyle='#c2d4c9';ctx.fillRect(px,py+23,28,3);
-      ctx.fillStyle='#55798b';ctx.fillRect(px,py+26,28,2);
-    }
-    if(left){ctx.fillStyle='#a8bcb8';ctx.fillRect(px,py+2,3,21)}
-    if(right){ctx.fillStyle='#254b60';ctx.fillRect(px+25,py+3,3,21)}
-  }
-  function pixel(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
-  function drawSpawnPad(){
-    var s=worldCenter(1,1);drawShadow(s.x,s.y+13,19,8,'#1b342954');
-    ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));
-    pixel(-15,-9,30,20,'#345a61');pixel(-12,-7,24,16,'#74b6a5');
-    pixel(-10,-5,20,12,'#28575d');pixel(-7,-2,14,6,'#b0e5bc');
-    pixel(-3,-4,6,10,'#2c6058');pixel(-13,11,26,3,'#2c4b55');
-    ctx.restore();
-  }
-  function drawQuestDevice(pt,index,isDone,time){
-    var x=Math.round(pt.x),y=Math.round(pt.y),glow=isDone?'#71e9b7':'#ffce75';
-    drawShadow(x,y+20,20,7,'#18302b87');
-    ctx.save();ctx.translate(x,y);
-    // wooden desk / science terminal, side edges, legs
-    pixel(-23,10,46,5,'#604d43');pixel(-20,15,6,9,'#4d413a');pixel(14,15,6,9,'#4d413a');
-    pixel(-24,5,48,7,'#c09160');pixel(-21,6,42,3,'#edc28b');pixel(-22,11,44,2,'#865a48');
-    pixel(-15,-20,30,27,'#283b50');pixel(-17,-19,3,25,'#132a3b');pixel(14,-19,3,25,'#132a3b');
-    pixel(-13,-17,26,19,isDone?'#2d8a7f':'#294f71');
-    pixel(-11,-15,22,15,isDone?'#328c7c':'#315f7c');
-    pixel(-10,-14,20,2,isDone?'#7af0ce':'#6dccf0');
-    pixel(-9,-10,6,2,'#c5f5e5');pixel(-9,-6,4,2,'#83c5c3');
-    pixel(-1,-1,2,6,'#345467');pixel(-9,5,18,3,'#344456');
-    pixel(-16,9,32,3,'#b6a6a0');pixel(-12,10,24,1,'#ede3d8');
-    // question sign above the monitor
-    pixel(-13,-34,26,12,isDone?'#2b7b67':'#574d44');
-    pixel(-11,-32,22,8,isDone?'#4abc9c':'#f2c16f');
-    ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#23313e';
-    ctx.fillText(isDone?'OK':'Q'+(index+1),0,-28);
-    if(!isDone){
-      var t=(Math.sin(time*3+index)+1)*.5;
-      ctx.globalAlpha=.38+t*.35;pixel(-17,-35,34,13,glow);ctx.globalAlpha=1;
-    }
-    ctx.restore();
-  }
-  function drawExitGate(pt,unlocked,time){
-    var x=Math.round(pt.x),y=Math.round(pt.y);
-    drawShadow(x,y+20,23,10,'#1425289c');
-    ctx.save();ctx.translate(x,y);
-    pixel(-20,-19,40,41,'#253b4f');pixel(-16,-22,32,8,'#7184a1');
-    pixel(-16,-15,32,31,unlocked?'#66559c':'#3c475b');
-    pixel(-12,-13,24,27,unlocked?'#c19cf8':'#596d7a');
-    pixel(-10,-11,20,22,unlocked?'#774db3':'#35475a');
-    pixel(-7,-9,14,18,unlocked?'#9c78d7':'#253747');
-    pixel(-19,16,38,6,'#879b9e');pixel(-15,18,30,3,'#c8d3bf');
-    pixel(-16,-30,32,9,unlocked?'#f3db8e':'#c4c6a9');
-    ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#203342';ctx.fillText(unlocked?'EXIT':'LOCK',0,-25);
-    if(unlocked){var g=.35+.2*Math.sin(time*4);ctx.globalAlpha=g;pixel(-10,-11,20,21,'#e1c6ff');ctx.globalAlpha=1}
-    ctx.restore();
-  }
-  function drawPlayer(time){
-    var p=current.player;
-    drawShadow(p.x,p.y+16,13,5,'#26433688');
-    if(playerSheet.complete && playerSheet.naturalWidth){
-      var dirs={down:0,left:1,right:2,up:3};
-      var d=dirs[p.dir||'down'],frame=p.moving?(Math.floor((p.walk||0)*.75)%4):0;
-      ctx.imageSmoothingEnabled=false;
-      ctx.drawImage(playerSheet,frame*24,d*32,24,32,
-        Math.round(p.x-15),Math.round(p.y-24),30,40);
-    }else{
-      ctx.fillStyle='#42b4a4';ctx.fillRect(p.x-9,p.y-14,18,26);
-    }
-  }
-  function drawLamp(x,y,time){
-    var pul=.72+.13*Math.sin(time*2+(x+y)*.04);
-    ctx.save();ctx.translate(x,y);ctx.globalAlpha=pul;pixel(-5,-5,10,9,'#f2d49c');pixel(-3,-3,6,5,'#fff4c4');ctx.restore();
-  }
-  function render(time){if(!current)return;var W=viewport.w,H=viewport.h;ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#213646';ctx.fillRect(0,0,W,H);
-    ctx.save();ctx.scale(gameZoom,gameZoom);ctx.translate(-camera.x,-camera.y);
-    var view=visibleWorld();
-    var fromX=Math.max(0,Math.floor(camera.x/TILE)-1),toX=Math.min(current.width*2,Math.ceil((camera.x+view.w)/TILE)+1),fromY=Math.max(0,Math.floor(camera.y/TILE)-1),toY=Math.min(current.height*2,Math.ceil((camera.y+view.h)/TILE)+1);
-    for(var y=fromY;y<toY;y++)for(var x=fromX;x<toX;x++){
-      var block=current.grid[y][x],px=x*TILE,py=y*TILE;
-      if(block)drawWallTile(px,py,x,y);else drawFloorTile(px,py,x,y);
-    }
-    // occasional small wall lamps signal the campus/laboratory theme
-    for(var ly=Math.max(1,fromY);ly<toY;ly++)for(var lx=Math.max(1,fromX);lx<toX;lx++){
-      if(current.grid[ly][lx]===1 && (ly*19+lx*11)%61===0 && current.grid[ly+1] && current.grid[ly+1][lx]===0){drawLamp(lx*TILE+14,ly*TILE+9,time)}
-    }
-    drawSpawnPad();
-    current.stations.forEach(function(s,i){drawQuestDevice(worldCenter(s.x,s.y),i,done[i],time)});
-    drawExitGate(worldCenter(current.exit.x,current.exit.y),done.every(Boolean),time);
-    drawPlayer(time);
-    ctx.restore();
-    var vignette=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.8);
-    vignette.addColorStop(0,'#00000000');vignette.addColorStop(1,'#05131a69');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
+  // BEGIN 2D VISUALS — artwork reads shared state; gameplay and driving stay here.
+  var rpgVisuals=MazeRpgVisuals.create(TILE);
+  function render(time){
+    if(!current)return;
+    rpgVisuals.render(ctx,current,done,camera,gameZoom,viewport,time,nearItem);
     if(showMap)drawMinimap();
   }
+  // END 2D VISUALS
   function resetMapBudget(){
     // Close any active preview and reset the quota for this new attempt.
     showMap=false;mini.classList.remove('show');

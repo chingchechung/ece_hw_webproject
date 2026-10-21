@@ -16,7 +16,7 @@ class StudentBundleTests(unittest.TestCase):
         files = {str(p.relative_to(ROOT / 'student'))
                  for p in (ROOT / 'student').rglob('*') if p.is_file()}
         self.assertEqual(files, {'index.html', 'js/game.js', 'js/assignment-loader.js',
-                                'js/assignment-rules.js', 'js/assignment-validator.js',
+                                'js/assignment-rules.js', 'js/assignment-validator.js', 'js/rpg-renderer.js',
                                 'assignments/manifest.json'})
         self.assertEqual(json.loads((ROOT / 'student/assignments/manifest.json').read_text()),
                          {'schemaVersion': 1, 'units': []})
