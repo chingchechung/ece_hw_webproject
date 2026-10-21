@@ -10,7 +10,8 @@ checkboxes for **one or more accepted answers**. Students choose one answer;
 any accepted label passes. V1 files remain editable in their original format;
 use **Convert v1 to v2** to create an explicit migrated copy. Phase 3 provides a static
 student site supporting both versions. Phase 5A adds original laboratory-themed
-2D pixel artwork; stop for instructor review before Phase 5B driving visuals.
+2D pixel artwork and subtle focus lighting/interaction feedback; stop for
+instructor review before Phase 5B driving visuals.
 
 ## Teacher editor — Windows 11
 
@@ -132,13 +133,22 @@ no image downloads, build step or third-party art assets are needed. Include thi
 new JavaScript file when manually updating the complete `student/` directory.
 Gameplay, HUD dimensions and the first-person renderer are preserved.
 
-![Synthetic Phase 5A laboratory maze](docs/images/phase-5a-maze.png)
+The 2D refinement adds a broad, gentle light around the avatar, a short
+directional cyan energy swipe when interacting with an incomplete station, and
+restrained proximity/unlocked-exit glows. The question pauses gameplay
+immediately and appears after a 160 ms visual cue. Reduced-motion preferences
+skip the swipe/reveal animation. The teacher map softens the scene shading.
+
+![Synthetic refined Phase 5A laboratory maze](docs/images/phase-5a-refinement-maze.png)
 
 [Character directions and animation sheet](docs/images/phase-5a-character.png) ·
-[Results, performance, changed files and limits](docs/phase-5a-results.md)
+[Interaction preview](docs/images/phase-5a-refinement-swipe.png) ·
+[Refinement results, performance, changed files and limits](docs/phase-5a-refinement-results.md) ·
+[Original Phase 5A report](docs/phase-5a-results.md)
 
 ```sh
 python tests/browser_visuals.py
+python tests/browser_refinement.py
 ```
 
 The visual suite uses synthetic S02 data and fixed maze seeds. It generates
@@ -148,6 +158,14 @@ Its `performance.json` records three paired camera-sweep trials at 1366×768,
 1024×768 and 390×844. Traces/screenshots are included by the existing CI artifact
 upload. Timing measures headless browser scheduling and JavaScript drawing-call
 cost; it is not a laptop hardware or Safari performance guarantee.
+
+The refinement suite adds light-position/readability checks, four-direction
+swipe/expiry checks, immediate modal/cancellation/reduced-motion coverage,
+updated review images and comparisons against the frozen reviewed Phase 5A
+renderer. Outputs are in `test-results/phase-5a-refinement/`, included in the
+same CI artifact. Its performance data includes both normal exploration and a
+stress workload with repeated interactions; the archived comparison renderer
+stays in `tests/fixtures/visuals/`, outside the student site.
 
 ## Automated checks on GitHub Actions
 
@@ -160,7 +178,8 @@ requirements. The workflow has only `contents: read`, uses no repository secrets
 and performs no deployment, uploads of course data or server synchronization.
 
 The job runs all Python/schema/model tests, Tk GUI tests, original browser tests,
-browser validator parity, student loading tests, Phase 4 walking/driving tests, Phase 5A visual checks
+browser validator parity, student loading tests, Phase 4 walking/driving tests,
+Phase 5A visual and refinement checks
 and the assignment CLI. All required dependencies are checked; skipped tests fail
 the CI runner. Independent suites continue after a failure so logs are retained.
 
@@ -283,6 +302,7 @@ xvfb-run -a python tests/gui_smoke.py
 
 Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-validation.md),
 [Phase 2](docs/phase-2-results.md), [Phase 3](docs/phase-3-results.md),
-[Phase 4](docs/phase-4-results.md), [Phase 5A](docs/phase-5a-results.md).
+[Phase 4](docs/phase-4-results.md), [Phase 5A](docs/phase-5a-results.md),
+[Phase 5A refinement](docs/phase-5a-refinement-results.md).
 Development stops for review before Phase 5B.
 See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

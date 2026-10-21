@@ -143,13 +143,48 @@
     rect(g,7,17,3,29,unlocked?'#7fd1af':'#a6b7b9');rect(g,46,17,3,29,unlocked?'#7fd1af':'#a6b7b9');
     return c;
   }
+  function makeLightOpening(){
+    var c=canvas(256,256),g=c.getContext('2d');
+    var gradient=g.createRadialGradient(128,128,0,128,128,128);
+    gradient.addColorStop(0,'#000');gradient.addColorStop(.3,'#000');
+    gradient.addColorStop(.68,'#0008');gradient.addColorStop(1,'#0000');
+    g.fillStyle=gradient;g.fillRect(0,0,256,256);return c;
+  }
+  function makeActivationGlow(){
+    var c=canvas(96,96),g=c.getContext('2d');
+    var gradient=g.createRadialGradient(48,48,5,48,48,46);
+    gradient.addColorStop(0,'#b6f4da99');gradient.addColorStop(.45,'#8de3d34d');gradient.addColorStop(1,'#8de3d300');
+    g.fillStyle=gradient;g.fillRect(0,0,96,96);return c;
+  }
+  function makeSwipeAtlas(){
+    var c=canvas(72*6,72),g=c.getContext('2d');
+    var points=[[3,-12],[7,-10],[11,-7],[14,-3],[15,1],[14,5],[11,9],[7,12]];
+    for(var frame=0;frame<6;frame++){
+      g.save();g.translate(frame*72+36,36);
+      var first=frame<3?0:frame-2,last=Math.min(points.length-1,3+frame*2);
+      // A stepped energy arc, with no particles, weapon or damage imagery.
+      for(var i=first;i<last;i++){
+        var a=points[i],b=points[i+1],steps=Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));
+        for(var n=0;n<=steps;n++){
+          var x=Math.round(a[0]+(b[0]-a[0])*n/steps)*2,y=Math.round(a[1]+(b[1]-a[1])*n/steps)*2;
+          rect(g,x-3,y-3,7,7,'#76d6d66b');rect(g,x-1,y-1,3,3,'#e2fff1');
+        }
+      }
+      var tip=points[last];rect(g,tip[0]*2-1,tip[1]*2-1,3,3,'#ffe5a3');g.restore();
+    }
+    return c;
+  }
   function create(tile){
     tile=tile||28;
     var characters=makeCharacterAtlas(),tiles=makeTiles(tile),stations=[[],[]],exits=[makeExit(false),makeExit(true)];
     for(var state=0;state<2;state++)for(var q=0;q<5;q++)stations[state][q]=makeStation(q,!!state);
+    var opening=makeLightOpening(),glow=makeActivationGlow(),swipes=makeSwipeAtlas();
+    var light=canvas(1,1),lightX=null,lightY=null,lightRadius=null,interaction=null,interactionDuration=.2;
+    var reducedMotion=root.matchMedia('(prefers-reduced-motion: reduce)');
     var scene=null,sceneMaze=null;
     function prepare(maze){
       if(sceneMaze===maze)return;
+      if(interaction&&interaction.maze!==maze)interaction=null;
       sceneMaze=maze;scene=canvas(maze.grid[0].length*tile,maze.grid.length*tile);
       var g=scene.getContext('2d');g.imageSmoothingEnabled=false;
       for(var y=0;y<maze.grid.length;y++)for(var x=0;x<maze.grid[0].length;x++){
@@ -181,6 +216,9 @@
       g.drawImage(characters,frame*32,row*40,32,40,Math.round(player.x-16),Math.round(player.y-27),32,40);
     }
     function drawStation(g,x,y,index,complete,time,near){
+      if(near&&!complete){
+        g.save();g.globalAlpha=.4+(reducedMotion.matches?0:.12*Math.sin(time*3));g.drawImage(glow,x-48,y-44);g.restore();
+      }
       if(near){
         rect(g,x-26,y+18,52,2,'#318b89');rect(g,x-26,y+14,2,5,'#318b89');rect(g,x+24,y+14,2,5,'#318b89');
       }
@@ -191,21 +229,65 @@
       if(near){rect(g,x+16,y-42,12,12,ink);lettering(g,'E',x+19,y-39,'#eff4df',1);}
     }
     function drawExit(g,x,y,unlocked,time,near){
+      if(unlocked){
+        g.save();g.globalAlpha=.5+(reducedMotion.matches?0:.12*Math.sin(time*2));
+        g.drawImage(glow,x-48,y-44);g.restore();
+      }
       g.drawImage(exits[unlocked?1:0],x-28,y-43);
       if(unlocked){rect(g,x-18,y+13,36,2,Math.floor(time*2)%2?'#bbefd0':mint);}
       if(near){rect(g,x+19,y-43,12,12,ink);lettering(g,'E',x+23,y-40,'#eff4df',1);}
     }
-    function render(g,maze,passed,camera,zoom,viewport,time,near){
+    function drawFocusLight(g,player,viewX,viewY,zoom,viewport,dpr,mapOpen){
+      // Quarter-resolution soft overlay; cached gradient and one small buffer.
+      // Rebuild only when the light moves by a CSS pixel, zoom or viewport changes.
+      var w=Math.ceil(viewport.w/4),h=Math.ceil(viewport.h/4);
+      var cx=Math.round(player.x*zoom-viewX),cy=Math.round((player.y-8)*zoom-viewY),radius=200*zoom;
+      if(light.width!==w||light.height!==h||lightX!==cx||lightY!==cy||lightRadius!==radius){
+        if(light.width!==w||light.height!==h){light.width=w;light.height=h;}
+        var lg=light.getContext('2d');lg.clearRect(0,0,w,h);
+        rect(lg,0,0,w,h,'#0a1b282e');lg.globalCompositeOperation='destination-out';
+        lg.drawImage(opening,(cx-radius)/4,(cy-radius)/4,radius/2,radius/2);
+        lg.globalCompositeOperation='source-over';lightX=cx;lightY=cy;lightRadius=radius;
+      }
+      g.save();g.setTransform(dpr,0,0,dpr,0,0);g.imageSmoothingEnabled=true;
+      g.globalAlpha=mapOpen?.35:1;g.drawImage(light,0,0,viewport.w,viewport.h);g.restore();
+    }
+    function beginInteraction(maze,index,time){
+      if(reducedMotion.matches)return false;
+      interaction={maze:maze,index:index,x:maze.player.x,y:maze.player.y,dir:maze.player.dir,start:time};return true;
+    }
+    function clearInteraction(){interaction=null;}
+    function drawInteraction(g,maze,time){
+      if(!interaction||interaction.maze!==maze)return;
+      if(reducedMotion.matches){interaction=null;return;}
+      var age=time-interaction.start;
+      if(age>=interactionDuration){interaction=null;return;}
+      if(age<0)return;
+      var phase=age/interactionDuration,frame=Math.min(5,Math.floor(phase*6));
+      var s=maze.stations[interaction.index],sx=(s.x*2+1)*tile,sy=(s.y*2+1)*tile;
+      g.save();g.globalAlpha=1-phase*.75;
+      // Activation stays below the Q label, which is never flashed over.
+      g.strokeStyle='#e0fff3';g.lineWidth=1;
+      g.strokeRect(sx-13.5,sy-25.5,27,16);
+      // Preserve the station's opaque question sign for every facing direction.
+      g.beginPath();g.rect(interaction.x-40,interaction.y-47,80,80);g.rect(sx-13,sy-42,26,16);g.clip('evenodd');
+      g.translate(Math.round(interaction.x),Math.round(interaction.y-7));
+      g.rotate(({right:0,down:Math.PI/2,left:Math.PI,up:-Math.PI/2})[interaction.dir]||0);
+      g.drawImage(swipes,frame*72,0,72,72,-36,-36,72,72);g.restore();
+    }
+    function render(g,maze,passed,camera,zoom,viewport,time,near,mapOpen){
       prepare(maze);
       g.clearRect(0,0,viewport.w,viewport.h);rect(g,0,0,viewport.w,viewport.h,'#8fa9a2');
       g.save();g.imageSmoothingEnabled=false;
       // Snap the view translation to device pixels without modifying the camera.
       var dpr=g.getTransform().a;
-      g.scale(zoom,zoom);g.translate(-Math.round(camera.x*zoom*dpr)/(zoom*dpr),-Math.round(camera.y*zoom*dpr)/(zoom*dpr));
+      var viewX=Math.round(camera.x*zoom*dpr)/dpr,viewY=Math.round(camera.y*zoom*dpr)/dpr;
+      g.scale(zoom,zoom);g.translate(-viewX/zoom,-viewY/zoom);
       var sx=Math.max(0,Math.floor(camera.x)-1),sy=Math.max(0,Math.floor(camera.y)-1);
       var sw=Math.min(scene.width,Math.ceil(camera.x+viewport.w/zoom)+1)-sx;
       var sh=Math.min(scene.height,Math.ceil(camera.y+viewport.h/zoom)+1)-sy;
       g.drawImage(scene,sx,sy,sw,sh,sx,sy,sw,sh);
+      drawFocusLight(g,maze.player,viewX,viewY,zoom,viewport,dpr,mapOpen);
       var left=camera.x-55,right=camera.x+viewport.w/zoom+55,top=camera.y-70,bottom=camera.y+viewport.h/zoom+55;
       for(var i=0;i<maze.stations.length;i++){
         var s=maze.stations[i],x=(s.x*2+1)*tile,y=(s.y*2+1)*tile;
@@ -213,9 +295,10 @@
       }
       var ex=(maze.exit.x*2+1)*tile,ey=(maze.exit.y*2+1)*tile;
       if(ex>=left&&ex<=right&&ey>=top&&ey<=bottom)drawExit(g,ex,ey,passed.every(Boolean),time,near&&near.type==='finish');
-      drawCharacter(g,maze.player,time);g.restore();
+      drawCharacter(g,maze.player,time);drawInteraction(g,maze,time);g.restore();
     }
-    return Object.freeze({render:render,drawCharacter:drawCharacter,drawStation:drawStation,drawExit:drawExit});
+    return Object.freeze({render:render,drawCharacter:drawCharacter,drawStation:drawStation,drawExit:drawExit,
+      beginInteraction:beginInteraction,clearInteraction:clearInteraction});
   }
   root.MazeRpgVisuals=Object.freeze({create:create});
 }(globalThis));

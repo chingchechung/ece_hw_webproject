@@ -77,6 +77,12 @@
     .toast.show{display:block}
     .veil{position:fixed;inset:0;background:#030a14ca;z-index:8;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
     .veil.show{display:flex}
+    /* Brief 2D energy cue; question DOM and modal input pause remain immediate. */
+    #veil.interaction-cue{animation:interactionBackdrop .16s step-end}
+    #veil.interaction-cue .dialog{animation:interactionDialog .16s step-end}
+    @keyframes interactionBackdrop{from{background:transparent;backdrop-filter:none}to{background:#030a14ca;backdrop-filter:blur(5px)}}
+    @keyframes interactionDialog{from{opacity:0}to{opacity:1}}
+    @media(prefers-reduced-motion:reduce){#veil.interaction-cue,#veil.interaction-cue .dialog{animation:none}}
     .dialog{background:linear-gradient(160deg,#1a304a,#101e32);border:1px solid #466889;width:min(100%,560px);max-height:90vh;overflow-y:auto;border-radius:17px;box-shadow:0 30px 100px #000b;padding:25px}
     .modalhead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
     .chip{font-size:11px;color:#041b25;font-weight:900;background:var(--gold);border-radius:99px;padding:6px 10px;display:inline-block}

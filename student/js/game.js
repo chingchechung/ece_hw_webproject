@@ -145,10 +145,14 @@
   var rpgVisuals=MazeRpgVisuals.create(TILE);
   function render(time){
     if(!current)return;
-    rpgVisuals.render(ctx,current,done,camera,gameZoom,viewport,time,nearItem);
+    rpgVisuals.render(ctx,current,done,camera,gameZoom,viewport,time,nearItem,showMap);
     if(showMap)drawMinimap();
   }
   // END 2D VISUALS
+  function clearInteractionCue(){
+    if(rpgVisuals&&rpgVisuals.clearInteraction)rpgVisuals.clearInteraction();
+    el('veil').classList.remove('interaction-cue');
+  }
   function resetMapBudget(){
     // Close any active preview and reset the quota for this new attempt.
     showMap=false;mini.classList.remove('show');
@@ -206,6 +210,7 @@
   }
   function toggleMode(){
     if(!current)return;
+    clearInteractionCue();
     gameMode=gameMode==='2d'?'drive':'2d';driveSpeed=0;pressed={};
     if(gameMode==='drive'){
       var dirs={right:0,down:Math.PI/2,left:Math.PI,up:-Math.PI/2};driveAngle=chooseDriveHeading(current.player.x,current.player.y,dirs[current.player.dir]||Math.PI/2);
@@ -400,8 +405,8 @@
     if(showMap)drawMinimap();
   }
   function frame(t){var dt=Math.min((t-lastFrame)/1000||.016,.045);lastFrame=t;updateMapBudget(t);update(dt);if(gameMode==='2d'){render(t/1000)}else if(t-driveRenderAt>=32){driveRenderAt=t;renderDrive(t/1000)}requestAnimationFrame(frame)}
-  function showDialog(html){modalOpen=true;pressed={};driveSpeed=0;el('dialog').innerHTML=html;el('veil').classList.add('show');el('dialog').focus()}
-  function hideDialog(){modalOpen=false;activeQuestion=-1;el('veil').classList.remove('show');el('dialog').innerHTML=''}
+  function showDialog(html){clearInteractionCue();modalOpen=true;pressed={};driveSpeed=0;el('dialog').innerHTML=html;el('veil').classList.add('show');el('dialog').focus()}
+  function hideDialog(){clearInteractionCue();modalOpen=false;activeQuestion=-1;el('veil').classList.remove('show');el('dialog').innerHTML=''}
   function videoCard(url,isExplanation){return '<div class="videobox"><div><div class="video-title">'+(isExplanation?'🎬 English Explanation (optional)':'🎬 English Question Video')+'</div><small>影片在新的分頁開啟，返回此頁繼續作答。</small></div><a class="video-link" target="_blank" rel="noopener noreferrer" href="'+escapeHtml(url)+'">▶ 開啟 YouTube ↗</a></div>'}
   function openQuestion(index){if(!assignment||!QUESTIONS[index]||done[index])return;activeQuestion=index;var q=QUESTIONS[index];
     showDialog('<div class="modalhead"><span class="chip">ENGLISH QUESTION · Q'+(index+1)+' / '+MAX_QUESTS+'</span><button class="btn" id="dialogClose">✕ 返回迷宮</button></div><h2>'+escapeHtml(q.title||q.id)+'</h2><p class="modaltext">先在 YouTube 新分頁觀看題目影片，回到迷宮選擇一個答案。</p>'+videoCard(q.questionVideoUrl,false)+'<div class="question">'+escapeHtml(q.prompt||'')+'</div><div class="answers">'+q.options.map(function(c,i){return '<button class="answer" type="button" data-answer="'+String.fromCharCode(65+i)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+escapeHtml(c)+'</button>'}).join('')+'</div><p class="muted">選擇一個答案即可。答錯會清除全部通關狀態，重新產生較小的迷宮。</p>');
@@ -425,10 +430,21 @@
     showDialog('<span class="chip" style="background:#9fe4d4">ALL QUESTS COMPLETED</span><h2>🎉 全部題目通過！</h2><p class="modaltext">'+escapeHtml(assignment.unitId+' · '+assignment.title)+'</p><div class="question">本輪成功：第 '+(failures+1)+' 次挑戰<br>已通過：'+MAX_QUESTS+' / '+MAX_QUESTS+'</div><div class="modalbuttons"><a class="video-link" href="'+escapeHtml(FORM_URL)+'" target="_blank" rel="noopener noreferrer">開啟 Google Form ↗</a></div><div class="modalbuttons"><button class="btn primary" id="again">重新玩一次</button><button class="btn" id="closeFinish">返回迷宮</button></div>');
     el('again').addEventListener('click',function(){newRound(true)});el('closeFinish').addEventListener('click',hideDialog);
   }
-  function interact(){if(modalOpen||!nearItem)return;if(gameMode==='drive'&&Math.abs(driveSpeed)>25){notify('請先減速停車，再按 E 開啟題目。');return;}if(nearItem.type==='question')openQuestion(nearItem.index);else finish()}
+  function interact(){
+    if(modalOpen||!nearItem)return;
+    if(gameMode==='drive'&&Math.abs(driveSpeed)>25){notify('請先減速停車，再按 E 開啟題目。');return;}
+    if(nearItem.type==='question'){
+      openQuestion(nearItem.index);
+      var cueTime=performance.now()/1000;
+      if(gameMode==='2d'&&modalOpen&&rpgVisuals&&rpgVisuals.beginInteraction&&rpgVisuals.beginInteraction(current,nearItem.index,cueTime)){
+        // Modal state/input pause is immediate; only its visual reveal waits 160ms.
+        el('veil').classList.add('interaction-cue');render(cueTime);
+      }
+    }else finish();
+  }
   function isTyping(elm){return elm&&['INPUT','TEXTAREA','SELECT'].includes(elm.tagName)}
   window.addEventListener('keydown',function(e){var key=e.key.toLowerCase();if(isTyping(document.activeElement)||assignmentPaused||!current)return;if(['arrowleft','arrowright','arrowup','arrowdown','w','a','s','d','e','v',' '].includes(key)&&!isTyping(document.activeElement))e.preventDefault();if(el('sidePanel').classList.contains('open')){if(key==='escape')togglePanel(false);return}if(modalOpen){if(key==='escape'){if(el('dialogClose'))hideDialog();else if(el('continueMaze'))hideDialog()}return}if(key==='v'){toggleMode();return}if(key==='e'||key===' ')interact();else pressed[key]=true});
-  window.addEventListener('keyup',function(e){pressed[e.key.toLowerCase()]=false});window.addEventListener('blur',function(){pressed={};driveSpeed=0});
+  window.addEventListener('keyup',function(e){pressed[e.key.toLowerCase()]=false});window.addEventListener('blur',function(){pressed={};driveSpeed=0;clearInteractionCue()});
   canvas.addEventListener('click',function(){if(gameMode==='2d')interact();canvas.focus()});
   function togglePanel(visible){
     var side=el('sidePanel');side.classList.toggle('open',visible);side.setAttribute('aria-hidden',String(!visible));
@@ -472,6 +488,7 @@
     hasAssignment:function(){return assignment!==null;},
     activeUnitId:function(){return assignment&&assignment.unitId;},
     onPause:function(){
+      clearInteractionCue();
       if(!assignmentPaused)updateMapBudget(performance.now());
       assignmentPaused=true;pressed={};driveSpeed=0;
     },

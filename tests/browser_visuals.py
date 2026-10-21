@@ -16,7 +16,7 @@ BRIDGE=(ROOT/'tests/visual_probe.js').read_text()
 
 
 
-class VisualTests(StudentBrowserHarness):
+class VisualHarness(StudentBrowserHarness):
     artifact_directory=ROOT/'test-results/phase-5a'
 
     def open(self,hooks=True,index=False):
@@ -27,7 +27,7 @@ class VisualTests(StudentBrowserHarness):
                 source=source[:a]+BASELINE_SPRITE+"\n  var playerSheet=new Image();playerSheet.src=CHARACTER_SHEET;\n  var rpgVisuals=null;\n"+BASELINE_DRAW+source[b:]
             source=source.replace('var rpgVisuals=MazeRpgVisuals.create(TILE);','var __assetStart=performance.now();var rpgVisuals=MazeRpgVisuals.create(TILE);window.__assetMs=performance.now()-__assetStart;')
             source=source.replace('Date.now()+Math.floor(Math.random()*999999)','104729+250000')
-            source=source.replace('  sizeCanvas();requestAnimationFrame(frame);loader.start();',BRIDGE+'  sizeCanvas();loader.start();')
+            source=source.replace('  sizeCanvas();requestAnimationFrame(frame);loader.start();',getattr(self,'bridge',BRIDGE)+'  sizeCanvas();loader.start();')
             route.fulfill(body=source,content_type='application/javascript')
         self.page.route('**/js/game.js',inject)
         self.page.goto(self.url)
@@ -54,6 +54,8 @@ class VisualTests(StudentBrowserHarness):
     def shot(self,name):
         self.page.screenshot(path=str(self.artifact_directory/name))
 
+
+class VisualTests(VisualHarness):
     def test_character_directions_idle_and_walk_artifacts(self):
         self.prepare()
         self.page.set_viewport_size({'width':1366,'height':900})

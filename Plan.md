@@ -10,7 +10,9 @@
 > chooses one. Manifest stays v1. The original four-choice/single-answer rules
 > below describe v1; v2 authoring follows the approved supplement in `AGENTS.md`.
 > Phases 0–4 and CI are reviewed. Phase 5A enhances 2D artwork only; see
-> `docs/phase-5a-results.md`. Stop for instructor review before Phase 5B driving
+> `docs/phase-5a-results.md`. The reviewed 2D art now receives focused lighting
+> and interaction refinement; see `docs/phase-5a-refinement-results.md`.
+> Stop for instructor review before Phase 5B driving
 > visuals. Preserve all approved gameplay and the existing driving renderer.
 
 ## 1. Project objective
@@ -234,6 +236,7 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 - [x] Readable laboratory floor/wall artwork, terminals and locked/unlocked exit.
 - [x] Cached static scenery and three-viewport paired Phase 4 performance measurements.
 - [x] Visual review artifacts and regression/CI integration.
+- [x] Reviewed-art refinement: subtle player focus light, directional interaction cue and state feedback.
 - [ ] Instructor approval of 2D graphics before Phase 5B.
 
 ### Phase 5B — Driving visual follow-up (not started)

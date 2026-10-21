@@ -23,6 +23,7 @@ SUITES = [
     ("browser-student", ["tests/browser_student.py"]),
     ("browser-gameplay", ["tests/browser_gameplay.py"]),
     ("browser-visuals", ["tests/browser_visuals.py"]),
+    ("browser-refinement", ["tests/browser_refinement.py"]),
     ("assignment-cli", ["tools/validate_assignments.py", "tests/fixtures/manifest.json",
                         "tests/fixtures/v2/manifest.json", "assignments/manifest.json",
                         "student/assignments/manifest.json"]),

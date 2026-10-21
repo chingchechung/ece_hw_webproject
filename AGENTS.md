@@ -20,7 +20,8 @@ Chinese choices, or commit unreleased answers. The original prototype remains
 the immutable baseline. Phase 2/v2 GUI review is approved, including instructor
 Windows 11 question-editing verification.
 Phase 4 and CI are reviewed, including instructor-reported real-computer play.
-Phase 5A authorizes 2D visual improvements only; see `docs/phase-5a-results.md`.
+Phase 5A is reviewed; its 2D lighting/interaction refinement is authorized.
+See `docs/phase-5a-results.md` and `docs/phase-5a-refinement-results.md`.
 Stop for instructor review before Phase 5B. Preserve the driving renderer,
 physics, gameplay, authoring and validation contracts.
 
