@@ -1,0 +1,48 @@
+name: Regression tests
+
+on:
+  push:
+    branches: [work]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    name: Ubuntu / Chromium / Python 3.12
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      EMI_BROWSER: chromium
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install development dependencies
+        shell: bash
+        run: |
+          mkdir -p test-results/ci
+          sudo apt-get update 2>&1 | tee test-results/ci/install.log
+          sudo apt-get install -y python3-tk xvfb xauth fonts-noto-cjk 2>&1 | tee -a test-results/ci/install.log
+          python -m pip install -r requirements-dev.txt 2>&1 | tee -a test-results/ci/install.log
+          python -m playwright install --with-deps chromium 2>&1 | tee -a test-results/ci/install.log
+      - name: Run all regression suites with a virtual display
+        run: xvfb-run -a -s "-screen 0 1440x1000x24 -nolisten tcp" python tests/run_ci.py
+      - name: Upload synthetic test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-chromium-python312-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14

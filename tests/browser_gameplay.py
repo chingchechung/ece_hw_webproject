@@ -13,6 +13,8 @@ from browser_student import StudentBrowserHarness as BrowserSupport, fixture, RO
 
 
 class GameplayTests(BrowserSupport):
+    artifact_directory = ROOT / 'test-results/phase-4'
+
     # Shared static-server harness; no test code enters the deployable bundle.
     def open(self, hooks=True, index=False):
         driver=(ROOT/'tests/gameplay_driver.js').read_text()+'\n'+(ROOT/'tests/placement_quality.js').read_text()
@@ -24,17 +26,12 @@ class GameplayTests(BrowserSupport):
             self.assertIn('window.gameplayTest',source)
             route.fulfill(response=response,body=source)
         self.page.route('**/js/game.js',inject)
-        self.context.tracing.start(screenshots=True,snapshots=True,sources=True)
         self.page.goto(self.url+('index.html' if index else ''))
         self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('正在讀取')")
 
     def tearDown(self):
         folder=ROOT/'test-results/phase-4'
         folder.mkdir(parents=True,exist_ok=True)
-        try:
-            self.context.tracing.stop(path=str(folder/(self._testMethodName+'.zip')))
-        except Exception:
-            pass  # A failure before open() should still clean up the server.
         try:
             if not self.page.is_closed():
                 self.page.screenshot(path=str(folder/(self._testMethodName+'.png')))

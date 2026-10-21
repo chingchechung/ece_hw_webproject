@@ -16,6 +16,7 @@ import unittest
 from urllib.parse import urlsplit
 
 from playwright.sync_api import sync_playwright
+from browser_support import launch_browser, save_browser_artifacts
 
 ROOT = Path(__file__).resolve().parents[1]
 HOOK = """
@@ -65,11 +66,11 @@ class StaticHandler(SimpleHTTPRequestHandler):
 
 
 class StudentBrowserHarness(unittest.TestCase):
+    artifact_directory = ROOT / 'test-results/browser-student'
     @classmethod
     def setUpClass(cls):
         cls.pw = sync_playwright().start()
-        cls.browser = cls.pw.chromium.launch(executable_path='/usr/bin/chromium',
-                                            headless=True, args=['--no-sandbox'])
+        cls.browser = launch_browser(cls.pw)
 
     @classmethod
     def tearDownClass(cls):
@@ -94,6 +95,7 @@ class StudentBrowserHarness(unittest.TestCase):
         self.context = self.browser.new_context(viewport={'width': 1366, 'height': 768})
         self.context.route('https://**/*', lambda route: route.fulfill(
             status=200, content_type='text/html', body='<title>External test stub</title>'))
+        self.context.tracing.start(screenshots=True, snapshots=True, sources=True)
         self.page = self.context.new_page()
         self.errors = []
         self.requests = []
@@ -101,7 +103,11 @@ class StudentBrowserHarness(unittest.TestCase):
         self.page.on('request', lambda request: self.requests.append(request.url))
 
     def tearDown(self):
-        self.context.close()
+        try:
+            save_browser_artifacts(self.context, self.page, self.artifact_directory,
+                                   self._testMethodName, self.errors)
+        finally:
+            self.context.close()
         self.server.shutdown()
         self.server.server_close()
         self.thread.join()

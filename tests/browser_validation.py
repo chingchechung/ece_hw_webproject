@@ -7,6 +7,7 @@ import threading
 import unittest
 
 from playwright.sync_api import sync_playwright
+from browser_support import launch_browser, save_browser_artifacts
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -27,10 +28,12 @@ class BrowserValidationTests(unittest.TestCase):
         thread.start()
         try:
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch(executable_path="/usr/bin/chromium", headless=True, args=["--no-sandbox"])
+                browser = launch_browser(playwright)
+                context = browser.new_context()
+                context.tracing.start(screenshots=True, snapshots=True, sources=True)
+                page = context.new_page()
+                errors = []
                 try:
-                    page = browser.new_page()
-                    errors = []
                     page.on("pageerror", lambda error: errors.append(str(error)))
                     base = f"http://127.0.0.1:{server.server_port}"
                     page.goto(base + "/emi_maze_dualview_v1.2/index.html")
@@ -65,7 +68,11 @@ class BrowserValidationTests(unittest.TestCase):
                     self.assertEqual(strict, [True]*4)
                     self.assertEqual(errors, [])
                 finally:
-                    browser.close()
+                    try:
+                        save_browser_artifacts(context, page, ROOT / "test-results/browser-validation",
+                                               self._testMethodName, errors)
+                    finally:
+                        browser.close()
         finally:
             server.shutdown()
             server.server_close()

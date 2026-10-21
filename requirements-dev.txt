@@ -1,0 +1,4 @@
+# Test tooling only; the student website and teacher editor do not require pip.
+playwright==1.62.0
+jsonschema==4.26.0
+Pillow==12.3.0

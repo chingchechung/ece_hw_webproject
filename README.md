@@ -123,6 +123,75 @@ Stop for review before Phase 5; no visual-polish phase has started. WebKit could
 not be installed because its download hosts return HTTP 403 under the cloud
 network policy; Chromium results do not establish Safari compatibility.
 
+## Automated checks on GitHub Actions
+
+Every push to **`work`** runs [Regression tests](https://github.com/chingchechung/ece_hw_webproject/actions/workflows/ci.yml)
+from `.github/workflows/ci.yml`. It uses a GitHub-hosted Ubuntu 24.04 runner,
+Python 3.12, Node 24, real Tk under Xvfb and Playwright-managed Chromium.
+`requirements-dev.txt` pins development-only Playwright, JSON Schema and screenshot
+dependencies. The student website and teacher editor retain their existing runtime
+requirements. The workflow has only `contents: read`, uses no repository secrets,
+and performs no deployment, uploads of course data or server synchronization.
+
+The job runs all Python/schema/model tests, Tk GUI tests, original browser tests,
+browser validator parity, student loading tests, Phase 4 walking/driving tests
+and the assignment CLI. All required dependencies are checked; skipped tests fail
+the CI runner. Independent suites continue after a failure so logs are retained.
+
+To review a run and download evidence:
+
+1. Open the repository's **Actions** tab, select **Regression tests**, then choose
+   the run whose branch is `work` and commit matches your push.
+2. Open **Ubuntu / Chromium / Python 3.12** to see installation and test logs.
+   Confirm the whole job is green, not just a YAML check or browser installation.
+3. On the run summary, download the **ubuntu-chromium-python312-…** artifact.
+   Artifacts are uploaded even when tests fail and retained for **14 days**.
+4. Unzip locally. `ci/summary.json` reports suite exit codes, skipped checks and
+   counts; `ci/*.log` contains full command output/tracebacks. Browser folders
+   include screenshots, `.trace.zip` traces and `.errors.json` diagnostics;
+   `phase-4/` also contains synthetic state and route/placement measurements.
+   View a trace with `python -m playwright show-trace <path-to-trace.zip>`.
+
+Only generated `test-results/` is uploaded from a fresh CI checkout. Tests use
+synthetic fixtures and temporary drafts; private `teacher_data/`, `export/`, real
+student information and instructor answer keys are never artifact inputs. Artifacts
+are for regression review, not student-site deployment.
+
+To run the same suite locally on Ubuntu:
+
+```sh
+sudo apt-get update
+sudo apt-get install -y python3-tk xvfb xauth fonts-noto-cjk
+python -m pip install -r requirements-dev.txt
+python -m playwright install --with-deps chromium
+xvfb-run -a -s "-screen 0 1440x1000x24 -nolisten tcp" python tests/run_ci.py
+```
+
+In Codex Cloud, the suite automatically falls back to an available system
+`chromium`/`chromium-browser` if the Playwright download is unavailable. To choose
+an installed Chromium explicitly, set `EMI_BROWSER_EXECUTABLE=/path/to/chromium`.
+A missing override fails clearly. Use the Cloud's available display/Xvfb rather
+than assuming `sudo` is available. The browser helper and artifacts stay in `tests/`.
+
+Optional macOS/WebKit strategy (separate from required Ubuntu CI): use a dedicated
+macOS runner or developer machine, install Python 3.12 and `requirements-dev.txt`,
+then run `python -m playwright install webkit`. Run the four browser scripts with
+`EMI_BROWSER=webkit` and no Chromium executable override:
+
+```sh
+EMI_BROWSER=webkit python tests/browser_baseline.py
+EMI_BROWSER=webkit python tests/browser_validation.py
+EMI_BROWSER=webkit python tests/browser_student.py
+EMI_BROWSER=webkit python tests/browser_gameplay.py
+```
+
+Keep its results/artifacts labelled separately and initially run it manually or
+as an optional job; Tk native GUI testing on macOS is a separate desktop check.
+Playwright WebKit is not Safari. Even a passing macOS/WebKit run would still need
+manual checks in actual Safari (focus, new tabs, input, display scaling and driving)
+before claiming Safari compatibility. No macOS/WebKit success is claimed by the
+Ubuntu/Chromium workflow, and Phase 5 visual work has not started.
+
 ## Original student prototype
 
 The working v1.2 baseline is `emi_maze_dualview_v1.2/index.html`, extracted
@@ -144,7 +213,7 @@ Run standard-library tests:
 python -m unittest discover -s tests -v
 ```
 
-Optional browser baseline test (Python Playwright and `/usr/bin/chromium`):
+Optional browser baseline test (development dependencies above and Chromium):
 
 ```sh
 python tests/browser_baseline.py

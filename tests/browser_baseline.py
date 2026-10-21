@@ -10,6 +10,7 @@ import threading
 import unittest
 
 from playwright.sync_api import sync_playwright
+from browser_support import launch_browser, save_browser_artifacts
 
 ROOT = Path(__file__).resolve().parents[1]
 HOOK = """
@@ -41,7 +42,7 @@ class BrowserBaselineTests(unittest.TestCase):
         cls.thread.start()
         cls.url = f"http://127.0.0.1:{cls.server.server_port}/emi_maze_dualview_v1.2/index.html"
         cls.playwright = sync_playwright().start()
-        cls.browser = cls.playwright.chromium.launch(executable_path="/usr/bin/chromium", headless=True, args=["--no-sandbox"])
+        cls.browser = launch_browser(cls.playwright)
 
     @classmethod
     def tearDownClass(cls):
@@ -52,12 +53,18 @@ class BrowserBaselineTests(unittest.TestCase):
         cls.thread.join()
 
     def setUp(self):
-        self.page = self.browser.new_page(viewport={"width": 1366, "height": 768})
+        self.context = self.browser.new_context(viewport={"width": 1366, "height": 768})
+        self.context.tracing.start(screenshots=True, snapshots=True, sources=True)
+        self.page = self.context.new_page()
         self.errors = []
         self.page.on("pageerror", lambda error: self.errors.append(str(error)))
 
     def tearDown(self):
-        self.page.close()
+        try:
+            save_browser_artifacts(self.context, self.page, ROOT / "test-results/browser-baseline",
+                                   self._testMethodName, self.errors)
+        finally:
+            self.context.close()
         self.assertEqual(self.errors, [])
 
     def load_hooks(self):
