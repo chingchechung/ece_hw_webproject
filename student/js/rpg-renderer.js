@@ -274,7 +274,7 @@
     }
     function beginSlash(maze,time){
       var settings=atmospheres[atmosphere];
-      if(reducedMotion.matches||!settings.reveal)return 0;
+      if(!settings.reveal)return 0;
       slash={maze:maze,dir:maze.player.dir,start:time,settings:settings};
       return settings.reveal;
     }
@@ -290,7 +290,6 @@
       atmosphere=value;clearInteraction();return true;
     }
     function drawInteraction(g,maze,time){
-      if(reducedMotion.matches){clearInteraction();return;}
       if(activation&&activation.maze===maze){
         var impactAge=time-activation.start,impactSettings=activation.settings;
         if(impactAge>=impactSettings.reveal)activation=null;
@@ -346,5 +345,5 @@
       clearInteraction:clearInteraction,setAtmosphere:setAtmosphere,
       getAtmosphere:function(){return atmosphere;}});
   }
-  root.MazeRpgVisuals=Object.freeze({create:create,release:'5a3-1'});
+  root.MazeRpgVisuals=Object.freeze({create:create,release:'5b1-1'});
 }(globalThis));

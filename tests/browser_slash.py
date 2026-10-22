@@ -20,7 +20,11 @@ class SlashTests(VisualHarness):
             (ROOT/'tests/slash_probe.js').read_text())
 
     def setUp(self):
-        if self._testMethodName=='test_real_keyboard_exploration_video':
+        if self._testMethodName in {'test_atmosphere_controls_slash_for_either_system_preference',
+                                   'test_system_preference_changes_preserve_pending_deadline_and_map',
+                                   'test_real_keyboard_slash_reduce_video','test_real_keyboard_slash_no_preference_video'}:
+            self.artifact_directory=ROOT/'test-results/phase-5b1/slash'
+        if self._testMethodName=='test_real_keyboard_exploration_video' or self._testMethodName.startswith('test_real_keyboard_slash_'):
             self.record_video_directory=self.artifact_directory/'video'
         super().setUp()
 
@@ -30,7 +34,9 @@ class SlashTests(VisualHarness):
             super().tearDown()
         finally:
             if video:
-                video.save_as(str(self.artifact_directory/'explore-slash-question.webm'));video.delete()
+                name={'test_real_keyboard_slash_reduce_video':'slash-reduce.webm',
+                      'test_real_keyboard_slash_no_preference_video':'slash-no-preference.webm'}.get(self._testMethodName,'explore-slash-question.webm')
+                video.save_as(str(self.artifact_directory/name));video.delete()
 
     def prepare(self,clock=True):
         self.artifact_directory.mkdir(parents=True,exist_ok=True)
@@ -159,17 +165,25 @@ class SlashTests(VisualHarness):
                 if action=='view':self.page.keyboard.press('v')
                 if action=='selector':self.page.keyboard.press('Escape')
 
-    def test_off_reduced_motion_and_drive_bypass_free_effect(self):
+    def test_atmosphere_controls_slash_for_either_system_preference(self):
         self.prepare()
-        for mode,reduced,drive in [('off',False,False),('normal',True,False),('strong',True,False),('strong',False,True)]:
-            self.mode(mode);self.page.emulate_media(reduced_motion='reduce' if reduced else 'no-preference');self.corridor()
-            if drive:self.page.keyboard.press('v')
-            self.page.keyboard.press('e');self.page.clock.run_for(250)
-            self.assertFalse(self.state()['slashing']);self.assertIsNone(self.state()['pending']);self.assertFalse(self.state()['modal'])
-            if drive:self.page.keyboard.press('v')
-        self.mode('strong');self.corridor();self.page.keyboard.press('e');self.page.clock.run_for(100)
+        results=[]
+        for reduced in [False,True]:
+            self.page.emulate_media(reduced_motion='reduce' if reduced else 'no-preference')
+            for mode in ['off','normal','strong']:
+                self.mode(mode);self.corridor();self.page.keyboard.press('e');self.page.clock.run_for(250)
+                state=self.state();effect=self.page.evaluate('slashTest.effect()')
+                self.assertEqual(state['slashing'],mode!='off');self.assertIsNone(state['pending']);self.assertFalse(state['modal'])
+                self.assertEqual(effect['pixels']>150,mode!='off');self.shot(f'{mode}-reduced-{reduced}.png')
+                results.append({'mode':mode,'reduced':reduced,**effect})
+                self.page.keyboard.press('Escape');self.page.keyboard.press('v');self.page.keyboard.press('e')
+                self.assertFalse(self.state()['slashing']);self.assertIsNone(self.state()['pending'])
+                self.page.keyboard.press('v')
+        self.save('system-preference-matrix.json',results)
+        self.page.emulate_media(reduced_motion='no-preference');self.mode('strong');self.corridor()
+        self.page.keyboard.press('e');self.page.clock.run_for(100)
         self.assertTrue(self.state()['slashing']);self.page.emulate_media(reduced_motion='reduce');self.page.clock.run_for(32)
-        self.assertFalse(self.state()['slashing']);self.assertFalse(self.state()['modal'])
+        self.assertTrue(self.state()['slashing']);self.assertFalse(self.state()['modal'])
         self.page.emulate_media(reduced_motion='no-preference')
         for control in ['space','canvas','touch']:
             self.corridor()
@@ -181,6 +195,53 @@ class SlashTests(VisualHarness):
             self.page.clock.run_for(250)
             self.assertTrue(self.state()['slashing']);self.assertIsNone(self.state()['pending']);self.assertFalse(self.state()['modal'])
             self.assert_no_scroll();self.page.keyboard.press('Escape')
+
+    def test_system_preference_changes_preserve_pending_deadline_and_map(self):
+        self.prepare();results=[]
+        for initial,changed in [('no-preference','reduce'),('reduce','no-preference')]:
+            for mode,duration in [('normal',460),('strong',600)]:
+                self.page.emulate_media(reduced_motion=initial);self.mode(mode)
+                self.page.evaluate('slashTest.station(false);refineTest.map(true)')
+                self.page.locator('#maze').focus();before=self.state();self.page.keyboard.press('e')
+                pending=self.state()['pending'];self.assertIsNotNone(pending)
+                self.page.clock.run_for(100);self.page.emulate_media(reduced_motion=changed);self.page.clock.run_for(32)
+                self.assertEqual(self.state()['pending'],pending);self.assertTrue(self.state()['slashing']);self.assertFalse(self.state()['modal'])
+                self.page.keyboard.press('e');self.page.clock.run_for(100)
+                effect=self.page.evaluate('slashTest.effect()');self.assertGreater(effect['pixels'],150)
+                self.shot(f'pending-{mode}-{changed}.png')
+                self.page.clock.run_for(duration-250)
+                self.assertFalse(self.state()['modal']);self.page.clock.run_for(70)
+                after=self.state();self.assertTrue(after['modal']);self.assertIsNone(after['pending'])
+                self.assertEqual(after['remaining'],before['remaining']);self.assertEqual(after['done'],before['done'])
+                questions=self.page.evaluate("atmosphereTest.events.filter(e=>e.event==='question')")
+                self.assertEqual(len(questions),len(results)+1)
+                results.append({'mode':mode,'initial':initial,'changed':changed,'duration':duration,'pending':pending,'effect':effect,'question':questions[-1]})
+                self.page.keyboard.press('Escape');self.page.evaluate('refineTest.map(false)')
+        self.save('preference-change-pending.json',results)
+
+    def live_slash_preference(self,preference):
+        self.prepare(clock=False);self.page.emulate_media(reduced_motion=preference);records=[]
+        for mode in ['strong','normal']:
+            self.mode(mode);self.corridor();self.page.keyboard.press('e')
+            self.page.wait_for_function("slashTest.calls.filter(e=>e.event==='slash').at(-1)?.sample")
+            action=self.page.evaluate("slashTest.calls.filter(e=>e.event==='slash').at(-1)")
+            self.assertGreater(action['sample']['pixels'],150);self.assertFalse(action['sample']['modal'])
+            records.append(action);self.page.wait_for_timeout(650)
+        self.mode('strong');self.page.evaluate('slashTest.station(false)');self.page.locator('#maze').focus()
+        self.page.keyboard.press('e');self.page.wait_for_selector('[data-answer]')
+        action=self.page.evaluate("slashTest.calls.filter(e=>e.event==='slash').at(-1)")
+        self.assertGreater(action['sample']['pixels'],150);self.assertTrue(action['sample']['pending']);self.assertFalse(action['sample']['modal'])
+        questions=self.page.evaluate("atmosphereTest.events.filter(e=>e.event==='question')")
+        self.assertEqual(len(questions),1);self.assertGreaterEqual(questions[0]['time']-action['time'],600)
+        self.page.wait_for_timeout(300);self.page.keyboard.press('Escape')
+        self.assertFalse(self.state()['modal']);self.assert_no_scroll()
+        self.save('live-'+preference+'.json',{'preference':preference,'free':records,'contextual':action,'questions':questions})
+
+    def test_real_keyboard_slash_reduce_video(self):
+        self.live_slash_preference('reduce')
+
+    def test_real_keyboard_slash_no_preference_video(self):
+        self.live_slash_preference('no-preference')
 
     def test_finish_stays_locked_and_delays_unlocked_dialog(self):
         self.prepare();self.page.evaluate('slashTest.finish()')
@@ -195,17 +256,19 @@ class SlashTests(VisualHarness):
 
     def test_approved_spotlight_is_pixel_identical(self):
         self.prepare();results=[]
-        for width,height in [(1366,768),(1024,768),(390,844)]:
-            self.page.set_viewport_size({'width':width,'height':height})
-            self.page.clock.run_for(32)
-            for mode in ['off','normal','strong']:
-                for zoom in [1.5,1.75]:
-                    for map_open in [False,True]:
-                        with self.subTest(width=width,mode=mode,zoom=zoom,map=map_open):
-                            difference=self.page.evaluate('a=>slashTest.lightingParity(...a)',[mode,zoom,map_open])
-                            results.append({'viewport':[width,height],'mode':mode,'zoom':zoom,'mapOpen':map_open,'changedPixels':difference})
-                            self.assertEqual(difference,0)
-            self.assert_no_scroll()
+        for preference in ['no-preference','reduce']:
+            self.page.emulate_media(reduced_motion=preference)
+            for width,height in [(1366,768),(1024,768),(390,844)]:
+                self.page.set_viewport_size({'width':width,'height':height})
+                self.page.clock.run_for(32)
+                for mode in ['off','normal','strong']:
+                    for zoom in [1.5,1.75]:
+                        for map_open in [False,True]:
+                            with self.subTest(width=width,mode=mode,zoom=zoom,map=map_open):
+                                difference=self.page.evaluate('a=>slashTest.lightingParity(...a)',[mode,zoom,map_open])
+                                results.append({'preference':preference,'viewport':[width,height],'mode':mode,'zoom':zoom,'mapOpen':map_open,'changedPixels':difference})
+                                self.assertEqual(difference,0)
+                self.assert_no_scroll()
         self.save('lighting-parity.json',results)
 
     def test_versioned_relative_assets_bypass_stale_script_cache(self):
@@ -213,18 +276,18 @@ class SlashTests(VisualHarness):
         self.publish(fixture(1,'S01'));self.server.cache_scripts=True;self.context.unroute('https://**/*')
         (self.site/'cache-probe.html').write_text('<title>Synthetic cache probe</title>')
         self.page.goto(self.url+'cache-probe.html')
-        paths=['rpg-renderer.js','game.js']
+        paths=['rpg-renderer.js','drive-materials.js','game.js']
         for name in paths:(self.site/'js'/name).write_text('/* synthetic old cached script */')
         old=self.page.evaluate("async paths=>Promise.all(paths.map(async name=>(await fetch('./js/'+name+'?v=5a2-old')).text()))",paths)
         for name in paths:(self.site/'js'/name).write_bytes((ROOT/'student/js'/name).read_bytes())
         cached=self.page.evaluate("async paths=>Promise.all(paths.map(async name=>(await fetch('./js/'+name+'?v=5a2-old')).text()))",paths)
         self.assertEqual(cached,old)
-        self.page.goto(self.url+'index.html?v=5b-1')
+        self.page.goto(self.url+'index.html?v=5b1-1')
         self.page.wait_for_function("!document.querySelector('#unitSelect').disabled")
         self.load('S01')
-        versions=self.page.evaluate("({game:document.documentElement.dataset.gameRelease,renderer:MazeRpgVisuals.release,scripts:Array.from(document.scripts,s=>s.getAttribute('src'))})")
-        self.assertEqual(versions['game'],'5b-1');self.assertEqual(versions['renderer'],'5a3-1')
-        for name,version in [('game.js','5b-1'),('rpg-renderer.js','5a3-1')]:
+        versions=self.page.evaluate("({game:document.documentElement.dataset.gameRelease,renderer:MazeRpgVisuals.release,materials:MazeDriveMaterials.release,scripts:Array.from(document.scripts,s=>s.getAttribute('src'))})")
+        self.assertEqual(versions['game'],'5b1-1');self.assertEqual(versions['renderer'],'5b1-1');self.assertEqual(versions['materials'],'5b1-1')
+        for name,version in [(name,'5b1-1') for name in paths]:
             self.assertIn('./js/'+name+'?v='+version,versions['scripts'])
             self.assertTrue(any(u.endswith('/js/'+name+'?v='+version) for u in self.requests))
         self.assert_no_scroll();self.save('deployment-cache.json',versions)

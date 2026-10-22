@@ -32,8 +32,14 @@ The instructor has approved all Phase 5A features, including the slash in a
 local browser; remote-desktop visibility was not a confirmed gameplay defect.
 Phase 5B authorizes first-person driving artwork enhancements while preserving
 all approved 2D visuals and the driving physics/gameplay/authoring contracts.
-See `docs/phase-5b-results.md`. Stop after Phase 5B for instructor review; do not
-merge into `main` or begin another refinement/release phase.
+See `docs/phase-5b-results.md`. The instructor reviewed Phase 5B on Windows and
+now authorizes Phase 5B.1 only: improve cached wall/floor materials and fix the
+confirmed Windows Animation effects OFF slash suppression. Atmosphere Off alone
+disables an explicit 2D slash; Normal/Strong play their full sequence under either
+OS motion preference. Preserve approved spotlight/shadows, other passive-motion
+accessibility, maze geometry, vehicle physics and authoring/assignment contracts.
+See `docs/phase-5b1-results.md`. Stop after Phase 5B.1 for review; do not merge
+into `main` or start unrelated changes.
 
 ## 1. Priority and working method
 

@@ -12,7 +12,8 @@ use **Convert v1 to v2** to create an explicit migrated copy. Phase 3 provides a
 student site supporting both versions. Phase 5A adds original laboratory-themed
 approved 2D pixel artwork and atmosphere/interaction feedback. Phase 5B enhances
 the first-person driving artwork while preserving the shared gameplay and physics.
-Stop after Phase 5B for instructor review.
+Phase 5B.1 adds realistic cached materials and fixes Windows reduced-motion slash suppression.
+Stop after Phase 5B.1 for instructor review.
 
 ## Teacher editor — Windows 11
 
@@ -68,7 +69,7 @@ Linux/Xvfb GUI regressions passed. The instructor also reports successful
 question editing on Windows 11; other native GUI workflows/macOS still need
 manual verification.
 
-## Student site — Phase 5B
+## Student site — Phase 5B.1
 
 The deployable website is **`student/` only**. It loads the relative
 `assignments/manifest.json`, lists only explicitly published S01–S12 entries,
@@ -153,8 +154,12 @@ Only a nearby incomplete question starts a pending question interaction. It
 pauses movement/map time and opens the actual dialog after 460 ms in Normal or
 600 ms in Strong. An unlocked finish uses the same delay before offering its
 Google Form; a locked finish stays locked. Escape, restart, switching units/view/
-modes, blur or hiding the page safely cancel the cue. Off and reduced motion
-skip the animation and delay. The teacher map stays clear and softens scene
+modes, blur or hiding the page safely cancel the cue. Atmosphere Off skips the
+animation and delay. **Windows Animation effects OFF does not disable the slash**:
+Normal/Strong still show their full sequence under `prefers-reduced-motion: reduce`.
+Changing that preference during a slash/pending question preserves its deadline.
+Use Atmosphere Off to explicitly disable the effect. Other passive motion remains
+reduced when the system requests it. The teacher map stays clear and softens scene
 shading. Free E has no map-time charge; an open map counts normal viewing time.
 Driving interaction remains immediate and has no slash.
 
@@ -205,9 +210,10 @@ directions, close-ups, lighting parity and stale-cache tests, and
 while slashing and approaching Q1 through real movement before its dialog opens.
 It uses synthetic assignments only and is included in the same CI artifact.
 
-## First-person driving review — Phase 5B
+## First-person driving review — Phase 5B.1
 
-Driving uses continuous steel-blue panel walls, a world-anchored pavement surface,
+Driving uses cached brushed composite/metal panels and mottled epoxy flooring,
+with recessed joints, restrained contact shading, distance-filtered grain,
 cyan edge channels on actual road boundaries, and restrained depth lighting.
 Q1–Q5 electronics terminals retain their identifiers after passing: amber marks
 incomplete terminals and mint/check marks completed ones. A transparent EXIT
@@ -218,17 +224,18 @@ The lower cockpit has slimmer pillars, steering feedback, a speed strip and an
 N/D/R indicator. Reduced motion disables optional bobbing, wheel animation and
 status-light pulses. The vehicle model, 12× virtual-distance scale, widened road
 mask, collision geometry and roughly 30 FPS driving-render cap are unchanged.
-All approved 2D art, atmosphere settings/persistence and free E-key slash remain
-unchanged, including their reduced-motion behavior.
+Approved 2D artwork, spotlight/shadows and atmosphere persistence remain
+unchanged. Phase 5B.1 corrects explicit slash availability under OS reduced motion.
 
-![Driving checkpoint](docs/images/phase-5b-driving.png)
+![Current native driving materials](docs/images/phase-5b1-native.png)
 
-[Before/after comparison](docs/images/phase-5b-before-after.png) ·
+[Previous Phase 5B comparison](docs/images/phase-5b-before-after.png) ·
 [Checkpoint and finish states](docs/images/phase-5b-checkpoints.png) ·
 [Full Phase 5B report, results, performance and changed files](docs/phase-5b-results.md)
 
 ```sh
 python tests/browser_drive.py
+python tests/browser_materials.py
 ```
 
 `test-results/phase-5b/` contains matched frozen/current views of straight roads,
@@ -241,14 +248,37 @@ it shows acceleration, a turn, braking, Q1 interaction and return to driving.
 Its initial pose uses a deterministic synthetic route. The existing Phase 4
 tests still navigate complete assignments from start using actual controls.
 
-For a manual static update, upload `student/js/game.js` first and
-`student/index.html` last, keeping the complete `student/` bundle together.
-Open **`index.html?v=5b-1`** to avoid a stale entry page. Network requests must use
-`./js/game.js?v=5b-1` and the unchanged `./js/rpg-renderer.js?v=5a3-1`.
-In DevTools, `document.documentElement.dataset.gameRelease` must be **`5b-1`**;
-`MazeRpgVisuals.release` stays **`5a3-1`** because its approved source is unchanged.
-These are the compatible asset versions for this release. See the report for
-upload checks and real-device review. No automatic deployment/server sync is added.
+[Phase 5B.1 report, exact changed files and measurements](docs/phase-5b1-results.md) ·
+[Matched materials](docs/images/phase-5b1-comparison.png) ·
+[Native-resolution materials](docs/images/phase-5b1-native.png) ·
+[Slash with simulated Windows animation disabled](docs/images/phase-5b1-reduced-slash.png)
+
+The paired Phase 5B/5B.1 material gallery, native frames, actual driving video,
+three-viewport timings, geometry/filtering results and traces are in
+`test-results/phase-5b1/`. Its `slash/` folder contains the system-preference
+matrix and real E-key recordings under **both** simulated motion preferences.
+The existing full gameplay/2D suites remain in CI.
+
+For a manual Apache update, upload **all three JavaScript files first**:
+`student/js/drive-materials.js` (new), `student/js/game.js`, and
+`student/js/rpg-renderer.js`; upload **`student/index.html` last**. Keep the full
+`student/` bundle together. There are no external texture assets. Never upload
+the repository root, tests, private drafts or test recordings.
+
+Open **`index.html?v=5b1-1`**. Network must show successful relative requests for
+all three scripts with **`?v=5b1-1`**. In DevTools Console:
+
+```js
+[document.documentElement.dataset.gameRelease,
+ MazeRpgVisuals.release, MazeDriveMaterials.release] // ["5b1-1", "5b1-1", "5b1-1"]
+document.querySelector('#atmosphereSelect').value    // "off", "normal" or "strong"
+matchMedia('(prefers-reduced-motion: reduce)').matches // OS/browser preference
+```
+
+With Windows 11 Animation effects OFF, Normal/Strong must still slash after E.
+Confirm empty-corridor E, a question's complete pre-dialog animation, and Off's
+explicit disabling in a local browser. The approved spotlight is unchanged.
+No automatic deployment/server synchronization is added.
 
 ## Automated checks on GitHub Actions
 
@@ -263,7 +293,7 @@ and performs no deployment, uploads of course data or server synchronization.
 The job runs all Python/schema/model tests, Tk GUI tests, original browser tests,
 browser validator parity, student loading tests, Phase 4 walking/driving tests,
 Phase 5A visual, refinement, atmosphere and slash checks, Phase 5B preservation,
-driving visual/control/recording/performance checks
+driving visual/control/recording/performance and Phase 5B.1 material/preference checks
 and the assignment CLI. All required dependencies are checked; skipped tests fail
 the CI runner. Independent suites continue after a failure so logs are retained.
 
@@ -319,7 +349,7 @@ as an optional job; Tk native GUI testing on macOS is a separate desktop check.
 Playwright WebKit is not Safari. Even a passing macOS/WebKit run would still need
 manual checks in actual Safari (focus, new tabs, input, display scaling and driving)
 before claiming Safari compatibility. No macOS/WebKit success is claimed by the
-Ubuntu/Chromium workflow. Phase 5B now stops for instructor review before further work.
+Ubuntu/Chromium workflow. Phase 5B.1 now stops for instructor review before further work.
 
 ## Original student prototype
 
@@ -389,6 +419,6 @@ Phase reports: [Phase 0](docs/phase-0-baseline.md), [Phase 1](docs/phase-1-valid
 [Phase 4](docs/phase-4-results.md), [Phase 5A](docs/phase-5a-results.md),
 [Phase 5A refinement](docs/phase-5a-refinement-results.md),
 [Phase 5A.2](docs/phase-5a2-results.md), [Phase 5A.3](docs/phase-5a3-results.md),
-[Phase 5B](docs/phase-5b-results.md).
-Development stops after Phase 5B for instructor review.
+[Phase 5B](docs/phase-5b-results.md), [Phase 5B.1](docs/phase-5b1-results.md).
+Development stops after Phase 5B.1 for instructor review.
 See also the [v2 schema/editor revision results](docs/phase-2-multianswer-results.md).

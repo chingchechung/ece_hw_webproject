@@ -15,7 +15,7 @@ class StudentBundleTests(unittest.TestCase):
     def test_student_bundle_contains_only_static_runtime_and_empty_allowlist(self):
         files = {str(p.relative_to(ROOT / 'student'))
                  for p in (ROOT / 'student').rglob('*') if p.is_file()}
-        self.assertEqual(files, {'index.html', 'js/game.js', 'js/assignment-loader.js',
+        self.assertEqual(files, {'index.html', 'js/game.js', 'js/drive-materials.js', 'js/assignment-loader.js',
                                 'js/assignment-rules.js', 'js/assignment-validator.js', 'js/rpg-renderer.js',
                                 'assignments/manifest.json'})
         self.assertEqual(json.loads((ROOT / 'student/assignments/manifest.json').read_text()),

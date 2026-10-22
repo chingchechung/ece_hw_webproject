@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var RELEASE='5b-1';document.documentElement.dataset.gameRelease=RELEASE;
+  var RELEASE='5b1-1';document.documentElement.dataset.gameRelease=RELEASE;
   var TILE=28, DRIVE_SCALE=12, DRIVE_TILE=14, DRIVE_TOP_SPEED=590, MAZE_SIZES=[[25,19],[21,15],[17,13],[13,9]], MAX_QUESTS=0, gameZoom=1.5;
   // Keep the validated public unit intact, including v2 accepted-label arrays.
   var assignment=null, assignmentPaused=false, FORM_URL='', QUESTIONS=[];
@@ -182,7 +182,7 @@
       if(pendingInteraction!==pending)return;
       interactionFrame=0;
       if(!validPending(pending)){clearInteractionCue();return;}
-      if(t>=pending.revealAt||motionPreference.matches){revealPending(pending);return;}
+      if(t>=pending.revealAt){revealPending(pending);return;}
       render(t/1000);interactionFrame=requestAnimationFrame(animate);
     }
     interactionFrame=requestAnimationFrame(animate);
@@ -335,8 +335,9 @@
   // Driving artwork owns only derived caches; authoritative roads/physics stay above.
   var driveArtwork=null;
   function prepareDriveArtwork(g,w,h){
-    if(!driveArtwork)driveArtwork={road:null,marks:null,floor:null,depths:null,w:0,h:0,walls:[]};
+    if(!driveArtwork)driveArtwork={road:null,marks:null,floor:null,depths:null,w:0,h:0};
     var art=driveArtwork,road=current.driveRoad;
+    if(!art.materials)art.materials=MazeDriveMaterials.create();
     if(art.road!==road){
       art.road=road;art.marks=new Uint8Array(road.bits.length);
       function open(x,y){return x>=0&&y>=0&&x<road.w&&y<road.h&&road.bits[y*road.w+x]===1;}
@@ -350,24 +351,20 @@
     }
     if(art.w!==w||art.h!==h){
       art.w=w;art.h=h;art.floor=g.createImageData(w,h);art.depths=new Float32Array(w);
-      art.roof=g.createLinearGradient(0,0,0,h*.5);
-      art.roof.addColorStop(0,'#142b3b');art.roof.addColorStop(.7,'#304e63');art.roof.addColorStop(1,'#607f8b');
+      art.roofRows=new Uint32Array(h);art.pixels=new Uint32Array(art.floor.data.buffer);
+      for(var row=0;row<h;row++){
+        var t=Math.min(1,row/(h*.5)),a=t<.7?[20,43,59]:[48,78,99],b=t<.7?[48,78,99]:[96,127,139];
+        var mix=t<.7?t/.7:(t-.7)/.3;
+        var r=Math.round(a[0]+(b[0]-a[0])*mix),gr=Math.round(a[1]+(b[1]-a[1])*mix),blue=Math.round(a[2]+(b[2]-a[2])*mix);
+        art.roofRows[row]=(255<<24)|(blue<<16)|(gr<<8)|r;
+      }
       art.dash=g.createLinearGradient(0,h*.86,0,h);
       art.dash.addColorStop(0,'#314b59');art.dash.addColorStop(.16,'#142b38');art.dash.addColorStop(1,'#081923');
     }
-    if(!art.walls.length)for(var side=0;side<2;side++){
-      var colors=[];
-      for(var fog=0;fog<64;fog++){
-        var t=fog/63*.52,base=side?[111,142,155]:[149,174,183],air=[77,105,123];
-        var rgb=base.map(function(c,i){return Math.round(c*(1-t)+air[i]*t);});
-        function color(f){return 'rgb('+rgb.map(function(c){return Math.round(c*f);}).join(',')+')';}
-        colors.push({face:color(1),upper:color(.89),seam:color(.79),base:color(.57),edge:color(1.08)});
-      }
-      art.walls.push(colors);
-    }
   }
   function drawMazeCeiling(g,w,h,horizon,time){
-    g.fillStyle=driveArtwork.roof;g.fillRect(0,0,w,h);
+    // Clear only the roof rows; floor and walls fill the rest of the reusable buffer.
+    for(var y=0;y<=horizon;y++)driveArtwork.pixels.fill(driveArtwork.roofRows[y],y*w,(y+1)*w);
   }
   function drawRoadFloor(g,w,h,horizon,focal){
     // Project the road onto a simple flat asphalt floor (low-cost 2x2 pixels).
@@ -376,6 +373,12 @@
         cs=Math.cos(driveAngle),sn=Math.sin(driveAngle),rightX=-sn,rightY=cs;
     for(var yy=0;yy<floorH;yy+=2){
       var depth=camH*focal/(yy+1.3),half=depth*Math.tan(.67);
+      // Account for both axes of the projected 2x2 footprint, especially at the horizon.
+      var footprint=Math.max(2*depth/(focal*DRIVE_SCALE),
+        (depth-camH*focal/(yy+3.3))/DRIVE_SCALE)*2;
+      var lod=Math.min(8,Math.max(0,Math.log2(Math.max(1,footprint))));
+      var level=Math.floor(lod),blend=lod-level;
+      var detail=Math.max(0,1-footprint/5);
       for(var xx=0;xx<w;xx+=2){
         var sideways=(xx/w*2-1)*half;
         var wx=current.player.x+(cs*depth+rightX*sideways)/DRIVE_SCALE,
@@ -383,11 +386,14 @@
         var gx=Math.floor(wx/DRIVE_TILE),gy=Math.floor(wy/DRIVE_TILE),index=gy*road.w+gx,r,gr,b;
         if(gx>=0&&gy>=0&&gx<road.w&&gy<road.h&&road.bits[index]){
           var flags=marks[index],lx=wx-gx*DRIVE_TILE,ly=wy-gy*DRIVE_TILE;
-          var detail=Math.max(0,1-depth/3500);
-          var noise=(((Math.floor(wx/6)*13)^(Math.floor(wy/6)*17))&3)*detail;
-          r=53+noise;gr=70+noise;b=83+noise;
-          // Restrained world-anchored slab joints fade before subpixel distance.
-          if(wx%28<.7||wy%28<.7){var joint=9*Math.max(0,1-depth*2/(focal*DRIVE_SCALE*1.2));r-=joint;gr-=joint;b-=joint*.8;}
+          var material=driveArtwork.materials.sampleFloor(wx,wy,level,blend);
+          var contact=Math.min(flags&4?lx:14,flags&8?14-lx:14,flags&16?ly:14,flags&32?14-ly:14);
+          var occlusion=Math.max(0,1-contact/6)*10;
+          r=80+material-occlusion;gr=90+material-occlusion;b=94+material-occlusion;
+          // Expansion joints are world anchored and filtered out below a pixel footprint.
+          var jointX=((wx%56)+56)%56,jointY=((wy%56)+56)%56;
+          var joint=Math.max(0,1-Math.min(jointX,56-jointX,jointY,56-jointY)/.65)*10*detail;
+          r-=joint;gr-=joint;b-=joint;
           var horizontal=!!(flags&1),vertical=!!(flags&2);
           var mx=((wx%(2*TILE))+(2*TILE))%(2*TILE),
               my=((wy%(2*TILE))+(2*TILE))%(2*TILE);
@@ -402,13 +408,13 @@
         }else{r=31;gr=49;b=63}
         var shade=Math.min(.55,depth/17000),fogR=76,fogG=101,fogB=119;
         r=(r*(1-shade)+fogR*shade)|0;gr=(gr*(1-shade)+fogG*shade)|0;b=(b*(1-shade)+fogB*shade)|0;
-        var offset=yy*w*4+xx*4;
+        var offset=(horizon+yy)*w*4+xx*4;
         for(var ry=0;ry<2&&yy+ry<floorH;ry++)for(var rx=0;rx<2&&xx+rx<w;rx++){
           var at=offset+ry*w*4+rx*4;arr[at]=r;arr[at+1]=gr;arr[at+2]=b;arr[at+3]=255;
         }
       }
     }
-    g.putImageData(image,0,horizon,0,0,w,floorH);
+    // Wall sampling completes this image, then uploads the whole surface once.
   }
   function drawWallRays(g,w,h,horizon,focal){
     // Tall, continuous maze walls replace the old short seaside rails. They
@@ -424,31 +430,46 @@
           top=horizon-590*focal/dist,
           height=bottom-top;
       if(bottom<0||top>h)continue;
-      var fog=Math.min(63,Math.max(0,Math.floor((dist-500)/12500*63)));
-      var face=driveArtwork.walls[hit.side][fog];
-      // Very faint panel seams, never random color patches that mimic doors.
       var hitCoord=hit.side?current.player.x+Math.cos(dir+off)*hit.dist:
                               current.player.y+Math.sin(dir+off)*hit.dist;
-      var seam=((hitCoord%56)+56)%56<1.2;
-      g.fillStyle=seam?face.seam:face.face;
-      g.fillRect(x,Math.max(0,top),columns+1,Math.min(h,bottom)-Math.max(0,top));
-      var panelY=horizon-180*focal/dist;
-      if(panelY>0){g.fillStyle=seam?face.seam:face.upper;g.fillRect(x,Math.max(0,top),columns+1,Math.min(h,panelY)-Math.max(0,top));}
-      // Bright continuous cap/trim lets a driver trace openings and corners.
-      var capY=top+26*focal/dist;
-      if(capY>=0&&capY<h){g.fillStyle=face.edge;g.fillRect(x,capY,columns+1,Math.max(1,8*focal/dist))}
-      var lightY=horizon-125*focal/dist;
-      if(lightY>=0&&lightY<h){g.fillStyle=hit.side?'#6ea5b3':'#9bced2';g.fillRect(x,lightY,columns+1,Math.max(1,5*focal/dist));}
-      var panelU=((hitCoord%56)+56)%56;
-      if(panelU>24&&panelU<32&&dist<7000){
-        var plateY=horizon-290*focal/dist,plateH=42*focal/dist;
-        g.fillStyle=face.base;g.fillRect(x,plateY,columns+1,plateH);
-        if(panelU<26){g.fillStyle='#8fc3ca';g.fillRect(x,plateY+plateH*.2,columns+1,plateH*.6);}
+      var lod=Math.min(7,Math.max(0,Math.log2(Math.max(1,columns*dist/(focal*DRIVE_SCALE)*128/56))));
+      var level=Math.floor(lod),textures=driveArtwork.materials.walls[hit.side],texture=textures[level],coarse=textures[Math.min(7,level+1)];
+      var u=((hitCoord%56)+56)%56/56,blend=lod-level;
+      var tx=u*texture.size,ix=Math.floor(tx),ux=tx-ix,nx=(ix+1)%texture.size;
+      var cx=u*coarse.size,ci=Math.floor(cx),cu=cx-ci,cn=(ci+1)%coarse.size;
+      var fog=Math.min(.40,Math.max(0,(dist-500)/20000)),air=[89,110,120];
+      var arr=driveArtwork.floor.data,pixels=driveArtwork.pixels;
+      // CPU 2x2 texture sampling avoids hundreds of native texture uploads per
+      // frame. The same DDA silhouette/depth and perspective determine each texel.
+      for(var y=Math.max(0,Math.floor(top));y<Math.min(h,bottom);y+=2){
+        var v=Math.max(0,(y+.5-top)/height),ty=Math.min(texture.size-1,v*texture.size),iy=Math.floor(ty),vy=ty-iy;
+        var cy=Math.min(coarse.size-1,v*coarse.size),jy=Math.floor(cy),cv=cy-jy;
+        var p0=(iy*texture.size+ix)*4,p1=(iy*texture.size+nx)*4;
+        var p2=(Math.min(texture.size-1,iy+1)*texture.size+ix)*4,p3=(Math.min(texture.size-1,iy+1)*texture.size+nx)*4;
+        var q0=(jy*coarse.size+ci)*4,q1=(jy*coarse.size+cn)*4;
+        var q2=(Math.min(coarse.size-1,jy+1)*coarse.size+ci)*4,q3=(Math.min(coarse.size-1,jy+1)*coarse.size+cn)*4;
+        var at=(y*w+x)*4;
+        for(var channel=0;channel<3;channel++){
+          var data=texture.pixels,lo=data[p0+channel]*(1-ux)+data[p1+channel]*ux,hi=data[p2+channel]*(1-ux)+data[p3+channel]*ux;
+          var value=lo+(hi-lo)*vy;
+          if(blend>0){data=coarse.pixels;lo=data[q0+channel]*(1-cu)+data[q1+channel]*cu;hi=data[q2+channel]*(1-cu)+data[q3+channel]*cu;value+=(lo+(hi-lo)*cv-value)*blend;}
+          arr[at+channel]=value+(air[channel]-value)*fog;
+        }
+        arr[at+3]=255;var packed=pixels[y*w+x];
+        if(x+1<w)pixels[y*w+x+1]=packed;
+        if(y+1<Math.min(h,bottom)){pixels[(y+1)*w+x]=packed;if(x+1<w)pixels[(y+1)*w+x+1]=packed;}
       }
-      var lowerY=horizon+83*focal/dist;
-      if(lowerY>=0&&lowerY<h){g.fillStyle=face.base;g.fillRect(x,lowerY,columns+1,Math.max(1,13*focal/dist))}
-      if(bottom>=0&&bottom<h){g.fillStyle='#192d3d';g.fillRect(x,bottom-2,columns+1,Math.max(2,6*focal/dist))}
+      function trim(y,size,color){
+        var start=Math.max(0,Math.floor(y)),end=Math.min(h,Math.ceil(y+size));
+        for(var row=start;row<end;row++){pixels[row*w+x]=color;if(x+1<w)pixels[row*w+x+1]=color;}
+      }
+      var capY=top+26*focal/dist;
+      trim(capY,Math.max(1,8*focal/dist),hit.side?0xffaba899:0xffc5c3b8);
+      trim(horizon-125*focal/dist,Math.max(1,5*focal/dist),hit.side?0xff9f9978:0xffc0bda1);
+      trim(horizon+83*focal/dist,Math.max(1,13*focal/dist),0xff6b6452);
+      trim(bottom-2,Math.max(2,6*focal/dist),0xff3b3324);
     }
+    g.putImageData(driveArtwork.floor,0,0);
   }
   function makeDriveCheckpoint(index,complete,finishPoint){
     var c=document.createElement('canvas');c.width=96;c.height=128;var g=c.getContext('2d');
@@ -639,9 +660,9 @@
   el('modeToggle').addEventListener('click',toggleMode);el('drawerModeToggle').addEventListener('click',function(){togglePanel(false);toggleMode()});
   el('atmosphereSelect').addEventListener('change',function(){setAtmosphere(this.value,true);canvas.focus({preventScroll:true});});
   el('drawerAtmosphereSelect').addEventListener('change',function(){setAtmosphere(this.value,true);});
+  // OS reduced motion affects passive effects, never an explicit slash or its deadline.
   motionPreference.addEventListener('change',function(){
-    if(!motionPreference.matches)return;
-    if(pendingInteraction)revealPending(pendingInteraction);else clearInteractionCue();
+    if(current&&!pendingInteraction){if(gameMode==='drive')renderDrive(performance.now()/1000);else render(performance.now()/1000);}
   });
   el('zoomSelect').addEventListener('change',function(){
     var next=Number(this.value);if([1.5,1.75].indexOf(next)<0)return;

@@ -186,9 +186,9 @@ class AtmosphereTests(VisualHarness):
         state=self.snapshot();self.assertEqual(state['unit'],'S01');self.assertFalse(state['modal'])
         self.assertEqual(state['done'],[False]*4);self.assertEqual(state['remaining'],30000)
 
-    def test_off_reduced_motion_and_driving_are_immediate(self):
+    def test_off_and_driving_immediate_reduced_motion_keeps_sequence(self):
         self.prepare(clock=True)
-        for mode,reduced,drive in [('off',False,False),('strong',True,False),('normal',False,True),('strong',False,True)]:
+        for mode,reduced,drive in [('off',False,False),('off',True,False),('normal',True,True),('strong',False,True)]:
             self.choose_mode(mode);self.page.emulate_media(reduced_motion='reduce' if reduced else 'no-preference')
             self.approach()
             if drive:self.page.keyboard.press('v')
@@ -196,21 +196,13 @@ class AtmosphereTests(VisualHarness):
             self.assertTrue(state['modal']);self.assertIsNone(state['pending'])
             self.assertGreater(state['answers'],0);self.page.keyboard.press('Escape')
             if drive:self.page.keyboard.press('v')
-        # A preference change during a pending animation must not wait on a skipped effect.
+        # Changing the OS preference must preserve the original active deadline.
+        self.choose_mode('strong');self.page.emulate_media(reduced_motion='no-preference')
         self.approach();self.page.keyboard.press('e');self.page.clock.run_for(100)
-        self.assertIsNotNone(self.snapshot()['pending'])
-        changed_at=self.snapshot()['now']
-        self.page.emulate_media(reduced_motion='reduce')
-        self.assertTrue(self.page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches"))
-        # Chromium may deliver the media-query change on its next rendering
-        # opportunity after the protocol response. The fake clock is paused;
-        # permit two frames, rather than waiting out the remaining 500 ms cue.
-        self.page.clock.run_for(32)
-        state=self.snapshot()
-        self.assertTrue(state['modal']);self.assertIsNone(state['pending'])
-        question=self.page.evaluate("atmosphereTest.events.filter(e=>e.event==='question').at(-1)")
-        self.assertGreaterEqual(question['time'],changed_at)
-        self.assertLessEqual(question['time']-changed_at,32)
+        pending=self.snapshot()['pending'];self.assertIsNotNone(pending)
+        self.page.emulate_media(reduced_motion='reduce');self.page.clock.run_for(32)
+        state=self.snapshot();self.assertFalse(state['modal']);self.assertEqual(state['pending'],pending)
+        self.page.clock.run_for(500);self.assertTrue(self.snapshot()['modal']);self.assertIsNone(self.snapshot()['pending'])
 
     def test_matched_modes_viewports_and_accessible_controls(self):
         self.prepare()

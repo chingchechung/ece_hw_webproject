@@ -59,8 +59,9 @@ class RefinementTests(VisualHarness):
         self.assertEqual(len(set(hashes)), 4)
         self.page.emulate_media(reduced_motion='reduce')
         reduced = self.page.evaluate("refineTest.swipe('right')")
-        self.assertFalse(reduced['started'])
-        self.assertEqual(reduced['changed'], 0)
+        self.assertTrue(reduced['started'])
+        self.assertGreater(reduced['changed'], 40)
+        self.assertEqual(reduced['expired'], reduced['clean'])
 
     def test_e_pending_sequence_cancels_without_late_dialog(self):
         self.prepare()
@@ -116,6 +117,8 @@ class RefinementTests(VisualHarness):
         self.page.emulate_media(reduced_motion='reduce')
         self.page.evaluate('visualTest.approach()')
         self.page.click('#touchInteract')
+        self.assertTrue(self.page.evaluate('refineTest.modal().cue'))
+        self.page.wait_for_selector('[data-answer]')
         self.assertTrue(self.page.evaluate('refineTest.modal().open'))
         self.assertFalse(self.page.evaluate('refineTest.modal().cue'))
         self.page.click('#dialogClose')

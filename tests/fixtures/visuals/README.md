@@ -29,3 +29,12 @@ unchanged physics/road state. It supports matched screenshots, state/control
 comparisons and performance measurements. No assignment data is present; never
 deploy this reference or any test bridge. Phase 5B separately hashes all
 approved gameplay blocks and the entire unchanged Phase 5A.3 2D renderer.
+
+`phase-5b-drive.js` freezes the complete driving artwork/cache functions from
+reviewed commit `11b0cdfab1ceb3df9a87e34183d3965e1d4870de` for Phase 5B.1 pairs.
+SHA-256: `30b43edfffbc7c12b4bf2044ef1689c4ddaba775a7a8aff9d2634f5a30f9186d`.
+It keeps its own derived caches in a test-only closure and shares the unchanged
+physics/state. No teacher data/assets are included. The older 5A.3 reference and
+all original gameplay routes remain. Phase 5B.1 source checks normalize only the
+authorized slash OS-preference gates/listener and release marker before hashing
+the approved gameplay/2D source; lighting still has exact pixel parity coverage.

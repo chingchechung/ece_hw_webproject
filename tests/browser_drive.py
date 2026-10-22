@@ -10,6 +10,7 @@ from drive_reference import DRIVE_BRIDGE
 
 class DrivingVisualTests(VisualHarness):
     artifact_directory=ROOT/'test-results/phase-5b'
+    renderer_names=('phase5a3','phase5b1')
     bridge=(BRIDGE+(ROOT/'tests/gameplay_driver.js').read_text()+DRIVE_BRIDGE+
             (ROOT/'tests/drive_probe.js').read_text())
 
@@ -160,7 +161,7 @@ class DrivingVisualTests(VisualHarness):
                 result=dict(trials[0]);result['trials']=trials
                 for key in ['meanRenderMs','p95RenderMs','renderedFps','rafFps']:result[key]=statistics.median(t[key] for t in trials)
                 self.assertEqual(result['frames'],90);self.assertGreater(result['renderedFps'],0)
-                result.update(renderer='phase5a3' if previous else 'phase5b',browser=self.browser.version);results.append(result)
+                result.update(renderer=self.renderer_names[0 if previous else 1],browser=self.browser.version);results.append(result)
         self.save('performance.json',results)
 
     def test_real_browser_driving_video(self):

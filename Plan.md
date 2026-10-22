@@ -19,7 +19,7 @@
 > `docs/phase-5a3-results.md`.
 > Phase 5A is approved, including the slash in a local browser. Phase 5B updates
 > first-person artwork while preserving the approved 2D visuals and all driving
-> physics/gameplay; see `docs/phase-5b-results.md`. Stop after Phase 5B for review.
+> physics/gameplay; see `docs/phase-5b-results.md`. Phase 5B.1 material/reduced-motion correction is authorized; see `docs/phase-5b1-results.md`. Stop after Phase 5B.1 for review.
 
 ## 1. Project objective
 
@@ -251,7 +251,14 @@ Use Python 3.12 (or 3.11+) with standard-library **Tkinter/ttk** and `json`, `pa
 
 - [x] Lab pavement/panel walls, readable checkpoints/finish and restrained motion feedback with frozen-reference comparisons.
 - [x] Preserve approved 2D artwork and tested physics; record synthetic driving screenshots/video and three-viewport benchmarks.
-- [ ] Instructor review of Phase 5B before any further refinement or Phase 6.
+- [x] Instructor reviewed Phase 5B on Windows; requested material realism and confirmed the OS reduced-motion slash issue.
+
+### Phase 5B.1 — Materials and Windows slash compatibility
+
+- [x] Cached world-anchored wall/floor materials, distance filtering and matched Phase 5B comparisons.
+- [x] Normal/Strong slash independent of OS animation preference; preserve spotlight and full reveal/cancellation sequence.
+- [x] Add preference/texture/recording/performance tests; retain all gameplay regression suites.
+- [ ] Instructor review of Phase 5B.1 before any further refinement or Phase 6.
 - [ ] Smoke test Chrome/Edge Windows 11 and Chrome/Safari macOS (or explicitly record untested real-device platforms).
 - [ ] Verify acceptable responsiveness on ordinary integrated-GPU laptops; no external network dependency except YouTube/Google Form.
 

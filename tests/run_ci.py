@@ -27,6 +27,7 @@ SUITES = [
     ("browser-atmosphere", ["tests/browser_atmosphere.py"]),
     ("browser-slash", ["tests/browser_slash.py"]),
     ("browser-drive", ["tests/browser_drive.py"]),
+    ("browser-materials", ["tests/browser_materials.py"]),
     ("assignment-cli", ["tools/validate_assignments.py", "tests/fixtures/manifest.json",
                         "tests/fixtures/v2/manifest.json", "assignments/manifest.json",
                         "student/assignments/manifest.json"]),
