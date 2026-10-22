@@ -4,6 +4,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
+from io import BytesIO
 import shutil
 import sys
 import threading
@@ -12,6 +13,7 @@ import traceback
 import unittest
 from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright
+from PIL import Image, ImageChops, ImageStat
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'test-results/3d-p0'
@@ -174,12 +176,19 @@ class ShowcaseBrowserTests(unittest.TestCase):
 
     def test_05_context_loss_and_restore(self):
         page = self.new_page()
+        before = Image.open(BytesIO(page.locator('#view').screenshot())).convert('RGB')
         page.evaluate("window.testLoss= document.querySelector('canvas').getContext('webgl2').getExtension('WEBGL_lose_context'); window.testLoss.loseContext()")
         page.wait_for_function('window.showcase.snapshot().contextLost')
         self.assertIn('context lost', page.locator('#message').inner_text())
         page.wait_for_timeout(500); page.evaluate('window.testLoss.restoreContext()')
         page.wait_for_function('window.showcase.snapshot().restoredContexts === 1', timeout=120000)
         self.rendered(page); self.assertTrue(self.snapshot(page)['ready']); self.assertEqual(page.locator('#message').inner_text(), '')
+        after = Image.open(BytesIO(page.locator('#view').screenshot())).convert('RGB')
+        # Central floor/wall crop excludes changing diagnostic text and controls.
+        w, h = before.size; crop = (int(w * 0.42), int(h * 0.55), int(w * 0.62), int(h * 0.75))
+        delta = ImageStat.Stat(ImageChops.difference(before.crop(crop), after.crop(crop))).rms
+        self.assertLess(max(delta), 3, 'Restored environment/shadows changed the static scene')
+        (OUT / 'context-restore-pixel-delta.json').write_text(json.dumps({'rgb_rms': delta, 'crop': crop}))
 
     def test_06_webgl2_unavailable_clear_fallback(self):
         page = self.new_page(fallback=True)

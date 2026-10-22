@@ -146,9 +146,9 @@ targets are disposed. The Arc report's “16GB” is treated as shared-memory re
 ## Automated results and Cloud evidence
 
 The local suite passed **184 tests**: 151 unchanged Lite, 24 showcase Node, and
-9 showcase browser tests (zero failures/skips). The final camera/metadata build
-is being rechecked; feature GitHub Actions verification will be recorded after
-its first push. The unchanged Lite runner already passed **151**
+9 showcase browser tests (zero failures/skips). The final inspection build passed all nine browser tests; a later recovery
+resource correction also passed the focused context-loss test with zero RGB
+change in its static-scene crop. Feature GitHub Actions verification is running. The unchanged Lite runner already passed **151**
 tests with zero failures/skips, including schema/model, Tkinter/Xvfb, v1/v2
 browser validation/loading, Phase 4 complete gameplay, and all approved Phase 5
 artwork/input regressions. All four assignment CLI checks passed.
@@ -174,7 +174,7 @@ resources, launcher/package boundaries and two-build reproducibility.
 The separate browser suite checks WebGL 2, nested relative paths, blocked external
 network requests, all sizes/presets/resource disposal, single-preset stability,
 keyboard/mouse/reset/orbit, 1280×800 at DPR 1.5, projector resizing to 1920×1080,
-fullscreen, context loss/restoration, unavailable-WebGL fallback, all six benchmark
+fullscreen, context loss/restoration (including a before/after scene pixel comparison), unavailable-WebGL fallback, all six benchmark
 scenarios, local JSON download, deterministic screenshots and real navigation.
 Any uncaught JavaScript error, console error or external request fails the suite.
 There is no unexpected page scrolling.
@@ -205,8 +205,14 @@ it does not measure either physical Intel GPU or establish native browser parity
 
 ## Visual evidence
 
-The final screenshots and recording are actual Chromium/WebGL rendering, not
-mockups or generated evidence. Few representative PNGs are committed under
+The final screenshots and recording are actual Chromium/WebGL rendering.
+
+![High preset, deterministic four-way junction](images/3d-p0/junction-high.png)
+
+[Laboratory terminal](images/3d-p0/laboratory-terminal.png) ·
+[Full maze overview](images/3d-p0/full-maze-overview.png)
+
+ Few representative PNGs are committed under
 `docs/images/3d-p0/`; the full gallery stays in ignored artifacts:
 
 - `straight.png`, `t-junction.png`, `four-way.png`, `wall.png`, `floor.png`.
@@ -324,7 +330,7 @@ showcase3d/README.md
 showcase3d/Start-Showcase.cmd
 showcase3d/THIRD_PARTY.md
 showcase3d/dist/LICENSES.txt
-showcase3d/dist/app-4JUWX4SJ.js
+showcase3d/dist/app-PB2RGZYH.js
 showcase3d/dist/app-RD2YC7DH.css
 showcase3d/dist/build-info.json
 showcase3d/dist/index.html

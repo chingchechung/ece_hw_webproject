@@ -205,7 +205,12 @@ async function initialize() {
   });
   canvas.addEventListener('webglcontextrestored', async () => {
     try {
-      metrics.dispose(); metrics = new Metrics(renderer); await renderer.compileAsync(scene, camera);
+      metrics.dispose(); metrics = new Metrics(renderer);
+      // Render-target contents cannot be re-uploaded from CPU images after loss.
+      environment.dispose(); environment = studioEnvironment(renderer); scene.environment = environment.texture;
+      if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+      renderer.shadowMap.needsUpdate = true;
+      await renderer.compileAsync(scene, camera);
       contextLost = false; restoredContexts++; resize(); message('');
     } catch { message('Graphics recovery failed. Reload the local page to restart.', true); }
   });
