@@ -42,7 +42,8 @@ Windows-runner HTTP checks do not verify the physical presentation computer.
   Continue driving after closing it. Completed screens turn green and progress
   increases. A held/repeated E does not reactivate completed labs.
 - All five labs unlock the exit. Drive there, stop and press **E** to finish.
-  The completion screen records no submission or personal data.
+  The completion screen records no submission or personal data. Close it, then
+  use Reset/R or Generate for another drive.
 
 **Reset / R** restarts the current seed and clears speed, steering, keys,
 progress and dialogs. **Generate** uses an optional uint32 seed (0–4294967295),

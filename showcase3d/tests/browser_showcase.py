@@ -310,6 +310,8 @@ class ShowcaseBrowserTests(unittest.TestCase):
                 self.assertEqual(self.snapshot(page)['rebuilds'],geometry_rebuilds,'Progress rebuilt static geometry')
                 if step['id']=='EXIT':
                     self.assertTrue(self.snapshot(page)['game']['finished'])
+                    self.assertEqual(page.locator('#dialog-close').inner_text(),'Close completion')
+                    self.assertIn('Reset',page.locator('#interaction-hint').inner_text())
                     break
                 page.click('#dialog-close')
                 if step['id']=='Q1':
@@ -327,7 +329,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
         (OUT/'control-completion.json').write_text(json.dumps({'plan':plan,'final':final,'activated':activated,
             'video':Path(page.video.path()).name,'clock':'Explicit accelerated simulation clock; every move used real keyboard holds, no position setters.'},indent=2))
         # Reset also cancels the still-open completion dialog.
-        page.click('#reset');self.assertTrue(page.locator('#dialog-overlay').is_hidden())
+        page.keyboard.press('r');self.assertTrue(page.locator('#dialog-overlay').is_hidden())
         self.assertEqual(self.snapshot(page)['game']['completed'],[False]*5)
         self.assertFalse(self.snapshot(page)['game']['finished'])
 

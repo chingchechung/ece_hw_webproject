@@ -107,7 +107,8 @@ E immediately marks an incomplete lab activated once and shows an acknowledgemen
 such as **Q1 · LAB 01 — Checkpoint Activated**. Completed labs stop offering their
 original activation; screens turn green and the compact HUD updates. All five
 completed flags unlock the exit's material/sign. Driving to the exit and pressing
-E shows the synthetic completion screen. No actual question, answer validator,
+E shows the synthetic completion screen. The finished attempt stays stopped until Reset/Generate; completion feedback says
+so explicitly. R also resets while a dialog button has focus. No actual question, answer validator,
 course JSON, YouTube, Forms, grading, identity or submission feature is added.
 
 The HUD shows virtual speed/reverse, progress, nearby identity and E/braking
@@ -300,7 +301,7 @@ A	docs/images/3d-p1/checkpoint-completed.png
 A	docs/images/3d-p1/demonstration-complete.png
 A	docs/images/3d-p1/driving-high.png
 M	showcase3d/README.md
-A	showcase3d/dist/app-2OF3JEXF.js
+A	showcase3d/dist/app-JABOVFIP.js
 D	showcase3d/dist/app-PB2RGZYH.js
 D	showcase3d/dist/app-RD2YC7DH.css
 A	showcase3d/dist/app-RYFAG6EX.css

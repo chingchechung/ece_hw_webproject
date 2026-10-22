@@ -135,7 +135,7 @@ function refreshHud() {
   text('progress',`${count} / 5`);
   text('nearby',attempt.finished ? 'Demonstration complete' : near ? `${near.id} · ${near.label}` : count===5 ? 'Exit unlocked' : 'Find Q1–Q5');
   const active = view==='driving' && !benchmarkRunning;
-  text('interaction-hint',!active ? 'Paused · return to driving to activate' : near ? Math.abs(attempt.vehicle.speed)>25 ? 'Brake to activate · speed must be ≤25 virtual' : near.type==='finish' && count<5 ? 'Exit locked · complete all five labs' : 'Press E to activate' : 'W accelerate · S brake / reverse · A/D steer');
+  text('interaction-hint',attempt.finished ? 'Reset / R or Generate for another drive' : !active ? 'Paused · return to driving to activate' : near ? Math.abs(attempt.vehicle.speed)>25 ? 'Brake to activate · speed must be ≤25 virtual' : near.type==='finish' && count<5 ? 'Exit locked · complete all five labs' : 'Press E to activate' : 'W accelerate · S brake / reverse · A/D steer');
   $('interact').hidden = !active || !near || !!attempt.interaction || attempt.finished;
   model.updateProgress(attempt.completed,active ? near : null,benchmarkRunning);
   text('control-hint',testClock ? 'Test clock active · keyboard drives the real physics' : active ? 'W accelerate · S brake/reverse · A/D steer · E activate' : 'Inspection paused · drag to look · return to driving');
@@ -148,6 +148,8 @@ function activate() {
   if (result.status==='locked') { $('status').textContent = 'Exit locked: activate all five synthetic checkpoints first.'; $('view').focus({preventScroll:true}); return; }
   if (result.status!=='activated') return;
   controller.clear(); refreshHud();
+  $('status').textContent = result.type==='finish' ? 'Demonstration complete · Reset/R or Generate for another drive' : `${result.id} activated · ${attempt.completed.filter(Boolean).length}/5 labs complete`;
+  $('dialog-close').textContent = result.type==='finish' ? 'Close completion' : 'Continue driving';
   $('dialog-title').textContent = result.type==='finish' ? 'Demonstration complete' : `${result.id} · ${result.label} — Checkpoint Activated`;
   $('dialog-text').textContent = result.type==='finish' ? 'All five labs are activated. You reached the exit using the maze driving controller. No grades, student data or submission are recorded.' : 'Synthetic laboratory checkpoint activated. Continue driving to the remaining labs, then reach the unlocked exit. No course question is loaded.';
   $('dialog-overlay').hidden = false; $('dialog-close').focus();

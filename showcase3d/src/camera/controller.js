@@ -8,9 +8,10 @@ export class Controller {
     window.addEventListener('keydown', event => {
       const key = event.key.toLowerCase();
       if (key === 'escape') { callbacks.close(); return; }
-      if (event.ctrlKey || event.metaKey || event.altKey || ['INPUT','SELECT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)) return;
+      if (event.ctrlKey || event.metaKey || event.altKey || ['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (key === 'r' && !event.repeat) { event.preventDefault(); callbacks.reset(); return; }
+      if (document.activeElement.tagName === 'BUTTON') return;
       if (['w','a','s','d','r','e','arrowup','arrowdown','arrowleft','arrowright'].includes(key)) event.preventDefault();
-      if (key === 'r' && !event.repeat) { callbacks.reset(); return; }
       if (!callbacks.canDrive()) return;
       if (key === 'e') { if (!event.repeat) callbacks.interact(); return; }
       this.keys.add(key);
