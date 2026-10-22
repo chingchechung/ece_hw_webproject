@@ -135,9 +135,23 @@ secrets, automated deployment or automatic teacher-data upload is introduced.
 
 ## Automated validation
 
-Required suite total is **236**: the 216 prior regressions plus 14 Node and six
-P2 browser tests. Windows launcher checks are additional. Local/CI execution
-details and the verified run are recorded below after verification.
+The verified GitHub run passed **236 tests**: the 216 prior regressions plus
+14 Node and six P2 browser tests. The seven Windows launcher checks also passed.
+Local and CI execution details are recorded below.
+
+Local Node **62/62** passed with zero skips. The full P2 browser suite passed
+**6/6 in 305.335 s**. After extending earned-progress preservation, successful
+unit switching, offline-network and individual question captures, the affected
+three tests passed again in **291.545 s**, and the v2 full route passed in
+**109.680 s**. All five retained navigation tests passed in **295.025 s**;
+all **151** Lite tests and four CLI manifests passed.
+
+The original 12-test local run took **824.839 s** and passed 11; its unchanged
+800 ms steering hold saw no animation frame while multiple SwiftShader suites
+ran concurrently. The same test, unchanged, passed alone in **18.330 s** after
+those suites finished. Both logs are retained. Physics and the original test
+were not altered to accommodate that timing failure. The sequential GitHub run
+below provides the final complete-suite verification.
 
 | Suite | Coverage |
 | --- | --- |
@@ -170,10 +184,39 @@ are functional evidence, not real-time FPS measurements.
 
 ### GitHub Actions verification
 
-Verification pending in this implementation checkpoint. Completion requires an
-actual successful feature-branch run, all jobs and uploaded artifacts; YAML
-validation alone is insufficient. The final report will replace this paragraph
-with the verified run/source SHA and evidence links.
+[Feature run #6 — success](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39757168509)
+executed on **2026-10-22**, from 09:39:57 to 10:03:45 UTC, for implementation
+commit **`eab7341f730e07ea8c2dddd1283248e60212ad24`**. The run and all three jobs
+are completed/success; this was verified from actual GitHub job logs and artifact
+metadata, not just workflow syntax.
+
+- [Showcase build and browser job](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39757168509/job/119752002265):
+  **62 Node tests**, zero failures/skips; reproducible build comparison passed.
+  All **12 original browser tests** passed in **870.123 s**, including the
+  unchanged timed steering test and P0 image comparisons. All **five navigation
+  tests** passed in **164.752 s**. All **six P2 tests** passed in **317.612 s**,
+  including both actual educational routes and the smaller-maze completion.
+  The standalone P2 ZIP was created and the evidence artifact uploaded.
+- [Unchanged Lite job](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39757168509/job/119752002351):
+  **151 tests passed**; all four CLI manifests validated; evidence uploaded.
+- [Windows launcher job](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39757168509/job/119752001779):
+  **seven checks passed**. Downloaded `results.json` confirms Windows PowerShell
+  **5.1.26100.33648**, and `server-errors.log` is empty. This verifies the HTTP
+  launcher, not physical Windows/Intel graphics or educational gameplay.
+
+Download while signed into GitHub with repository access:
+
+| Artifact | Contents |
+| --- | --- |
+| [showcase3d-p2-39757168509-1](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39757168509/artifacts/12416864193) | `3d-p2/`: Node/browser results, synthetic screenshots/traces/requests, route video/JSON and **showcase3d-p2-static.zip**; `3d-p1/` and `3d-p1.1/`: preserved original evidence |
+| [showcase3d-windows-launcher-39757168509-1](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39757168509/artifacts/12415484595) | Downloaded/checked launcher result and server logs |
+| [lite-preservation-39757168509-1](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39757168509/artifacts/12416523072) | Unchanged synthetic Python, GUI and browser results |
+
+All three artifacts uploaded successfully with 14-day retention, expiring
+**2026-11-05 UTC**. The final delivery commit changes only this report and adds
+one safe synthetic screenshot; runtime, build, tests, workflow and packaged guide
+are identical to the verified source commit. The feature workflow excludes
+docs-only changes, so that report update does not start another run.
 
 The feature workflow installs pinned development dependencies on Ubuntu 24.04,
 Python 3.12/Node 24, Chromium and Xvfb, preserving Lite and Windows jobs. It runs
@@ -194,6 +237,17 @@ both views at one position, all headings, three/four-option questions, correct/
 wrong feedback, smaller mazes, remaining full map, locked/unlocked exit and both
 completion/Form dialogs. Selected safe PNGs are in **`docs/images/3d-p2/`**.
 
+![Original top-down car](images/3d-p2/car-heading-0.png)
+
+[Published unit selector](images/3d-p2/published-unit-selector.png) ·
+[Four-option v1 question](images/3d-p2/v1-four-options.png) ·
+[Three-option v2 question](images/3d-p2/v2-three-options.png) ·
+[Correct answer](images/3d-p2/correct-answer.png) ·
+[Wrong answer / smaller maze](images/3d-p2/wrong-answer-smaller-maze.png) ·
+[Remaining full map](images/3d-p2/full-map-remaining.png) ·
+[Four-question completion](images/3d-p2/four-question-completion.png) ·
+[Five-question completion](images/3d-p2/five-question-completion.png)
+
 There are no new 3D per-frame meshes/materials or changed presets. Correct answers
 only repaint existing screens and overlays; browser assertions require the same
 rebuild counter. The cached car adds **55,296 backing bytes** (54 KiB). The JS
@@ -209,6 +263,8 @@ JavaScript submission/startup work and is not GPU/compositor timing. These are
 short Chromium 154/SwiftShader functional observations under shared cloud load,
 not a sustained benchmark or Intel measurement. The original P0 comparison and
 benchmark methodology remain intact.
+All six local paired P0 Medium/High wall/floor/straight-corridor image crops have
+RGB RMS **0/0/0** in `3d-p1/p0-visual-parity.json`.
 
 ## Instructor review and limitations
 
@@ -243,7 +299,8 @@ Next action is instructor **P2 review**. No further phase has begun.
 
 ## Exact changed files
 
-The final delivery lists paths relative to approved `7902de5` below. Generated
+The final delivery changes **52 paths** relative to approved `7902de5`, counting
+both sides of superseded generated assets. Generated
 bundle names supersede the old P1.1 assets; Lite source/tests/stable workflow,
 teacher tools, schemas, public Lite manifests and approved tags are unchanged.
 
@@ -288,6 +345,7 @@ A	docs/images/3d-p2/four-question-completion.png
 A	docs/images/3d-p2/full-map-remaining.png
 A	docs/images/3d-p2/published-unit-selector.png
 A	docs/images/3d-p2/v1-four-options.png
+A	docs/images/3d-p2/v2-three-options.png
 A	docs/images/3d-p2/wrong-answer-smaller-maze.png
 A	showcase3d/dist/app-4J526KQD.css
 A	showcase3d/dist/app-Y2HAESKF.js
