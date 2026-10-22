@@ -23,6 +23,6 @@ const hashes = {};
 for (const file of [...files, 'dist/index.html', 'dist/LICENSES.txt'].sort()) {
   hashes[file.replace('dist/', '')] = sha256(await readFile(file));
 }
-await writeFile('dist/build-info.json', JSON.stringify({ phase: '3D-P1', three: '0.180.0',
+await writeFile('dist/build-info.json', JSON.stringify({ phase: '3D-P1.1', three: '0.180.0',
   esbuild: '0.25.12', liteBaseline: exportMaps().baseline, files: hashes }, null, 2) + '\n');
 console.log('Reproducible local bundle:', hashes);

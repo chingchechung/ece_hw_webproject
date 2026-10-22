@@ -1,15 +1,16 @@
-# Engineering Maze Lab — 3D Driving P1
+# Engineering Maze Lab — Dual-View Driving P1.1
 
 Five **synthetic** laboratory checkpoints, the approved Lite arcade driving
 model, and the approved P0 Three.js/WebGL 2 artwork. No real course questions,
-answer keys, Forms, student records, grades or saved progress. Stop at P1 for
-instructor driving review before any P2 educational integration.
+answer keys, Forms, student records, grades or saved progress. Stop at P1.1 for
+instructor navigation review before any P2 educational integration. Physical P1
+driving is approved; no numerical Intel performance result was supplied.
 
 ## Start offline on Windows 11
 
-1. In GitHub **Actions → 3D showcase P1**, open the successful feature-branch
-   run and download **showcase3d-p1-…**.
-2. Extract its **showcase3d-p1-static.zip** completely to a local folder.
+1. In GitHub **Actions → 3D showcase P1.1**, open the successful feature-branch
+   run and download **showcase3d-p1.1-…**.
+2. Under `3d-p1.1/`, extract **showcase3d-p1.1-static.zip** completely to a local folder.
 3. Double-click **Start-Showcase.cmd**. Built-in Windows PowerShell 5.1/.NET
    starts a server at `http://127.0.0.1:8787/` (next free port through 8797) and
    opens the default browser. Use Chrome or Edge with graphics acceleration.
@@ -46,14 +47,46 @@ Windows-runner HTTP checks do not verify the physical presentation computer.
   use Reset/R or Generate for another drive.
 
 **Reset / R** restarts the current seed and clears speed, steering, keys,
-progress and dialogs. **Generate** uses an optional uint32 seed (0–4294967295),
+progress, dialogs and full-map allowance. It keeps your chosen driving view.
+**Generate** uses an optional uint32 seed (0–4294967295),
 or a new random seed if blank. Select any original maze size. Reset keeps the
-same map; Generate/size selection clears the attempt. Invalid seeds preserve the
-current attempt. Seed 0 follows Lite's existing fallback to RNG seed 29.
+same map; Generate/size selection explicitly starts a fresh attempt, including
+30 seconds of map allowance. Invalid seeds preserve the current attempt.
+Seed 0 follows Lite's existing fallback to RNG seed 29.
 
-**Overview** pauses driving and keeps position/progress. Drag/wheel inspects the
-whole maze; **Return to driving** resumes at the same vehicle position with zero
-speed. Inspect views stage only the camera and also preserve the vehicle. Mouse
+## Dual-view navigation
+
+**V / 2D driving / 3D driving** changes presentation. Both views use the very
+same vehicle, `stepDriving()` function, maze, checkpoint flags and exit. Switching
+stops speed and releases held controls, preserving exact position, heading,
+distance, seed and progress. The controls above work in either view. The 2D
+triangle points in the vehicle heading; it does not point toward a checkpoint.
+
+The player-centered Canvas 2D view shows real roads and walls. Amber circles are
+incomplete Q1–Q5; green boxes/checks are completed labs. EXIT shows LOCKED or OPEN.
+**2D zoom 125% / 150% / 175%** changes a uniform scale; 150% is the default.
+The local scale adapts to viewport/map size and always crops the map. The camera
+follows the player and clamps at maze boundaries. No click-to-move, route planner,
+target arrow or separate walking physics is present.
+
+**M / Full map** opens/closes a different, complete maze map. Driving pauses.
+The countdown is **30 seconds cumulative per attempt**, not per opening. Closing
+pauses it. A background/hidden or unfocused tab does not consume time; returning
+continues the same remaining allowance. WebGL context loss pauses counting too.
+At zero it closes and cannot reopen until Reset or Generate starts a new attempt.
+Ordinary local 2D driving still works. The diagnostic simulation clock never
+fast-forwards this real wall-clock allowance. Escape also closes the full map.
+
+V closes an open full map, then changes the driving view without restoring time.
+V/M do not dismiss checkpoint dialogs; close the dialog or reset first. Typing
+in the seed field or selecting an option does not trigger shortcuts.
+
+**3D presentation overview** is the existing unlimited developer/presentation
+camera, clearly separate from the timed gameplay map. It pauses driving and
+keeps position/progress. Drag/wheel inspects the whole architecture; **Return to
+driving** resumes the intended 2D or 3D view at the same vehicle position with zero
+speed. Inspect views stage only the camera and also preserve the vehicle. V/M
+operate only in driving views. Mouse
 look never changes vehicle heading. Blur/hiding and dialogs stop the vehicle and
 release controls. The wall collision model is Lite's; synthetic props remain
 non-colliding presentation objects.
@@ -79,14 +112,16 @@ runs, and **Export local JSON** after each. No data is uploaded.
 
 The instructor qualitatively approved P0 High on a physical UHD 770 as very
 smooth with excellent visuals. **No numerical Intel GPU benchmark has been
-provided.** P1 driving on UHD 770 and Arc 140V still needs physical review.
-Cloud SwiftShader performance is software rendering, not Intel throughput.
+provided.** P1 driving was subsequently approved after physical testing.
+P1.1 navigation and Arc 140V presentation review remain pending. Cloud SwiftShader performance
+is software rendering, not Intel throughput.
 
 Before a presentation, verify offline launch, steering/braking/reverse, all five
 labs and exit, reset/new seeds, mode returns, live quality changes, 1280×800 at
 150% scaling, fullscreen and the 1080p projector. Export measurements from both
 physical devices. See `docs/3d-p1-results.md` in the repository for the complete
-hardware review procedure, parity evidence and limitations.
+hardware review procedure, parity evidence and limitations. Navigation-specific
+results, evidence and review steps are in `docs/3d-p1.1-results.md`.
 
 ## Development and tests
 
@@ -117,7 +152,15 @@ From the repository root:
 python -m pip install -r requirements-dev.txt
 python -m playwright install chromium
 python showcase3d/tests/browser_showcase.py
+python showcase3d/tests/browser_navigation.py
 python showcase3d/scripts/package.py
+```
+
+The navigation suite uses a windowed Chromium instance to test actual tab focus.
+On a headless Linux machine, run it under a virtual display instead:
+
+```console
+xvfb-run -a -s "-screen 0 2048x1400x24 -nolisten tcp" python showcase3d/tests/browser_navigation.py
 ```
 
 Test fixtures and infrastructure stay outside `dist/`. The frozen approved P0
@@ -129,6 +172,10 @@ exposes `window.showcase.advanceSimulation(seconds)` (bounded to 20 s per call).
 It advances the actual physics using held keyboard input and never sets positions.
 Its accelerated-clock video is functional evidence, not a real-time FPS benchmark.
 Normal presentation URLs use real animation-frame timing and expose no clock hook.
+The separate navigation suite retains evidence in `test-results/3d-p1.1/`, including
+a complete real-keyboard 3D → 2D → Q1 → 3D → exit recording, actual cumulative timer
+exhaustion, emulated hidden events and actual tab focus loss/return. The original
+P1 browser suite and all Lite tests remain unchanged.
 
 The separate feature CI runs all Lite regressions, Node source/physics/geometry
 checks, Chromium/WebGL driving and visual checks, and Windows launcher checks.

@@ -2,10 +2,13 @@
 
 Read [AGENTS.md](AGENTS.md) and [Plan.md](Plan.md) before development.
 
-The separate **3D Showcase P1** lives on `feature/3d-showcase`, under
+The separate **3D Showcase P1.1** lives on `feature/3d-showcase`, under
 [`showcase3d/`](showcase3d/README.md). It adds the approved Lite arcade driving
 model, five synthetic checkpoint interactions, a locked/unlocked exit, seeded
 maze regeneration and a compact HUD while preserving the approved P0 artwork.
+**V** switches between 3D and player-centered Canvas 2D driving with the same
+vehicle and progress. **M** opens a separate full maze map with a cumulative
+30-second allowance per attempt; local 2D driving remains available afterward.
 No real course data is connected. The committed static bundle runs offline with
 **Start-Showcase.cmd**; no Node/npm is needed at the venue.
 
@@ -13,15 +16,16 @@ Lite remains tagged **`lite-v1.0`** at
 `823786bc01b68901455061d5fe31d6076c61f20e`; `work` is unchanged. Approved P0 is
 preserved by **`showcase3d-p0-approved`** at
 `f685a21e391cdb0848b851e6bf2b72707c77162a`. The instructor reports P0 High is
-smooth on UHD 770; numerical FPS and P1 driving review on both devices remain
-pending. See [results, changed files and hardware checklist](docs/3d-p1-results.md).
+smooth on UHD 770 and has approved physical P1 driving. No numerical Intel FPS
+was supplied. P1.1 navigation and Arc 140V presentation review remain pending.
+See [results, changed files and hardware checklist](docs/3d-p1.1-results.md).
 
-In GitHub **Actions → 3D showcase P1 → latest feature-branch run**, inspect all
-three jobs. Download **showcase3d-p1-…** for `showcase3d-p1-static.zip`, screenshots,
+In GitHub **Actions → 3D showcase P1.1 → latest feature-branch run**, inspect all
+three jobs. Download **showcase3d-p1.1-…** for `3d-p1.1/showcase3d-p1.1-static.zip`, screenshots,
 real-browser videos, traces and benchmark JSON; **showcase3d-windows-launcher-…**
 contains PowerShell HTTP checks, and **lite-preservation-…** contains the unchanged
 Lite suite's evidence. Artifacts upload even on failure and remain for 14 days.
-No automatic deployment is configured. Stop after P1 for instructor review.
+No automatic deployment is configured. Stop after P1.1 for instructor review.
 
 The offline Tkinter/ttk teacher editor supports S01–S12,
 private incomplete drafts, four/five questions, local Allow Play, validated unit

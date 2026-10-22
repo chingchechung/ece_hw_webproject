@@ -1,10 +1,11 @@
 import { initialVehicle, rayDistance } from './driving.js';
 import { logicalToLite, liteToThree } from './coordinates.js';
+import { createMapAllowance } from './navigation.js';
 export const INTERACTION_RANGE = 70; // Lite drive-mode range, world pixels (3.5 m).
 export const INTERACTION_SPEED = 25; // Lite's virtual-speed gate, <=25 accepted.
 export function createAttempt(map) {
   return { vehicle: initialVehicle(map), completed: Array(5).fill(false), finished: false,
-    interaction: null, activations: 0, checkpoints: map.stations.map((logical, index) => {
+    interaction: null, activations: 0, map: createMapAllowance(), checkpoints: map.stations.map((logical, index) => {
       const position = logicalToLite(logical);
       return { id: `Q${index+1}`, label: `LAB ${String(index+1).padStart(2, '0')}`, logical: { ...logical }, position, world: liteToThree(position) };
     }), exit: { logical: { ...map.exit }, position: logicalToLite(map.exit), world: liteToThree(logicalToLite(map.exit)) } };

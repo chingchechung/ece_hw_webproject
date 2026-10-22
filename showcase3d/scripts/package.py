@@ -3,7 +3,7 @@ from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
 root = Path(__file__).resolve().parents[1]
-output = root.parent / 'test-results/3d-p1/showcase3d-p1-static.zip'
+output = root.parent / 'test-results/3d-p1.1/showcase3d-p1.1-static.zip'
 output.parent.mkdir(parents=True, exist_ok=True)
 files = [*sorted((root / 'dist').glob('*')), *(root / name for name in (
     'Start-Showcase.cmd', 'launch.ps1', 'serve.py', 'README.md', 'THIRD_PARTY.md'))]

@@ -2,6 +2,18 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved isolated 3D-P1.1 supplement — 2026-10-22
+
+The instructor approved physical P1 3D driving and authorized dual-view navigation
+on `feature/3d-showcase`. Add a local Canvas 2D driving presentation of the same
+vehicle/physics, V switching, and an M full-map overlay with a shared cumulative
+30-second allowance that runs only while visible in the active tab. Keep the
+existing clearly labelled developer/presentation overview. Preserve Lite, all
+existing tests, P0/P1 3D art and offline packaging. Use synthetic checkpoints;
+no automatic routing, navigation arrows to targets or educational integration.
+See `docs/3d-p1.1-results.md`. This supersedes the P1 stop below; stop after P1.1
+for review, without starting P2 or merging into `work`/`main`.
+
 ## Approved isolated 3D-P1 supplement — 2026-10-22
 
 The instructor approved P0 and reports smooth High-quality visuals on a physical

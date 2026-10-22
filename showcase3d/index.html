@@ -2,21 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark"><title>EMI Lab · 3D Driving P1</title>
+  <meta name="color-scheme" content="dark"><title>EMI Lab · Dual-View Driving P1.1</title>
   <link rel="icon" href="data:,"><link rel="stylesheet" href="__STYLE__">
 </head>
 <body>
-  <header><div class="brand"><span class="brand-mark">E<span>∕</span>M</span><div><h1>Engineering Maze Lab</h1><p>3D DRIVING · P1</p></div></div><span class="edition">Five synthetic checkpoints · no course data</span><button id="fullscreen">Fullscreen</button></header>
+  <header><div class="brand"><span class="brand-mark">E<span>∕</span>M</span><div><h1>Engineering Maze Lab</h1><p>DUAL-VIEW DRIVING · P1.1</p></div></div><span class="edition">Five synthetic checkpoints · no course data</span><button id="fullscreen">Fullscreen</button></header>
   <nav aria-label="Scene controls">
     <label>Maze <select id="maze"><option value="25x19">25 × 19 · full</option><option value="21x15">21 × 15</option><option value="17x13">17 × 13</option><option value="13x9">13 × 9 · small</option></select></label>
     <fieldset id="quality"><legend>Quality</legend><button data-quality="Low">Low</button><button data-quality="Medium" aria-pressed="true">Medium</button><button data-quality="High">High</button></fieldset>
     <label>Resolution <select id="scale"><option value="auto">Preset</option><option value="0.5">0.50×</option><option value="0.7">0.70×</option><option value="0.85">0.85×</option><option value="1">1.00×</option><option value="1.25">1.25×</option></select></label>
     <label>Limit <select id="fps"><option value="30">30 FPS</option><option value="60">60 FPS · evaluate</option></select></label>
-    <button id="camera">Overview</button><button id="reset">Reset · R</button>
+    <button id="toggle-view" aria-pressed="false">2D driving · V</button><button id="toggle-map" aria-pressed="false">Full map · M · 30s</button>
+    <label id="zoom-control" hidden>2D zoom <select id="zoom2d"><option value="125">125%</option><option value="150" selected>150%</option><option value="175">175%</option></select></label>
+    <button id="camera" title="Unlimited developer/presentation camera, separate from the timed gameplay map">3D presentation overview</button><button id="reset">Reset · R</button>
     <label>Seed <input id="seed" inputmode="numeric" placeholder="Random" aria-label="Optional uint32 maze seed"></label><button id="generate">Generate</button>
   </nav>
   <main id="stage">
     <canvas id="view" tabindex="0" aria-label="3D driving. W accelerates, S brakes/reverses, A/D steer, E activates, R resets."></canvas>
+    <canvas id="map-view" hidden tabindex="0" aria-label="2D maze driving. Same vehicle and controls; V switches views, M toggles the timed full map."></canvas>
+    <div id="map-banner" hidden><div><strong>Full maze map · driving paused</strong><span id="map-time" role="timer">30.0 s remaining / 30 s</span></div><button id="close-map">Close map · M</button></div>
     <div class="scene-caption"><span>EMI / ENGINEERING ENVIRONMENTS</span><h2 id="scene-name">Laboratory corridor</h2><p id="seed-label"></p></div>
     <div id="message" role="status">Preparing local WebGL 2 scene…</div>
     <div id="driving-hud" aria-label="Driving status"><div><strong id="speed">0</strong><small>VIRTUAL km/h</small></div><div><strong id="progress">0 / 5</strong><small>LAB CHECKPOINTS</small></div><div class="nearby"><strong id="nearby">Find Q1–Q5</strong><small id="interaction-hint">W accelerate · S brake / reverse · A/D steer</small></div><button id="interact" hidden>Activate · E</button></div>

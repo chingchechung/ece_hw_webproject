@@ -10,6 +10,11 @@ export class Controller {
       if (key === 'escape') { callbacks.close(); return; }
       if (event.ctrlKey || event.metaKey || event.altKey || ['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
       if (key === 'r' && !event.repeat) { event.preventDefault(); callbacks.reset(); return; }
+      if (key === 'v' || key === 'm') {
+        event.preventDefault();
+        if (!event.repeat) (key === 'v' ? callbacks.toggleView : callbacks.toggleMap)();
+        return;
+      }
       if (document.activeElement.tagName === 'BUTTON') return;
       if (['w','a','s','d','r','e','arrowup','arrowdown','arrowleft','arrowright'].includes(key)) event.preventDefault();
       if (!callbacks.canDrive()) return;

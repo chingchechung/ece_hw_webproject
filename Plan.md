@@ -4,6 +4,12 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> P1.1 navigation continuation: physical P1 driving is approved. Add V-switchable
+> Canvas 2D driving using the same vehicle/physics and authoritative maze; M opens
+> a cumulative 30-second full map. Preserve P0/P1 visuals and the separate labelled
+> presentation overview. No routing assistance or educational integration.
+> See [3D-P1.1 results](docs/3d-p1.1-results.md). Stop after P1.1 for review.
+
 > Separate showcase continuation, 2026-10-22: P0 is approved after qualitative
 > UHD 770 High-preset review. P1 adapts Lite driving and adds five synthetic
 > checkpoint/exit interactions on `feature/3d-showcase`, preserving Lite and P0
