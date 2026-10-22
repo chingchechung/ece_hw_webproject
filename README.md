@@ -14,6 +14,8 @@ jobs and download **showcase3d-p0-…** for the venue-ready static ZIP, screensh
 real-browser video, traces and local benchmark JSON. The separate **lite-preservation-…**
 artifact contains the unchanged Lite regression results. Artifacts are retained
 14 days and are available even after test failure; check job status first.
+The separate **showcase3d-windows-launcher-…** artifact records Windows PowerShell
+HTTP launcher checks; Intel GPU performance still requires physical-device review.
 
 The offline Tkinter/ttk teacher editor supports S01–S12,
 private incomplete drafts, four/five questions, local Allow Play, validated unit

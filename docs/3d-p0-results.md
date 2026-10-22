@@ -106,6 +106,12 @@ distance and polar angle keep the camera above walls/floor; panning is disabled.
 This is not Lite's vehicle acceleration, turning model or 12× driving-distance
 experience, and does not claim educational/gameplay parity.
 
+Forced WebGL context loss preserves the scene/camera, then recreates the generated
+PMREM environment and static shadow target before resuming. GPU render-target
+contents cannot be recovered by re-uploading CPU texture images alone. The
+regression compares a fixed floor/wall crop before and after recovery (local
+RGB RMS 0/0/0; CI tolerance <3), alongside initialization/error checks.
+
 ## Presets, display scaling and diagnostics
 
 | Setting | Low | Medium | High |
@@ -145,13 +151,46 @@ targets are disposed. The Arc report's “16GB” is treated as shared-memory re
 
 ## Automated results and Cloud evidence
 
-The local suite passed **184 tests**: 151 unchanged Lite, 24 showcase Node, and
-9 showcase browser tests (zero failures/skips). The final inspection build passed all nine browser tests; a later recovery
-resource correction also passed the focused context-loss test with zero RGB
-change in its static-scene crop. Feature GitHub Actions verification is running. The unchanged Lite runner already passed **151**
-tests with zero failures/skips, including schema/model, Tkinter/Xvfb, v1/v2
-browser validation/loading, Phase 4 complete gameplay, and all approved Phase 5
-artwork/input regressions. All four assignment CLI checks passed.
+The local suite passed **184 tests**: 151 unchanged Lite, 24 showcase Node and
+9 showcase browser tests. After the final recovery correction, the focused
+context-loss test also passed with **zero RGB RMS change** in its static-scene
+crop. GitHub Actions then ran the complete final source and passed all **184**
+tests with zero failures/skips, plus seven Windows launcher HTTP checks.
+All four assignment CLI manifest checks passed.
+
+Verified implementation commit:
+**`0e6a8d0e5392439aa29e81a58ce842a2c81abdda`**.
+[Workflow 39725150728 — completed / success](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39725150728)
+was inspected through actual job status, downloaded Windows result JSON and
+completed job logs; this is not a YAML-only validation. The following final
+commit updates root documentation only; the tested runtime is unchanged.
+
+| Suite | Actual result |
+| --- | --- |
+| Existing Python schema/model/source | 59 passed |
+| Existing Tkinter GUI/Xvfb | 16 passed |
+| Existing browser baseline/validation/student/gameplay/Phase 5 | 76 passed |
+| New Node geometry/provenance/bundle checks | 24 passed |
+| New Chromium/WebGL browser checks | 9 passed in 315.759 s on GitHub |
+| Windows PowerShell launcher | 7 HTTP checks passed; 5.1.26100.33438; empty server-error log |
+
+The three jobs all concluded **success**. GitHub used Ubuntu 24.04, Python 3.12,
+Node 24 and Playwright's Chrome for Testing **151.0.7922.34**; this differs from
+local system Chromium 154 and the instructor's target Chrome 155.
+The earlier complete workflow
+[39724657428](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39724657428)
+also passed before the recovery-resource correction.
+
+Final uploaded artifacts (14-day retention):
+
+- [Showcase evidence and standalone ZIP](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39725150728/artifacts/12402992877):
+  Node/browser logs, screenshots, traces, real navigation video, benchmark JSON
+  and `showcase3d-p0-static.zip` (~150 KB compressed runtime package).
+- [Windows launcher results](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39725150728/artifacts/12403095955):
+  actual PowerShell version, seven passing checks, server/error logs.
+- [Unchanged Lite evidence](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39725150728/artifacts/12402974112):
+  complete 151-test summary and the existing synthetic GUI/browser evidence.
+
 
 Commands used (from repository root unless noted):
 
@@ -174,8 +213,8 @@ resources, launcher/package boundaries and two-build reproducibility.
 The separate browser suite checks WebGL 2, nested relative paths, blocked external
 network requests, all sizes/presets/resource disposal, single-preset stability,
 keyboard/mouse/reset/orbit, 1280×800 at DPR 1.5, projector resizing to 1920×1080,
-fullscreen, context loss/restoration (including a before/after scene pixel comparison), unavailable-WebGL fallback, all six benchmark
-scenarios, local JSON download, deterministic screenshots and real navigation.
+fullscreen, context loss/restoration (including a before/after scene pixel comparison),
+unavailable-WebGL fallback, all six benchmark scenarios, local JSON download, deterministic screenshots and real navigation.
 Any uncaught JavaScript error, console error or external request fails the suite.
 There is no unexpected page scrolling.
 
@@ -190,8 +229,14 @@ Cold navigation/module/scene/shader preparation and first submission are exporte
 separately from warmed frame statistics. Shader preparation is elapsed setup time,
 not fabricated GPU timing. Cold metadata explicitly labels the initial Medium
 preset/map/buffer; later preset switches are warmed scenario measurements.
-`KHR_parallel_shader_compile` may be unavailable in
-Cloud; the explicit warning is retained in logs.
+One local shortened functional capture at Low / manual 0.5 scale produced
+roughly **1.1–11.2 FPS** across six scenes at 480×239 or 480×260 internal size,
+with only 1–8 frame-interval samples per scene. Its initial Medium cold setup
+reported 447.6 ms shader preparation, 2041.4 ms to ready and 2606.9 ms to first
+frame submission. These noisy software-renderer observations establish no
+hardware throughput target; the exported JSON retains the exact counts and
+settings. `KHR_parallel_shader_compile` may be unavailable in Cloud; the explicit
+warning is retained in logs.
 
 Feature-only `.github/workflows/showcase3d.yml` runs separate Ubuntu showcase and
 unchanged Lite jobs, plus a Windows PowerShell 5.1 launcher HTTP smoke job. It has
@@ -212,7 +257,7 @@ The final screenshots and recording are actual Chromium/WebGL rendering.
 [Laboratory terminal](images/3d-p0/laboratory-terminal.png) ·
 [Full maze overview](images/3d-p0/full-maze-overview.png)
 
- Few representative PNGs are committed under
+Three representative PNGs are committed under
 `docs/images/3d-p0/`; the full gallery stays in ignored artifacts:
 
 - `straight.png`, `t-junction.png`, `four-way.png`, `wall.png`, `floor.png`.
