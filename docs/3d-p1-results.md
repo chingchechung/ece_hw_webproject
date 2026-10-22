@@ -154,9 +154,10 @@ pinned esbuild **0.25.12**, with reproducible committed `dist/` and MIT attribut
 ## Automated results and CI
 
 The local full suite passed **203 tests**: 151 unchanged Lite, 40 showcase Node
-and 12 showcase browser tests, with zero failures/skips. A focused rerun validates
-final benchmark resource/state refinements. Actual final GitHub verification is
-recorded below after the feature push; YAML syntax alone is not acceptance.
+and 12 showcase browser tests, with zero failures/skips. Focused reruns validate
+the final benchmark/state refinements and complete keyboard route, including R
+from the completion dialog. The complete final source also passed on GitHub
+Actions; this is an executed workflow result, not only YAML validation.
 
 | Checks | Coverage |
 | --- | --- |
@@ -164,6 +165,37 @@ recorded below after the feature push; YAML syntax alone is not acceptance.
 | Showcase Node: 40 | P0 tests, source/geometry preservation, generator parity, coordinate conversion, exact driving parity, collisions/sliding, interaction state, pure input-route replay, frozen visual baseline and reproducible builds |
 | Showcase Chromium: 12 | WebGL/relative offline bundle, sizes/presets/disposal, driving/mouse/reset, DPR/fullscreen/projector, context recovery/fallback, benchmark export, screenshots/video, full control route, blur/regeneration/mode preservation and paired P0 pixels |
 | Windows launcher | Seven static HTTP/MIME/HEAD/path-boundary checks; no physical GPU claim |
+
+### Verified GitHub Actions delivery
+
+[Feature run #4 — success](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39733205986)
+executed on 2026-10-22 for source commit
+**`20fa36c6d8dac164a7703b4ce9cf03b619a11540`**. All three jobs succeeded:
+
+- [Showcase Node/build and Chromium](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39733205986/job/119672781277):
+  40 Node tests, reproducible generated files, and all 12 browser tests; zero
+  failures/skips. The browser suite took 879.734 s, including the complete
+  keyboard route, completion-dialog reset and paired P0 image comparisons.
+- [Unchanged Lite](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39733205986/job/119672781386):
+  151 tests passed, plus all four CLI manifest checks.
+- [Windows launcher](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39733205986/job/119672780967):
+  seven checks passed. Downloaded `results.json` confirms built-in PowerShell
+  **5.1.26100.33648**; its server error log is empty.
+
+Download these artifacts while signed into GitHub with repository access:
+
+| Artifact | Contents |
+| --- | --- |
+| [showcase3d-p1-39733205986-1](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39733205986/artifacts/12406204897) | Full synthetic screenshots, browser videos, traces, console logs, Node/browser results, benchmark JSON and **showcase3d-p1-static.zip** |
+| [showcase3d-windows-launcher-39733205986-1](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39733205986/artifacts/12406576225) | Downloaded and checked launcher result plus server logs |
+| [lite-preservation-39733205986-1](https://github.com/chingchechung/ece_hw_webproject/actions/runs/39733205986/artifacts/12405804526) | Existing synthetic Python/Tk/Chromium regression evidence and summary |
+
+Artifacts have 14-day retention and expire on **2026-11-05 UTC**. In the showcase
+artifact, `control-completion.json` identifies the recorded full-route video;
+`video/` also contains the ordinary real-time navigation clip. The final delivery
+commit only updates this report. Its application, generated bundle, tests and
+workflow are identical to the verified source commit above. A report-only commit
+does not trigger the feature workflow's runtime path filter.
 
 Actual commands used:
 
@@ -234,6 +266,24 @@ was observed. Resource estimates retain P0's 0.5/2/8 MiB PBR mip budgets, ~4 MiB
 screen maps, approximate environment/shadow/framebuffer allowances, excluding
 browser/driver overhead. They are estimates, not measured VRAM. Arc's reported
 16GB is shared-memory reporting, not guaranteed dedicated VRAM.
+
+The local `matched-*.json` snapshots record the following **software-renderer
+observations**, at 1280×800 CSS pixels, DPR 1, the same 25×19 map/seed 20261022
+and inspection pose. Chromium 154.0.8037.57 reports ANGLE/Vulkan SwiftShader
+(Subzero). These short samples include preparation and scheduling delays; their
+small counts do not support a comparative performance conclusion or Intel FPS
+claim. CPU submission excludes asynchronous rendering work.
+
+| Preset | Internal buffer | Frame samples | Frame mean / p95, ms | CPU submission mean, ms |
+| --- | --- | ---: | ---: | ---: |
+| Low | 896×424 | 9 | 364.81 / 1400.00 | 53.26 |
+| Medium | 1088×515 | 6 | 549.98 / 1250.00 | 34.81 |
+| High | 1280×606 | 8 | 758.31 / 1149.90 | 28.01 |
+
+The automated six-scene export check deliberately shortens each warmup/sample
+to 400/1200 ms. The manual benchmark still defaults to 1000/5000 ms; use repeated
+manual runs on the physical devices for performance review. Exported JSON retains
+the actual durations, renderer identity and nullable asynchronous timer results.
 
 ## Physical-device review checklist
 
