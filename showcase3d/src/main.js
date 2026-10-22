@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import './style.css';
-import data from './maze/maps.json';
+import data from './maze/maps.json' with { type: 'json' };
 import { CELL, center, viewPose, walkable, move, DIRECTIONS } from './maze/layout.js';
 import { buildMazeScene } from './scene/geometry.js';
 import { createMaterials, studioEnvironment } from './materials/laboratory.js';

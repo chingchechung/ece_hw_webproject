@@ -22,6 +22,7 @@ test('entry resources are relative and complete; no CDN imports or fetches', () 
   for (const name of readdirSync(`${root}/dist`).filter(n => /\.(js|css)$/.test(n))) {
     const text = readFileSync(`${root}/dist/${name}`, 'utf8');
     assert.ok(!/(?:import\s*\(|from\s*)["']https?:|url\(["']?https?:|fetch\(["']https?:/.test(text));
+    if (name.endsWith('.js')) assert.equal(text.split('03cd7fe5e60aec7d9cb47a799a8facfd73e4e3137602f5fd4edadb73b34ea564').length-1,1,'Bundle must embed the fixed maze data once');
   }
   const lock = JSON.parse(readFileSync(`${root}/package-lock.json`));
   assert.equal(lock.packages['node_modules/three'].version, '0.180.0');

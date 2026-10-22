@@ -300,10 +300,10 @@ A	docs/images/3d-p1/checkpoint-completed.png
 A	docs/images/3d-p1/demonstration-complete.png
 A	docs/images/3d-p1/driving-high.png
 M	showcase3d/README.md
+A	showcase3d/dist/app-2OF3JEXF.js
 D	showcase3d/dist/app-PB2RGZYH.js
 D	showcase3d/dist/app-RD2YC7DH.css
 A	showcase3d/dist/app-RYFAG6EX.css
-A	showcase3d/dist/app-UMZRAWDN.js
 M	showcase3d/dist/build-info.json
 M	showcase3d/dist/index.html
 M	showcase3d/index.html
@@ -326,6 +326,7 @@ A	showcase3d/src/maze/lite-generated.js
 M	showcase3d/src/scene/geometry.js
 M	showcase3d/src/style.css
 M	showcase3d/tests/browser_showcase.py
+M	showcase3d/tests/bundle.test.mjs
 A	showcase3d/tests/control-route.mjs
 A	showcase3d/tests/fixtures/p0/baseline.json
 A	showcase3d/tests/fixtures/p0/index.html
