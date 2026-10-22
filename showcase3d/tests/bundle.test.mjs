@@ -5,7 +5,10 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { sha256 } from '../scripts/export-maze.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
-function manifest() { return Object.fromEntries(readdirSync(`${root}/dist`).sort().map(name => [name, sha256(readFileSync(`${root}/dist/${name}`))])); }
+function manifest() {
+  const names=readdirSync(`${root}/dist`,{recursive:true,withFileTypes:true}).filter(e=>e.isFile()).map(e=>`${e.parentPath}/${e.name}`);
+  return Object.fromEntries(names.sort().map(path=>[path.slice(`${root}/dist/`.length),sha256(readFileSync(path))]));
+}
 test('committed local deployment exactly matches two reproducible source builds', () => {
   const committed = manifest();
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root });

@@ -13,7 +13,7 @@ export function path(map, start, finish) {
   if(!prev.has(`${finish.x},${finish.y}`))throw new Error('Unreachable route target');
   const nodes=[];let p=finish;while(p){nodes.unshift(p);p=prev.get(`${p.x},${p.y}`);}return nodes;
 }
-export function planRoute(map) {
+export function planRoute(map, checkpointLimit = map.stations.length) {
   let vehicle=initialVehicle(map),logical={x:1,y:1};
   const output=[],visited=new Set(),dt=1/60;
   const apply=(keys,seconds)=>{
@@ -41,7 +41,7 @@ export function planRoute(map) {
     }
     throw new Error('Could not drive to route point '+JSON.stringify(point));
   };
-  while(visited.size<5){
+  while(visited.size<checkpointLimit){
     let chosen=-1,best=null;
     map.stations.forEach((station,index)=>{if(visited.has(index))return;const p=path(map,logical,station);if(!best||p.length<best.length){best=p;chosen=index;}});
     // Compress straight logical runs; turn only after braking at a real corner.

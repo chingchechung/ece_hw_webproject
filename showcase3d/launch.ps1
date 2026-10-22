@@ -15,7 +15,7 @@ foreach ($candidate in 8787..8797) {
 }
 if ($null -eq $listener) { throw 'Loopback ports 8787-8797 are busy. Close another local demo and retry.' }
 $url = "http://127.0.0.1:$showcasePort/"
-Write-Host "Engineering Maze Lab / 3D-P1.1`n$url`nClose this window or press Ctrl+C to stop. Only dist/ is served."
+Write-Host "Engineering Maze Lab / 3D-P2`n$url`nClose this window or press Ctrl+C to stop. Only dist/ is served."
 if (!$NoBrowser) { Start-Process $url }
 $mime = @{ '.html'='text/html; charset=utf-8'; '.js'='text/javascript; charset=utf-8'; '.css'='text/css; charset=utf-8'; '.json'='application/json'; '.txt'='text/plain; charset=utf-8'; '.png'='image/png' }
 try {

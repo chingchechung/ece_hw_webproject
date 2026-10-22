@@ -1,5 +1,6 @@
 import { LITE_ROAD_TILE } from '../gameplay/coordinates.js';
 import { rectangles, wallRuns } from '../maze/layout.js';
+import { createVehicleSprite, drawVehicle } from './vehicle2d.js';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 export const MAP_ZOOMS = [125, 150, 175];
@@ -26,6 +27,7 @@ export class Map2D {
     this.canvas = canvas; this.context = canvas.getContext('2d', { alpha:false });
     this.cache = document.createElement('canvas'); this.cacheContext = this.cache.getContext('2d', { alpha:false });
     this.builds = 0; this.draws = 0; this.samples = []; this.last = null;
+    this.vehicleSprite = createVehicleSprite();
   }
   setMap(map) {
     if (this.map === map) return;
@@ -77,14 +79,12 @@ export class Map2D {
       }
       ctx.restore();
     }
-    ctx.save();ctx.translate(player.x,player.y);ctx.rotate(attempt.vehicle.heading);
-    ctx.fillStyle='#e9fdff';ctx.strokeStyle='#074c6b';ctx.lineWidth=3;ctx.beginPath();
-    ctx.moveTo(17,0);ctx.lineTo(-11,-10);ctx.lineTo(-6,0);ctx.lineTo(-11,10);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+    drawVehicle(ctx,this.vehicleSprite,player,attempt.vehicle.heading,full);
     const legendWidth = full?353:380, legendX = Math.max(12,width-legendWidth-12);
     ctx.fillStyle='#102632e8';ctx.fillRect(legendX,height-34,legendWidth,24);ctx.fillStyle='#dbecef';ctx.font='11px system-ui';ctx.textAlign='left';
-    ctx.fillText(full?'FULL MAZE · amber: remaining · green ✓: completed':'LOCAL DRIVING · ▲ vehicle · amber: remaining · green ✓: completed',legendX+10,height-22);
+    ctx.fillText(full?'FULL MAZE · car: you · amber: remaining · green ✓: completed':'LOCAL DRIVING · car: you · amber: remaining · green ✓: completed',legendX+10,height-22);
     this.draws++;this.samples.push(performance.now()-started);if(this.samples.length>90)this.samples.shift();
-    this.last={camera,markers,vehicle:{...attempt.vehicle,screen:player},cacheBuilds:this.builds,draws:this.draws,
+    this.last={camera,markers,vehicle:{...attempt.vehicle,screen:player,artwork:'procedural-car-v1'},cacheBuilds:this.builds,draws:this.draws,
       cacheBytes:this.cache.width*this.cache.height*4,canvasBytes:width*height*4,
       cpuPaintMeanMs:this.samples.reduce((a,b)=>a+b,0)/this.samples.length};
   }

@@ -10,16 +10,20 @@ import { PRESETS, resolution } from './performance/quality.js';
 import { Metrics } from './performance/metrics.js';
 import { generateMap } from './maze/generate.js';
 import { stepDriving, canDriveStand } from './gameplay/driving.js';
-import { createAttempt, pauseAttempt, nearestInteraction, interact } from './gameplay/attempt.js';
+import { createAttempt, pauseAttempt, nearestInteraction, interact, answerQuestion, attemptSize } from './gameplay/attempt.js';
 import { virtualSpeedToMeters } from './gameplay/coordinates.js';
 import { consumeMapAllowance, setMapOpen } from './gameplay/navigation.js';
 import { Map2D } from './scene/map2d.js';
+import { AssignmentSelector } from './assignments/selector.js';
+import { questionContents, correctContents, finishContents } from './assignments/question-ui.js';
 
 const $ = id => document.getElementById(id);
 const cold = { moduleReadyMs: performance.now() };
 let renderer, metrics, scene, camera, environment, controller, orbit, model, surfaces, sun;
 let current = data.maps[0], quality = 'Medium', override = null, mode = 'first-person';
 let attempt = createAttempt(current), view = 'driving', drivingView = '3d', map2d, zoom2d = 150;
+let assignment = null, assignmentSelector, assignmentPaused = false;
+const educational = () => assignment !== null;
 let mapClockAt = performance.now(), mapVisible = !document.hidden && document.hasFocus(), webglFrames = 0;
 const testClock = new URL(location.href).searchParams.get('testClock') === '1';
 let ready = false, contextLost = false, lastFrame = 0, lastRender = 0, lastPanel = 0, buffer = {};
@@ -37,6 +41,7 @@ function resize() {
   camera.aspect = width / height; camera.updateProjectionMatrix();
 }
 function inspect(type) {
+  if(educational())return;
   closeMap();
   scene.fog = new THREE.Fog('#83969b', 28, 85);
   pauseGame(); view = 'inspection'; document.body.dataset.view = view; mode = 'first-person'; controller.enabled = true; controller.driving = false; orbit.enabled = false;
@@ -54,6 +59,7 @@ function inspect(type) {
   $('view').focus({ preventScroll: true });
 }
 function overview() {
+  if(educational())return;
   closeMap();
   pauseGame(); view = 'overview'; document.body.dataset.view = view; mode = 'overview'; controller.enabled = false; orbit.enabled = true; model.ceilings.visible = false;
   scene.fog = null;
@@ -79,7 +85,7 @@ function configureLighting() {
 function rebuild() {
   if (model) { model.dispose(); disposedScenes++; }
   if (!surfaces) surfaces = createMaterials(PRESETS[quality], renderer.capabilities.getMaxAnisotropy());
-  model = buildMazeScene(current, surfaces.materials); scene.add(model.group); rebuilds++;
+  model = buildMazeScene(current, surfaces.materials, assignment?.questions.map(q=>q.id)); scene.add(model.group); rebuilds++;
   configureLighting();
   if (mode === 'overview') model.ceilings.visible = false;
   renderer.renderLists.dispose(); metrics.reset(); resize();
@@ -96,11 +102,11 @@ function setQuality(next) {
   configureLighting(); metrics.reset(); resize(); refreshHud();
   focusDriving();
 }
-function canDrive() { return ready && view === 'driving' && !attempt.map.open && !attempt.interaction && !attempt.finished && !benchmarkRunning && !contextLost && !document.hidden; }
+function canDrive() { return ready && !assignmentPaused && view === 'driving' && !attempt.map.open && !attempt.interaction && !attempt.finished && !benchmarkRunning && !contextLost && !document.hidden; }
 function pauseGame() { controller?.clear(); pauseAttempt(attempt); }
 function settleMapTime(now = performance.now()) {
   const wasOpen = attempt.map.open;
-  consumeMapAllowance(attempt, Math.max(0,now-mapClockAt), mapVisible && !contextLost && !benchmarkRunning);
+  consumeMapAllowance(attempt, Math.max(0,now-mapClockAt), mapVisible && !assignmentPaused && !attempt.interaction && !contextLost && !benchmarkRunning);
   mapClockAt = Math.max(now,mapClockAt);
   if (wasOpen && !attempt.map.open) {
     pauseGame(); syncPresentation();
@@ -121,7 +127,7 @@ function syncPresentation() {
   $('toggle-view').setAttribute('aria-pressed',String(drivingView==='2d'));
   $('toggle-map').setAttribute('aria-pressed',String(attempt.map.open));
   if (view==='driving') {
-    text('scene-name', drivingView==='2d' ? '2D driving / local maze' : 'Maze driving / five laboratories');
+    text('scene-name', educational() ? `${drivingView==='2d'?'2D':'3D'} assignment / ${assignment.unitId}` : drivingView==='2d' ? '2D driving / local maze' : 'Maze driving / five laboratories');
     controller.enabled = drivingView==='3d' && !attempt.map.open;
   }
   if (show2d && map2d) drawMap();
@@ -131,12 +137,12 @@ function drawMap() {
   map2d.render(current,attempt,{width,height,zoom:zoom2d,full:attempt.map.open});
 }
 function toggleDrivingView() {
-  if (!ready || benchmarkRunning || view!=='driving' || attempt.interaction) return;
+  if (!ready || assignmentPaused || benchmarkRunning || view!=='driving' || attempt.interaction) return;
   closeMap(); pauseGame(); drivingView = drivingView==='3d' ? '2d' : '3d';
   syncPresentation(); refreshHud(); metrics.reset(); focusDriving();
 }
 function toggleMap() {
-  if (!ready || benchmarkRunning || contextLost || view!=='driving' || attempt.interaction || attempt.finished) return;
+  if (!ready || assignmentPaused || benchmarkRunning || contextLost || view!=='driving' || attempt.interaction || attempt.finished) return;
   settleMapTime(); pauseGame();
   const requested = !attempt.map.open;
   if (!setMapOpen(attempt,requested) && requested) $('status').textContent = 'Full-map allowance used · local 2D driving remains available';
@@ -152,20 +158,23 @@ function resumeDriving() {
 }
 function resetAttempt() {
   if (benchmarkRunning) return;
+  assignmentSelector?.close();
+  if(educational()){startEducationalRound(0);$('status').textContent='Fresh attempt · same unit · 25 × 19 · full map 30 s';return;}
   closeMap(); pauseGame(); attempt = createAttempt(current); mapClockAt = performance.now(); controller.pitch = 0;
-  $('dialog-overlay').hidden = true; resumeDriving();
+  hideDialog(); resumeDriving();
   $('status').textContent = 'Attempt reset · same seed · five synthetic labs';
 }
 function mazeChanged(map) { return map.seed !== current.seed || map.topologyHash !== current.topologyHash || map.id !== current.id; }
-function replaceMap(map) {
-  closeMap(); pauseGame(); $('dialog-overlay').hidden = true;
+function replaceMap(map, failures = 0) {
+  closeMap(); pauseGame(); hideDialog();
   const changed = mazeChanged(map);
-  current = map; attempt = createAttempt(current); mapClockAt = performance.now(); controller.pitch = 0;
+  current = map; attempt = createAttempt(current,assignment,failures); mapClockAt = performance.now(); controller.pitch = 0;
+  $('maze').value=current.id;
   if (changed) rebuild();
   resumeDriving();
 }
 function generate() {
-  if (benchmarkRunning || contextLost) return;
+  if (educational() || assignmentPaused || benchmarkRunning || contextLost) return;
   const text = $('seed').value.trim();
   if (text && (!/^\d+$/.test(text) || !Number.isSafeInteger(Number(text)) || Number(text)>4294967295)) {
     $('status').textContent = 'Enter a seed from 0 to 4294967295, or leave it blank for random.';
@@ -178,19 +187,42 @@ function generate() {
   $('status').textContent = `New maze · seed ${seed} · synthetic demonstration`;
 }
 function text(id,value) { const node = $(id); if (node.textContent !== value) node.textContent = value; }
+function randomSeed() { let seed=crypto.getRandomValues(new Uint32Array(1))[0];return seed===current.seed?(seed+1)>>>0:seed; }
+function startEducationalRound(failures) {
+  const [w,h]=attemptSize(failures),map=generateMap(w,h,randomSeed(),assignment.questions.length);
+  replaceMap(map,failures);
+}
+function updateModeUi() {
+  document.body.dataset.challenge=educational()?'education':'demo';
+  text('edition',educational()?`Educational Assignment Mode · ${assignment.unitId}`:'3D Demonstration Mode');
+  for(const id of ['camera','inspection','benchmark','maze','seed','generate']){
+    $(id).disabled=educational();
+    if(['camera','benchmark'].includes(id))$(id).hidden=educational();
+    if(['inspection','maze','seed'].includes(id))$(id).closest('label').hidden=educational();
+    if(id==='generate')$(id).hidden=educational();
+  }
+}
+function setDialogInert(value) {
+  for(const node of document.querySelectorAll('body > header, body > nav, body > footer, #stage > :not(#dialog-overlay)'))node.inert=value;
+}
+function showDialog() { $('dialog-overlay').hidden=false;setDialogInert(true);$('dialog-close').focus(); }
+function hideDialog() { $('dialog-overlay').hidden=true;setDialogInert(false);$('dialog-extra').replaceChildren(); }
 function refreshHud() {
   if (!model) return;
   const near = nearestInteraction(current,attempt), count = attempt.completed.filter(Boolean).length;
   text('speed',String(Math.round(Math.abs(attempt.vehicle.speed)*.25)) + (attempt.vehicle.speed<0 ? ' R' : ''));
-  text('progress',`${count} / 5`);
-  text('nearby',attempt.finished ? 'Demonstration complete' : near ? `${near.id} · ${near.label}` : count===5 ? 'Exit unlocked' : 'Find Q1–Q5');
-  const active = view==='driving' && !attempt.map.open && !benchmarkRunning;
+  const total=attempt.completed.length;
+  text('progress',`${count} / ${total}`);
+  text('unit-status',educational()?`${assignment.unitId} · ${assignment.title} · Attempt ${attempt.failures+1} · ${current.width} × ${current.height}`:'3D Demonstration Mode · five synthetic labs');
+  text('progress-label',educational()?'QUESTIONS COMPLETED':'LAB CHECKPOINTS');
+  text('nearby',attempt.finished ? educational()?'Assignment complete':'Demonstration complete' : near ? `${near.id} · ${near.label}` : count===total ? 'Exit unlocked' : educational()?`Find Q01–Q0${total}`:'Find Q1–Q5');
+  const active = !assignmentPaused && view==='driving' && !attempt.map.open && !benchmarkRunning;
   text('map-time',`${(attempt.map.remainingMs/1000).toFixed(1)} s remaining / 30 s`);
   text('toggle-map',`${attempt.map.open?'Close':'Full'} map · M · ${Math.ceil(attempt.map.remainingMs/1000)}s`);
   $('toggle-map').disabled = benchmarkRunning || contextLost || !!attempt.interaction || attempt.finished || (!attempt.map.open && attempt.map.remainingMs<=0) || view!=='driving';
   $('toggle-view').disabled = benchmarkRunning || !!attempt.interaction || view!=='driving';
-  $('benchmark').disabled = benchmarkRunning || attempt.map.open;
-  text('interaction-hint',attempt.finished ? 'Reset / R or Generate for another drive' : !active ? 'Paused · return to driving to activate' : near ? Math.abs(attempt.vehicle.speed)>25 ? 'Brake to activate · speed must be ≤25 virtual' : near.type==='finish' && count<5 ? 'Exit locked · complete all five labs' : 'Press E to activate' : 'W accelerate · S brake / reverse · A/D steer');
+  $('benchmark').disabled = educational() || benchmarkRunning || attempt.map.open;
+  text('interaction-hint',attempt.finished ? educational()?'Reset / R or select another published unit':'Reset / R or Generate for another drive' : !active ? 'Paused · return to driving to activate' : near ? Math.abs(attempt.vehicle.speed)>25 ? 'Brake to activate · speed must be ≤25 virtual' : near.type==='finish' && count<total ? `Exit locked · complete all ${total} ${educational()?'questions':'labs'}` : 'Press E to activate' : 'W accelerate · S brake / reverse · A/D steer');
   $('interact').hidden = !active || !near || !!attempt.interaction || attempt.finished;
   model.updateProgress(attempt.completed,active ? near : null,benchmarkRunning);
   text('control-hint',testClock ? 'Test clock active · keyboard drives the real physics' : active ? 'W accelerate · S brake/reverse · A/D steer · E activate' : 'Inspection paused · drag to look · return to driving');
@@ -200,18 +232,41 @@ function activate() {
   const result = interact(current,attempt);
   if (result.status==='outside') return;
   if (result.status==='moving') { $('status').textContent = 'Brake and stop near the marker before pressing E.'; focusDriving(); return; }
-  if (result.status==='locked') { $('status').textContent = 'Exit locked: activate all five synthetic checkpoints first.'; focusDriving(); return; }
+  if (result.status==='locked') { $('status').textContent = educational() ? 'Exit locked: answer every question correctly first.' : 'Exit locked: activate all five synthetic checkpoints first.'; focusDriving(); return; }
+  if(result.status==='question'){
+    const q=assignment.questions[result.index],expected=attempt,interaction=attempt.interaction;
+    controller.clear();text('dialog-title',`${q.id} / ${assignment.questions.length} · ${q.title||'English question'}`);text('dialog-text',q.prompt||'Watch the English question video, then choose one answer.');
+    questionContents($('dialog-extra'),assignment,q,label=>chooseAnswer(label,expected,interaction));
+    text('dialog-close','Return without answering');refreshHud();showDialog();return;
+  }
   if (result.status!=='activated') return;
   controller.clear(); refreshHud();
+  if(educational() && result.type==='finish'){
+    text('dialog-title','Assignment complete');text('dialog-text','All questions passed. Complete the published Google Form separately. No submission is recorded here.');
+    finishContents($('dialog-extra'),assignment,attempt);text('dialog-close','Close completion');showDialog();return;
+  }
   $('status').textContent = result.type==='finish' ? 'Demonstration complete · Reset/R or Generate for another drive' : `${result.id} activated · ${attempt.completed.filter(Boolean).length}/5 labs complete`;
   $('dialog-close').textContent = result.type==='finish' ? 'Close completion' : 'Continue driving';
   $('dialog-title').textContent = result.type==='finish' ? 'Demonstration complete' : `${result.id} · ${result.label} — Checkpoint Activated`;
   $('dialog-text').textContent = result.type==='finish' ? 'All five labs are activated. You reached the exit using the maze driving controller. No grades, student data or submission are recorded.' : 'Synthetic laboratory checkpoint activated. Continue driving to the remaining labs, then reach the unlocked exit. No course question is loaded.';
-  $('dialog-overlay').hidden = false; $('dialog-close').focus();
+  showDialog();
+}
+function chooseAnswer(label,expected,interaction) {
+  if(expected!==attempt || interaction!==attempt.interaction || assignmentPaused || $('dialog-overlay').hidden)return;
+  const result=answerQuestion(attempt,assignment,label);
+  if(result.status==='correct'){
+    text('dialog-title',`Correct answer · ${assignment.questions[result.index].id} completed`);
+    text('dialog-text',`${assignment.unitId} · ${assignment.title} · ${attempt.completed.filter(Boolean).length} / ${assignment.questions.length}`);
+    correctContents($('dialog-extra'),assignment.questions[result.index]);text('dialog-close','Continue to the maze');refreshHud();$('dialog-close').focus();
+  }else if(result.status==='wrong'){
+    startEducationalRound(result.failures);attempt.interaction={type:'feedback',stage:'wrong'};
+    text('dialog-title','Wrong answer · new smaller maze');text('dialog-text',`All question progress cleared. ${assignment.unitId} stays selected. Attempt ${attempt.failures+1}: ${current.width} × ${current.height}; full-map allowance restored to 30 seconds.`);
+    text('dialog-close','Start the next attempt');refreshHud();showDialog();
+  }
 }
 function closeDialog() {
   if ($('dialog-overlay').hidden) return;
-  attempt.interaction = null; $('dialog-overlay').hidden = true; controller.clear(); refreshHud(); focusDriving();
+  attempt.interaction = null; hideDialog(); controller.clear(); refreshHud(); focusDriving();
 }
 function physicsTick(dt,input) { if (canDrive()) attempt.vehicle = stepDriving(current,attempt.vehicle,input,dt); }
 function advanceSimulation(seconds) {
@@ -226,12 +281,13 @@ function snapshot() {
   const stats = renderer.info, preset = PRESETS[quality];
   // Estimates cover owned texture mip chains and main color/depth buffers, not browser/driver overhead.
   const estimatedResources = { pbrTextureBytes: surfaces.estimatedTextureBytes,
-    screenTextureBytes: 6 * 512 * 256 * 4 * 4 / 3,
+    screenTextureBytes: (attempt.checkpoints.length+1) * 512 * 256 * 4 * 4 / 3,
     environmentApproxBytes: 2 * 1024 * 256 * 8,
     shadowApproxBytes: preset.shadow ** 2 * 4,
     framebufferApproxBytes: buffer.width * buffer.height * 8,
     note: 'Budget estimate, not measured VRAM. Excludes driver, compositor, geometry and transient allocations; shared GPU memory is not dedicated VRAM.' };
-  return { phase: '3D-P1.1', ready, webgl2: renderer.capabilities.isWebGL2, three: THREE.REVISION,
+  return { phase: '3D-P2', ready, webgl2: renderer.capabilities.isWebGL2, three: THREE.REVISION,
+    challengeMode:educational()?'education':'demo',assignment:assignment?{unitId:assignment.unitId,title:assignment.title,schemaVersion:assignment.schemaVersion,questionCount:assignment.questions.length}:null,assignmentPaused,
     baseline: data.baseline, generatorHash: data.generatorHash, quality, scaleOverride: override,
     targetFps: Number($('fps').value), buffer, devicePixelRatio: window.devicePixelRatio, rendererPixelRatio: renderer.getPixelRatio(),
     viewport: { width: innerWidth, height: innerHeight }, mode, view, drivingView, navigationView: view==='driving' ? `driving${drivingView}` : view,
@@ -252,6 +308,7 @@ function updatePanel() {
 function exportResults() {
   const report = snapshot(); delete report.game; delete report.heldKeys;
   delete report.map2d;
+  delete report.assignment;
   const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob), a = document.createElement('a');
   a.href = url; a.download = `emi-3dp1-${quality.toLowerCase()}-${Date.now()}.json`; a.click();
@@ -283,7 +340,7 @@ function benchmarkPose(progress) {
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 let cancelBenchmark = false, benchmarkRunning = false;
 async function runBenchmark({ warmupMs = 1000, durationMs = 5000 } = {}) {
-  if (!ready || benchmarkRunning || contextLost || attempt.interaction || attempt.map.open) return;
+  if (educational() || assignmentPaused || !ready || benchmarkRunning || contextLost || attempt.interaction || attempt.map.open) return;
   warmupMs = Math.max(200, Math.min(10000, warmupMs)); durationMs = Math.max(600, Math.min(60000, durationMs));
   pauseGame();
   const saved = { current, attempt, view, drivingView, inspection: $('inspection').value, pose: { ...controller.pose } };
@@ -306,7 +363,7 @@ async function runBenchmark({ warmupMs = 1000, durationMs = 5000 } = {}) {
       await wait(warmupMs); metrics.reset();
       await wait(durationMs);
       if (cancelBenchmark || contextLost) break;
-      const result = snapshot(); delete result.benchmarkResults; delete result.game; delete result.heldKeys; delete result.map2d;
+      const result = snapshot(); delete result.benchmarkResults; delete result.game; delete result.heldKeys; delete result.map2d; delete result.assignment;
       benchmarkResults.push({ scenario: name, warmupMs, durationMs, report: result });
     }
   } finally {
@@ -356,13 +413,29 @@ async function initialize() {
   scene.add(new THREE.HemisphereLight('#e8f4f2', '#4c626b', 2.35));
   sun = new THREE.DirectionalLight('#fff1d8', 2.1); scene.add(sun, sun.target);
   map2d = new Map2D($('map-view'));
-  metrics = new Metrics(renderer); controller = new Controller(canvas, { reset: resetAttempt, pause: pauseGame, close: () => attempt.map.open ? toggleMap() : closeDialog(), interact: activate, canDrive, toggleView:toggleDrivingView, toggleMap });
+  metrics = new Metrics(renderer); controller = new Controller(canvas, { reset: resetAttempt, pause: pauseGame, close: () => assignmentSelector?.dialog.open ? assignmentSelector.close() : attempt.map.open ? toggleMap() : closeDialog(), interact: activate, canDrive, toggleView:toggleDrivingView, toggleMap });
   orbit = new OrbitControls(camera, canvas); orbit.enabled = false; orbit.enableDamping = true;
   rebuild(); resumeDriving(); cold.sceneBuiltMs = performance.now();
   cold.initialPreset = quality; cold.initialMaze = current.id; cold.initialBuffer = { ...buffer };
   const prep = performance.now(); await renderer.compileAsync(scene, camera);
   cold.shaderPreparationMs = performance.now() - prep; cold.readyMs = performance.now();
   ready = true; mapVisible = !document.hidden && document.hasFocus(); mapClockAt = performance.now(); message('');
+  assignmentSelector=new AssignmentSelector({
+    canOpen:()=>ready&&!benchmarkRunning&&!contextLost&&!attempt.interaction,
+    pause:()=>{settleMapTime();assignmentPaused=true;pauseGame();},
+    resume:()=>{assignmentPaused=false;mapClockAt=performance.now();refreshHud();focusDriving();},
+    unit:unit=>{assignment=unit;updateModeUi();startEducationalRound(0);},
+    demo:()=>{assignment=null;updateModeUi();replaceMap(generateMap(25,19,randomSeed()));}
+  });
+  updateModeUi();
+  const networkNotice=()=>{$('offline-note').hidden=navigator.onLine;};
+  window.addEventListener('online',networkNotice);window.addEventListener('offline',networkNotice);networkNotice();
+  $('dialog-overlay').addEventListener('keydown',event=>{
+    if(event.key!=='Tab')return;
+    const nodes=[...$('dialog-overlay').querySelectorAll('button,a[href]')].filter(n=>!n.disabled);
+    const index=nodes.indexOf(document.activeElement),next=event.shiftKey?(index-1+nodes.length)%nodes.length:(index+1)%nodes.length;
+    event.preventDefault();nodes[next]?.focus();
+  });
   canvas.addEventListener('webglcontextlost', event => {
     event.preventDefault(); contextLost = true; pauseGame(); cancelBenchmark = true;
     metrics.pending = []; // Context-owned query handles are invalid after loss.

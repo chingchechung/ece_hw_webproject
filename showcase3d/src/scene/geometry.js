@@ -80,7 +80,7 @@ function screenTexture(label, exit = false) {
   paintScreen(c, label, exit);
   const texture = new THREE.CanvasTexture(c); texture.colorSpace = THREE.SRGBColorSpace; return texture;
 }
-export function buildMazeScene(map, materials) {
+export function buildMazeScene(map, materials, checkpointLabels = null) {
   const group = new THREE.Group(), ceilings = new THREE.Group(), extras = [];
   const screenResources = [];
   group.name = 'deterministic-maze'; group.add(ceilings);
@@ -132,7 +132,7 @@ export function buildMazeScene(map, materials) {
   instances(new THREE.BoxGeometry(0.43, 0.9, 0.43), materials.dark, terminals.map(t => ({ ...t, y: 0.55 })), group, 'terminal-stems');
   instances(new THREE.BoxGeometry(1.18, 0.86, 0.28), materials.top, terminals.map(t => ({ ...t, y: 1.45 })), group, 'oscilloscope-bodies');
   terminals.forEach((t, i) => {
-    const texture = screenTexture(`LAB ${String(i + 1).padStart(2, '0')}`);
+    const texture = screenTexture(checkpointLabels?.[i] ?? `LAB ${String(i + 1).padStart(2, '0')}`);
     const material = new THREE.MeshStandardMaterial({ map: texture, emissiveMap: texture, emissive: '#ffffff', emissiveIntensity: 0.55, roughness: 0.5 });
     extras.push(texture, material);
     screenResources.push({ texture, material });
@@ -162,13 +162,13 @@ export function buildMazeScene(map, materials) {
       const key = completed.join(',') + ':' + (nearby?.id || '') + ':' + presentation;
       if (key === progressKey) return; progressKey = key;
       screenResources.forEach((r,i) => {
-        const state = presentation ? '' : completed[i] ? 'COMPLETE' : nearby?.index === i ? 'READY / PRESS E WHEN STOPPED' : 'SIGNAL ANALYSIS / DEMO';
-        paintScreen(r.texture.image, `LAB ${String(i+1).padStart(2,'0')}`, false, state);
+        const state = presentation ? '' : completed[i] ? 'COMPLETE' : nearby?.index === i ? 'READY / PRESS E WHEN STOPPED' : checkpointLabels ? 'ENGLISH QUESTION / PRESS E' : 'SIGNAL ANALYSIS / DEMO';
+        paintScreen(r.texture.image, checkpointLabels?.[i] ?? `LAB ${String(i+1).padStart(2,'0')}`, false, state);
         r.texture.needsUpdate = true;
         r.material.emissiveIntensity = presentation ? .55 : completed[i] ? .8 : nearby?.index === i ? .95 : .55;
       });
       const unlocked = completed.every(Boolean);
-      paintScreen(texture.image, 'EXIT  →', true, presentation ? '' : unlocked ? 'UNLOCKED' : 'LOCKED / COMPLETE ALL 5 LABS');
+      paintScreen(texture.image, 'EXIT  →', true, presentation ? '' : unlocked ? 'UNLOCKED' : `LOCKED / COMPLETE ALL ${completed.length} ${checkpointLabels?'QUESTIONS':'LABS'}`);
       texture.needsUpdate = true;
       beam.material.color.set(presentation ? '#aac3b3' : unlocked ? '#a4dfb8' : '#c4b596');
       beam.material.emissive.set(presentation ? '#35775d' : unlocked ? '#438d64' : '#4c3c21');

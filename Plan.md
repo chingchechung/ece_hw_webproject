@@ -4,6 +4,14 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> P2 continuation: physical P1.1 navigation is approved. On `feature/3d-showcase`
+> only, add an original Canvas car and the approved v1/v2 educational assignment
+> flow using unchanged Lite validators and four/five-question generator parity.
+> Preserve demo mode, 3D visuals/physics/controls and all prior regressions.
+> Keep the default publication empty and preserve manually published JSON during
+> rebuilds. See [3D-P2 results](docs/3d-p2-results.md). Stop after P2 for review;
+> no merge into `work`/`main` and no further graphics/gameplay phase.
+
 > P1.1 navigation continuation: physical P1 driving is approved. Add V-switchable
 > Canvas 2D driving using the same vehicle/physics and authoritative maze; M opens
 > a cumulative 30-second full map. Preserve P0/P1 visuals and the separate labelled

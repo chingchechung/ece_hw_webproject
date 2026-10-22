@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark"><title>EMI Lab · Dual-View Driving P1.1</title>
+  <meta name="color-scheme" content="dark"><title>EMI Lab · Assignment Driving P2</title>
   <link rel="icon" href="data:,"><link rel="stylesheet" href="__STYLE__">
 </head>
 <body>
-  <header><div class="brand"><span class="brand-mark">E<span>∕</span>M</span><div><h1>Engineering Maze Lab</h1><p>DUAL-VIEW DRIVING · P1.1</p></div></div><span class="edition">Five synthetic checkpoints · no course data</span><button id="fullscreen">Fullscreen</button></header>
+  <header><div class="brand"><span class="brand-mark">E<span>∕</span>M</span><div><h1>Engineering Maze Lab</h1><p>DUAL-VIEW ASSIGNMENTS · P2</p></div></div><span class="edition" id="edition">3D Demonstration Mode</span><button id="assignment-mode">Educational Assignment Mode</button><button id="fullscreen">Fullscreen</button></header>
   <nav aria-label="Scene controls">
     <label>Maze <select id="maze"><option value="25x19">25 × 19 · full</option><option value="21x15">21 × 15</option><option value="17x13">17 × 13</option><option value="13x9">13 × 9 · small</option></select></label>
     <fieldset id="quality"><legend>Quality</legend><button data-quality="Low">Low</button><button data-quality="Medium" aria-pressed="true">Medium</button><button data-quality="High">High</button></fieldset>
@@ -23,12 +23,15 @@
     <div id="map-banner" hidden><div><strong>Full maze map · driving paused</strong><span id="map-time" role="timer">30.0 s remaining / 30 s</span></div><button id="close-map">Close map · M</button></div>
     <div class="scene-caption"><span>EMI / ENGINEERING ENVIRONMENTS</span><h2 id="scene-name">Laboratory corridor</h2><p id="seed-label"></p></div>
     <div id="message" role="status">Preparing local WebGL 2 scene…</div>
-    <div id="driving-hud" aria-label="Driving status"><div><strong id="speed">0</strong><small>VIRTUAL km/h</small></div><div><strong id="progress">0 / 5</strong><small>LAB CHECKPOINTS</small></div><div class="nearby"><strong id="nearby">Find Q1–Q5</strong><small id="interaction-hint">W accelerate · S brake / reverse · A/D steer</small></div><button id="interact" hidden>Activate · E</button></div>
-    <div id="dialog-overlay" hidden><section role="dialog" aria-modal="true" aria-labelledby="dialog-title"><span class="dialog-kicker">SYNTHETIC DEMONSTRATION</span><h2 id="dialog-title"></h2><p id="dialog-text"></p><button id="dialog-close">Continue driving</button></section></div>
+    <div id="offline-note" hidden role="status">Offline: demonstration and packaged assignments work. YouTube and Google Forms require Internet access.</div>
+    <div id="unit-status"></div>
+    <div id="driving-hud" aria-label="Driving status"><div><strong id="speed">0</strong><small>VIRTUAL km/h</small></div><div><strong id="progress">0 / 5</strong><small id="progress-label">LAB CHECKPOINTS</small></div><div class="nearby"><strong id="nearby">Find Q1–Q5</strong><small id="interaction-hint">W accelerate · S brake / reverse · A/D steer</small></div><button id="interact" hidden>Activate · E</button></div>
+    <div id="dialog-overlay" hidden><section role="dialog" aria-modal="true" aria-labelledby="dialog-title"><span class="dialog-kicker">ENGINEERING MAZE LAB</span><h2 id="dialog-title"></h2><p id="dialog-text"></p><div id="dialog-extra"></div><button id="dialog-close">Continue driving</button></section></div>
     <aside id="diagnostics"><details open><summary>Render diagnostics <span id="fps-badge">—</span></summary><pre id="stats"></pre><button id="export">Export local JSON</button></details></aside>
     <div class="view-controls"><label>View <select id="inspection"><option value="driving">Return to driving</option><option value="start">Inspect start</option><option value="straight">Straight corridor</option><option value="t-junction">T junction</option><option value="four-way">Four-way junction</option><option value="checkpoint">Laboratory terminal</option><option value="finish">Exit structure</option><option value="wall">Wall close-up</option><option value="floor">Floor close-up</option></select></label><span id="control-hint">W accelerate · S brake/reverse · A/D steer · E activate</span></div>
   </main>
   <footer><span id="status">Local synthetic demo · no grades or saved progress</span><label>Device <select id="device"><option>Unspecified / Cloud</option><option>Windows · UHD 770</option><option>Windows · Arc 140V</option></select></label><button id="benchmark">Run six-scene benchmark</button><button id="cancel-benchmark" hidden>Cancel</button></footer>
+  <dialog id="assignment-picker" aria-labelledby="assignment-heading"><h2 id="assignment-heading">Educational Assignment Mode</h2><p>Only units in this package's validated public manifest are available. The current attempt is paused while you choose.</p><p id="assignment-status" role="status"></p><label>Published unit <select id="unit-select" disabled></select></label><div class="picker-buttons"><button id="load-assignment" disabled>Start selected unit</button><button id="refresh-assignments">Refresh manifest</button></div><section id="assignment-warning" hidden><p id="switch-message"></p><button id="confirm-assignment">Confirm new attempt</button></section><div class="picker-buttons"><button id="cancel-assignment">Cancel / return to current attempt</button><button id="choose-demo">3D Demonstration Mode</button></div><p class="link-notice">No grades, identities or submissions are recorded. The instructor manages YouTube and Google Forms separately.</p></dialog>
   <noscript>This prototype requires JavaScript and WebGL 2. The separate Lite edition remains available.</noscript>
   <script type="module" src="__SCRIPT__"></script>
 </body>

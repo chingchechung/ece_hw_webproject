@@ -2,6 +2,22 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved isolated 3D-P2 supplement — 2026-10-22
+
+The instructor approved physical P1.1 navigation and authorized P2 on
+`feature/3d-showcase`, starting `7902de5`. Replace only the 2D triangle with an
+original procedural car, and integrate published educational assignments using
+the actual unchanged Lite rules/validators. Support v1/v2, four/five questions,
+single-label accepted answers, safe confirmed unit switching, Lite failure-size
+policy, videos and a final Form link. Preserve the separate offline synthetic
+demo, approved 3D art/physics/controls, cumulative map budget and all prior tests.
+Disable unlimited presentation/developer controls in educational mode. Default
+public manifests stay empty; fixtures/private drafts never enter the release.
+Preserve explicitly published JSON across builds and document local-only manual
+publication. See `docs/3d-p2-results.md`. This supersedes the P1.1 stop below.
+Stop after P2 for instructor review; do not merge into `work`/`main` or begin
+another graphics/gameplay phase.
+
 ## Approved isolated 3D-P1.1 supplement — 2026-10-22
 
 The instructor approved physical P1 3D driving and authorized dual-view navigation

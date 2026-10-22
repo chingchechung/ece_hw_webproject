@@ -1,8 +1,8 @@
 // GENERATED read-only from lite-v1.0 student/js/game.js. Do not edit.
 // Source SHA256: 03cd7fe5e60aec7d9cb47a799a8facfd73e4e3137602f5fd4edadb73b34ea564
-export function generateLayout(w,h,seed){
-if(![[25,19],[21,15],[17,13],[13,9]].some(s=>s[0]===w&&s[1]===h)||!Number.isInteger(seed)||seed<0||seed>4294967295)throw new Error('Invalid demo size or uint32 seed');
-var Date={now:()=>seed},Math=Object.create(globalThis.Math);Math.random=()=>0;var MAX_QUESTS=5,seedCounter=0,TILE=28,DRIVE_TILE=14;
+export function generateLayout(w,h,seed,questionCount=5){
+if(![[25,19],[21,15],[17,13],[13,9]].some(s=>s[0]===w&&s[1]===h)||!Number.isInteger(seed)||seed<0||seed>4294967295||![4,5].includes(questionCount))throw new Error('Invalid maze size, uint32 seed or question count');
+var Date={now:()=>seed},Math=Object.create(globalThis.Math);Math.random=()=>0;var MAX_QUESTS=questionCount,seedCounter=0,TILE=28,DRIVE_TILE=14;
   function randomizer(seed){var a=seed>>>0;return function(){a^=a<<13;a^=a>>>17;a^=a<<5;return (a>>>0)/4294967296}}
   function shuffle(items,rnd){for(var i=items.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=items[i];items[i]=items[j];items[j]=t}return items}
   function generateMaze(w,h){

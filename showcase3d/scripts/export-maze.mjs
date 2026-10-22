@@ -31,8 +31,8 @@ export function exportMaps() {
 export function runtimeGeneratorSource() {
   const generator = generatorSource();
   if (sha256(generator) !== '03cd7fe5e60aec7d9cb47a799a8facfd73e4e3137602f5fd4edadb73b34ea564') throw new Error('Reviewed generator changed');
-  return `// GENERATED read-only from lite-v1.0 student/js/game.js. Do not edit.\n// Source SHA256: ${sha256(generator)}\nexport function generateLayout(w,h,seed){\n` +
-    `if(![[25,19],[21,15],[17,13],[13,9]].some(s=>s[0]===w&&s[1]===h)||!Number.isInteger(seed)||seed<0||seed>4294967295)throw new Error('Invalid demo size or uint32 seed');\n` +
-    `var Date={now:()=>seed},Math=Object.create(globalThis.Math);Math.random=()=>0;var MAX_QUESTS=5,seedCounter=0,TILE=28,DRIVE_TILE=14;\n` + generator +
+  return `// GENERATED read-only from lite-v1.0 student/js/game.js. Do not edit.\n// Source SHA256: ${sha256(generator)}\nexport function generateLayout(w,h,seed,questionCount=5){\n` +
+    `if(![[25,19],[21,15],[17,13],[13,9]].some(s=>s[0]===w&&s[1]===h)||!Number.isInteger(seed)||seed<0||seed>4294967295||![4,5].includes(questionCount))throw new Error('Invalid maze size, uint32 seed or question count');\n` +
+    `var Date={now:()=>seed},Math=Object.create(globalThis.Math);Math.random=()=>0;var MAX_QUESTS=questionCount,seedCounter=0,TILE=28,DRIVE_TILE=14;\n` + generator +
     `\nvar result=generateMaze(w,h);buildDriveRoad(result);result.driveRoad.bits=Array.from(result.driveRoad.bits);return result;\n}\n`;
 }
