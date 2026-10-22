@@ -1,12 +1,13 @@
 {
-  "phase": "3D-P2",
+  "phase": "3D-P2.1",
+  "version": "1.0.0-rc1",
   "three": "0.180.0",
   "esbuild": "0.25.12",
   "liteBaseline": "823786bc01b68901455061d5fe31d6076c61f20e",
   "files": {
     "LICENSES.txt": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
-    "app-4J526KQD.css": "4026ed02e60aad0da010966ec7eb335ab92f4346a1434b1da11ba54c53a29ed7",
-    "app-Y2HAESKF.js": "b5cabafc735bf4e10d60578784f88cac4bb1d74bef0158178834b6059300ac15",
-    "index.html": "0eda3a971d6982e184bb3692161c6f259cd126319b99933a6999f2d4dcf86465"
+    "app-D7QFAYHC.css": "bd4ebc90358dc2ffdb6e38cbce665eb029d74fba40960caf7958602494bcf730",
+    "app-VZ3UGDYR.js": "f74587aeeb103553200922998b2a0d94f63530d66121ec73725052bec90a23ce",
+    "index.html": "1571e547150375e5f51caa11a6c6402b6e1a00731896b51bb9e4e510eb76a1b3"
   }
 }

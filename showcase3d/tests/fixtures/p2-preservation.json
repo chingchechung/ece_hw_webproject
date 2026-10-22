@@ -1,0 +1,27 @@
+{
+  "baseline": "8a9061f0128813700b6a2ca179358b8c27e56447",
+  "files": {
+    "src/gameplay/driving.js": "20af335a7abf85a70572b75bc4cd01224020ecb27aed6a733b3b33895a59fb51",
+    "src/gameplay/coordinates.js": "5f2fe38ca02ac039e9a60f7001d82e651604f96e22905b7cffb3352707bec553",
+    "src/gameplay/attempt.js": "3d08de8b202c38b8fd87c693b46229bcd1da7582984731ccf504df2072a1d987",
+    "src/gameplay/navigation.js": "6de6ad5780ba6a24eb953b69042ab65f9000cf48865ca38ea228a445f19c4f34",
+    "src/maze/generate.js": "1b3bde4efa1f2e6d20ddc59fed6e07cce95d04256fe3852b3d4045d0c8ed5ac9",
+    "src/maze/lite-generated.js": "57d5a7c004bc98f0e0bff146893313a15dc7e11fb241c3b9652fd6c345d0b499",
+    "src/maze/maps.json": "837a1f664225755228be90001c3aa9713ea954c7e412f8b8bdb46a2f923b021b",
+    "src/scene/geometry.js": "0dc83b50aeb3b008ef27c488cf05276fbb31d8ca5c56e4d76ad5e3c946444aa2",
+    "src/scene/map2d.js": "d801023b09d1358eaf127e9ce9a6f387d699f9d44a323a0c2f9d044f1d91c623",
+    "src/scene/vehicle2d.js": "900f815d353c3cdbb14a0ac9d3b1af6bd061b87971450d4504950bd9f7a54a07",
+    "src/materials/laboratory.js": "f824bbee123ff7cf7f2c1833cc9b67590edbd4dd3135d14d42c68748a0bc2d88",
+    "src/performance/quality.js": "651ae3dae95af1181564ff286cf660649cbecddce45283205bb1e658f9a8daf6",
+    "src/performance/metrics.js": "4a1d349163d617bf90e50bd4cf1b22fd14f4db63200122473fe7e06fc912e012",
+    "src/camera/controller.js": "17b6a766f470486c99a77992661e2858900efbb5c766c980a46cdf7fde9fc39a",
+    "src/assignments/validator.js": "fe63eb82b2e6993dfa79625a93962dcb07f8cd52638b51768a1c3a8cf63a2a85",
+    "src/assignments/loader.js": "a3f2fb2421827a467574161c9b65b044b487d80693d00c8f8052289712314e83",
+    "src/assignments/question-ui.js": "d678e7127b32ba3acc336f48f1647678ea6607a39f0346bd9289a1ba571c6817",
+    "src/assignments/selector.js": "f885b4d97cdc62ce664177fadc2c1cb18f1835c3176af31d07c7c2e45e4ba900"
+  },
+  "main_sections": {
+    "lighting": "483d437061e90a71268799e9df49cde63a5af1051a906d8ded75448c22df8ef8",
+    "renderer_camera": "14bc3d0fd8e6fddef6af91519a9645468be295fcb68cece5032395ff186ec524"
+  }
+}

@@ -49,7 +49,7 @@ test('isolated graphics rebuild retains published files byte-for-byte and fails 
     // Packaging must not sweep arbitrary files from the public runtime root.
     writeFileSync(join(app,'dist/ignored-draft.json'),'TEST ONLY — not an approved publication');
     execFileSync('python',[join(app,'scripts/package.py')],{stdio:'pipe'});
-    const archive=join(temp,'test-results/3d-p2/showcase3d-p2-static.zip');
+    const archive=join(temp,'test-results/3d-p2.1/showcase3d-1.0.0-rc1-static.zip');
     const contents=JSON.parse(execFileSync('python',['-c',"import json,sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); print(json.dumps({'names':z.namelist(),'unit':z.read('showcase3d/dist/assignments/S02.json').decode()}))",archive],{encoding:'utf8'}));
     assert.equal(contents.names.length,12);assert.ok(!contents.names.some(name=>name.includes('ignored-draft')));assert.equal(contents.unit,bytes.toString());
     const html=readFileSync(join(app,'dist/index.html'));writeFileSync(join(directory,'manifest.json'),'broken');assert.throws(build);

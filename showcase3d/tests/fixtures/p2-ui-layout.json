@@ -1,0 +1,42 @@
+{
+  "baseline": "8a9061f0128813700b6a2ca179358b8c27e56447",
+  "scope": "Unmodified P2 default interface, Medium/preset, browser DPR 1.5",
+  "viewports": [
+    {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1.5,
+      "stage": {
+        "x": 0,
+        "y": 178,
+        "width": 1280,
+        "height": 564
+      },
+      "visible_controls": 18
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "dpr": 1.5,
+      "stage": {
+        "x": 0,
+        "y": 178,
+        "width": 1366,
+        "height": 532
+      },
+      "visible_controls": 18
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1.5,
+      "stage": {
+        "x": 0,
+        "y": 136,
+        "width": 1920,
+        "height": 886
+      },
+      "visible_controls": 18
+    }
+  ]
+}

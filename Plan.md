@@ -4,6 +4,15 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> P2.1 release preparation: the instructor approved P2 after Apache deployment
+> and Windows/Iris Xe testing. Clean the default UI, consolidate graphics in
+> Settings and retain opt-in presenter/debug tools with educational guards.
+> Preserve all gameplay, rendering, physics, formats, Lite and published JSON.
+> Verify the actual GitHub Actions run, then create the new annotated
+> `showcase3d-v1.0.0-rc1` tag at its tested implementation/build commit.
+> See [P2.1 release results](docs/3d-p2.1-release-results.md). Stop for review;
+> no final release tag, automatic deployment, merge or additional development.
+
 > P2 continuation: physical P1.1 navigation is approved. On `feature/3d-showcase`
 > only, add an original Canvas car and the approved v1/v2 educational assignment
 > flow using unchanged Lite validators and four/five-question generator parity.

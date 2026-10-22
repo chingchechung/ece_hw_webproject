@@ -2,10 +2,14 @@
 
 Read [AGENTS.md](AGENTS.md) and [Plan.md](Plan.md) before development.
 
-The separate **3D Showcase P2** lives on `feature/3d-showcase`, under
+The separate **3D Showcase release candidate** lives on `feature/3d-showcase`, under
 [`showcase3d/`](showcase3d/README.md). It preserves the approved 3D art, physics
-and dual-view navigation while adding an original top-down car and educational
-assignments through the unchanged Lite v1/v2 validators. Students choose one
+and dual-view navigation, the original top-down car and educational assignments
+through the unchanged Lite v1/v2 validators. P2.1 simplifies the default UI to
+essential driving controls and compact **Settings**. Presenter tools use
+`?presenter=1`; diagnostics/benchmarks use `?debug=1`, and both remain blocked
+during educational assignments. The manual Device selector is removed.
+Students choose one
 answer; any accepted label passes. Units have four/five real question checkpoints,
 wrong-answer shrinking mazes, videos and a final Google Form link. Only explicitly
 published units load. **The release manifest is empty**; the separate synthetic
@@ -18,16 +22,24 @@ Lite remains tagged **`lite-v1.0`** at
 `823786bc01b68901455061d5fe31d6076c61f20e`; `work` is unchanged. Approved P0 is
 preserved by **`showcase3d-p0-approved`** at
 `f685a21e391cdb0848b851e6bf2b72707c77162a`. The instructor reports P0 High is
-smooth on UHD 770 and has approved physical P1.1 navigation. No numerical Intel
-FPS was supplied. P2 and Arc 140V presentation review remain pending.
-See [results, changed files and review checklist](docs/3d-p2-results.md).
+smooth on UHD 770 and has approved P2 gameplay after university Apache deployment
+and separate Windows/Iris Xe laptop testing. No numerical Intel FPS was supplied.
+Review the cleaned P2.1 UI before a final release. The non-overwriting annotated
+**`showcase3d-v1.0.0-rc1`** tag identifies the exact implementation/build commit
+that passed candidate checks; no final `v1.0.0` tag or merge is made.
+See [candidate results, changed files and review checklist](docs/3d-p2.1-release-results.md).
 
-In GitHub **Actions → 3D showcase P2 → latest feature-branch run**, inspect all
-three jobs. Download **showcase3d-p2-…** for `3d-p2/showcase3d-p2-static.zip`, screenshots,
+In GitHub **Actions → 3D showcase release candidate**, inspect the verified run
+listed in the candidate report and all three jobs. Download **showcase3d-p2.1-…**
+for `3d-p2.1/showcase3d-1.0.0-rc1-static.zip`, screenshots,
 real-browser videos, traces and benchmark JSON; **showcase3d-windows-launcher-…**
 contains PowerShell HTTP checks, and **lite-preservation-…** contains the unchanged
 Lite suite's evidence. Artifacts upload even on failure and remain for 14 days.
-No automatic deployment is configured. Stop after P2 for instructor review.
+For an Apache upgrade, upload new hashed runtime assets first and index last;
+**leave the live `assignments/` directory untouched**, including its manifest.
+Do not replace it with the release's empty bootstrap manifest. The guide includes
+manual verification and rollback instructions. No automatic deployment is
+configured. Stop after P2.1 and candidate preparation for instructor review.
 
 The offline Tkinter/ttk teacher editor supports S01–S12,
 private incomplete drafts, four/five questions, local Allow Play, validated unit

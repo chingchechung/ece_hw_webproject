@@ -21,6 +21,16 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'test-results/3d-p1'
 
 
+def choose_quality(page, quality):
+    """Exercise the public Settings dialog; frozen P0 retains its original toolbar."""
+    if page.locator('#settings').count():
+        page.click('#settings')
+        page.click(f'[data-quality="{quality}"]')
+        page.click('#settings-close')
+    else:
+        page.click(f'[data-quality="{quality}"]')
+
+
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, *_args):
         pass
@@ -61,7 +71,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
         self.contexts = []; self.pages = []; self.errors = []; self.external = []; self.logs = []
         self.started = time.monotonic()
 
-    def new_page(self, width=960, height=700, dpr=1, video=False, fallback=False, clock=False, baseline=False):
+    def new_page(self, width=960, height=700, dpr=1, video=False, fallback=False, clock=False, baseline=False, tools=True, init_script=None):
         args = {'viewport': {'width': width, 'height': height}, 'device_scale_factor': dpr,
                 'accept_downloads': True}
         if video:
@@ -70,6 +80,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
         context.tracing.start(screenshots=True, snapshots=True, sources=True)
         self.contexts.append(context)
         page = context.new_page(); self.pages.append(page)
+        if init_script:page.add_init_script(init_script)
         page.on('pageerror', lambda error: self.errors.append(str(error)))
         page.on('console', lambda message: self.logs.append({'type': message.type, 'text': message.text}))
         def route(request):
@@ -82,10 +93,12 @@ class ShowcaseBrowserTests(unittest.TestCase):
         if fallback:
             page.add_init_script("""const get=HTMLCanvasElement.prototype.getContext;
                 HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl2'?null:get.call(this,type,...args)};""")
-        page.goto((self.url.replace('/dist/','/p0/') if baseline else self.url) + ('?testClock=1' if clock else ''))
+        query = (['presenter=1','debug=1'] if tools is True else tools.split('&') if isinstance(tools,str) else []) if not baseline else []
+        if clock: query.append('testClock=1')
+        page.goto((self.url.replace('/dist/','/p0/') if baseline else self.url) + ('?'+'&'.join(query) if query else ''))
         if not fallback:
             page.wait_for_function('window.showcase?.snapshot().ready', timeout=120000)
-            page.select_option('#scale', '0.5')
+            if (baseline or 'debug=1' in query) and page.locator('#scale').count():page.select_option('#scale', '0.5')
             self.rendered(page)
         return page
 
@@ -132,7 +145,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
         page = self.new_page(); original = self.snapshot(page)['maze']['topologyHash']; counts = {}
         for _ in range(2):
             for quality in ['Low', 'High', 'Medium']:
-                page.click(f'[data-quality="{quality}"]'); self.rendered(page); s = self.snapshot(page)
+                choose_quality(page, quality); self.rendered(page); s = self.snapshot(page)
                 self.assertEqual(s['maze']['topologyHash'], original)
                 if quality in counts:
                     self.assertEqual(s['render']['textures'], counts[quality]['textures'])
@@ -154,7 +167,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
         self.assertEqual(s['disposedScenes'], s['rebuilds'] - 1)
 
     def test_03_keyboard_mouse_collision_and_reset(self):
-        page = self.new_page(); page.click('[data-quality="Low"]'); page.select_option('#inspection', 'driving')
+        page = self.new_page(); choose_quality(page, 'Low'); page.select_option('#inspection', 'driving')
         start = self.snapshot(page)['pose']; page.locator('#view').focus()
         page.keyboard.down('w'); page.wait_for_timeout(1800); page.keyboard.up('w'); self.rendered(page)
         after = self.snapshot(page); self.assertNotEqual(after['pose'], start); self.assertTrue(after['cameraWalkable'])
@@ -175,7 +188,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
     def test_04_laptop_150_percent_projector_resize_and_fullscreen(self):
         page = self.new_page(1280, 800, 1.5)
         for quality, cap in [('Low', 1280), ('Medium', 1600), ('High', 1920)]:
-            page.click(f'[data-quality="{quality}"]'); page.select_option('#scale', 'auto'); self.rendered(page)
+            choose_quality(page, quality); page.select_option('#scale', 'auto'); self.rendered(page)
             s = self.snapshot(page); self.assertEqual(s['devicePixelRatio'], 1.5); self.assertEqual(s['rendererPixelRatio'], 1)
             self.assertLessEqual(s['buffer']['width'], cap)
         page.click('#fullscreen'); page.wait_for_function('Boolean(document.fullscreenElement)'); self.rendered(page)
@@ -210,7 +223,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
         self.assertTrue(page.locator('#benchmark').is_disabled())
 
     def test_07_six_scenario_benchmark_and_local_json_export(self):
-        page = self.new_page(); page.click('[data-quality="Low"]')
+        page = self.new_page(); choose_quality(page, 'Low')
         results = page.evaluate('window.showcase.runBenchmark({warmupMs:400,durationMs:1200})')
         self.assertEqual(len(results), 6); self.assertEqual(results[0]['report']['maze']['id'], '25x19')
         self.assertEqual(results[1]['report']['maze']['id'], '13x9')
@@ -230,7 +243,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
             page.select_option('#inspection', view); self.rendered(page)
             page.screenshot(path=str(OUT / f'{view}.png'))
         for quality in ['Low', 'Medium', 'High']:
-            page.select_option('#inspection', 'four-way'); page.click(f'[data-quality="{quality}"]')
+            page.select_option('#inspection', 'four-way'); choose_quality(page, quality)
             self.rendered(page); page.screenshot(path=str(OUT / f'matched-{quality.lower()}.png'))
             (OUT / f'matched-{quality.lower()}.json').write_text(json.dumps(self.snapshot(page), indent=2))
         page.click('#camera'); self.rendered(page); page.screenshot(path=str(OUT / 'full-maze-overview.png'))
@@ -239,13 +252,13 @@ class ShowcaseBrowserTests(unittest.TestCase):
 
     def test_09_real_browser_navigation_recording(self):
         page = self.new_page(1280, 800, video=True); page.locator('#diagnostics summary').click()
-        page.click('[data-quality="Low"]'); page.select_option('#scale', '0.5')
+        choose_quality(page, 'Low'); page.select_option('#scale', '0.5')
         page.select_option('#inspection', 'driving'); self.rendered(page)
         # Actual keyboard navigation, not generated frames or screenshots posing as video.
         before = self.snapshot(page)['pose']; page.locator('#view').focus(); page.keyboard.down('w'); page.wait_for_timeout(1600); page.keyboard.up('w')
         page.keyboard.down('a'); page.wait_for_timeout(900); page.keyboard.up('a')
         page.keyboard.down('w'); page.wait_for_timeout(2200); page.keyboard.up('w')
-        page.click('[data-quality="Medium"]'); self.rendered(page)
+        choose_quality(page, 'Medium'); self.rendered(page)
         after = self.snapshot(page)['pose']; self.assertNotEqual(before, after)
         (OUT / 'navigation-evidence.json').write_text(json.dumps({'before': before, 'after': after,
             'video': Path(page.video.path()).name,
@@ -254,7 +267,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
 
 
     def prepare_route(self, page):
-        page.click('[data-quality="Low"]'); page.select_option('#scale', '0.5')
+        choose_quality(page, 'Low'); page.select_option('#scale', '0.5')
         page.fill('#seed', '20264049'); page.select_option('#maze', '13x9')
         page.locator('#view').focus(); self.rendered(page)
         return json.loads((OUT/'control-route.json').read_text())
@@ -298,7 +311,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
                 self.assertIn(step['id'],page.locator('#nearby').inner_text())
                 if step['id']=='Q1':
                     page.screenshot(path=str(OUT/'checkpoint-within-range.png'))
-                    page.click('[data-quality="High"]');page.select_option('#scale','auto')
+                    choose_quality(page, 'High');page.select_option('#scale','auto')
                     page.select_option('#inspection','checkpoint');self.rendered(page)
                     page.screenshot(path=str(OUT/'checkpoint-before.png'));page.click('#camera')
                 if step['id']=='EXIT':
@@ -311,7 +324,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
                 if step['id']=='EXIT':
                     self.assertTrue(self.snapshot(page)['game']['finished'])
                     self.assertEqual(page.locator('#dialog-close').inner_text(),'Close completion')
-                    self.assertIn('Reset',page.locator('#interaction-hint').inner_text())
+                    self.assertIn('Restart',page.locator('#interaction-hint').inner_text())
                     break
                 page.click('#dialog-close')
                 if step['id']=='Q1':
@@ -320,7 +333,7 @@ class ShowcaseBrowserTests(unittest.TestCase):
                     before=self.snapshot(page)['game']['completed']
                     page.keyboard.press('e');self.assertTrue(page.locator('#dialog-overlay').is_hidden())
                     self.assertEqual(self.snapshot(page)['game']['completed'],before)
-                    page.click('[data-quality="Low"]');page.select_option('#scale','0.5')
+                    choose_quality(page, 'Low');page.select_option('#scale','0.5')
         self.assertEqual(set(activated),{'Q1','Q2','Q3','Q4','Q5','EXIT'})
         self.assertTrue(moving_rejected,'Accepted route must also exercise the high-speed interaction gate')
         final=self.snapshot(page);self.assertEqual(final['game']['activations'],5)
@@ -357,8 +370,8 @@ class ShowcaseBrowserTests(unittest.TestCase):
         self.assertEqual(self.snapshot(page)['game'],saved);page.click('#camera')
         page.evaluate('window.showcase.runBenchmark({warmupMs:400,durationMs:1200})')
         self.assertEqual(self.snapshot(page)['game'],saved)
-        page.click('[data-quality="High"]');self.assertEqual(self.snapshot(page)['game'],saved)
-        page.click('[data-quality="Low"]')
+        choose_quality(page, 'High');self.assertEqual(self.snapshot(page)['game'],saved)
+        choose_quality(page, 'Low')
         previous=self.snapshot(page);page.fill('#seed','invalid');page.click('#generate')
         self.assertEqual(self.snapshot(page)['game'],previous['game'])
         page.fill('#seed','');page.click('#generate');fresh=self.snapshot(page)

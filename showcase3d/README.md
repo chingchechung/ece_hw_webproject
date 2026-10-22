@@ -1,17 +1,23 @@
-# Engineering Maze Lab — Educational Assignments P2
+# Engineering Maze Lab — v1.0.0-rc1
 
 The approved dual-view driving and P0 Three.js/WebGL 2 artwork now support
 **Educational Assignment Mode** alongside **3D Demonstration Mode**. The release
 contains an empty public manifest: no course questions, instructor drafts or
 student information. Educational play uses the same published v1/v2 JSON as Lite.
-Physical P1.1 navigation is approved. Stop after P2 for instructor review;
-no numerical Intel performance result was supplied.
+The instructor approved P2 gameplay after successful university Apache deployment
+and testing from a separate Windows/Iris Xe laptop. This P2.1 candidate cleans
+the player interface while preserving that gameplay and all approved rendering.
+Review the cleaned interface on Windows and Apache before a final v1.0.0 release.
+No numerical Intel performance result was supplied.
 
 ## Start offline on Windows 11
 
-1. In GitHub **Actions → 3D showcase P2**, open the successful feature-branch
-   run and download **showcase3d-p2-…**.
-2. Under `3d-p2/`, extract **showcase3d-p2-static.zip** completely to a local folder.
+1. Use the annotated **showcase3d-v1.0.0-rc1** tag and its matching verified run
+   in GitHub **Actions → 3D showcase release candidate**. The
+   [latest candidate results](https://github.com/chingchechung/ece_hw_webproject/blob/feature/3d-showcase/docs/3d-p2.1-release-results.md)
+   identify the exact source commit, run and artifacts.
+2. Download **showcase3d-p2.1-…**. Under `3d-p2.1/`, extract
+   **showcase3d-1.0.0-rc1-static.zip** completely to a local folder.
 3. Double-click **Start-Showcase.cmd**. Built-in Windows PowerShell 5.1/.NET
    starts a server at `http://127.0.0.1:8787/` (next free port through 8797) and
    opens the default browser. Use Chrome or Edge with graphics acceleration.
@@ -33,7 +39,7 @@ Windows-runner HTTP checks do not verify the physical presentation computer.
 
 ## Choose an educational assignment
 
-**Educational Assignment Mode** pauses driving and opens the public unit selector.
+**Assignments / Demo** pauses driving and opens the public unit selector.
 Only S01–S12 explicitly listed in the validated local
 `./assignments/manifest.json` appear. **Refresh manifest** rereads it without
 cache. An empty manifest clearly reports that no units have been published.
@@ -69,6 +75,40 @@ that unit with zero failures and 30 seconds. It keeps the chosen driving view.
 Unlimited overview, inspection, manual seed/size generation and benchmarks are
 hidden/guarded during educational play, so they cannot bypass the map allowance.
 
+## Player interface and optional tools
+
+The normal page keeps the title/mode badge, **Assignments / Demo**, **Settings**,
+**Fullscreen**, **V**, timed **M**, **Restart / R**, conditional 2D zoom, speed,
+progress and interaction hints. It has no Device selector, diagnostics toolbar,
+seed/size fields or benchmark controls. Choose **Low / Medium / High** inside
+Settings; **Medium** remains the default. Opening Settings pauses driving and
+map consumption; a paused full map is concealed behind Settings/unit selection
+so it cannot be read without using its allowance. Closing resumes the same attempt. Tab stays within the
+dialog, Escape closes it, and driving focus returns to the game. Quality changes
+do not regenerate the maze, change answers or restore map time.
+
+Optional URLs, relative to the same static directory:
+
+| URL | Synthetic demonstration tools |
+| --- | --- |
+| `./` | Compact player interface |
+| `./?presenter=1` | Architectural overview, inspection, deterministic seeds and optional maze generation |
+| `./?debug=1` | Render diagnostics, browser-reported renderer, benchmark/export and manual scale/frame cap |
+| `./?presenter=1&debug=1` | Both tool groups |
+
+Use **Player UI** to leave tools without reloading or losing the current vehicle/
+progress. Leaving overview/inspection returns to the same vehicle in the intended
+driving view. During a benchmark, cancel/finish it before leaving tools.
+The flags do not grant educational privileges: an active assignment disables
+presentation, generation, benchmark/export and advanced settings in application
+logic, including programmatic events. Basic quality selection stays available.
+
+No one chooses a GPU model. Diagnostic/export identity comes from the browser,
+which may report a generic renderer. It is not used to guess GPU capability or
+automatically select quality. The approved preset limits and default 30 FPS cap
+remain unchanged. A larger visible game area may increase the actual framebuffer
+within those same limits. Use Low if appropriate for the particular device.
+
 ## Publish assignments explicitly — local files only
 
 The Python GUI is unchanged. Validate/export only units the instructor has
@@ -100,13 +140,32 @@ preserves existing valid `dist/assignments/` bytes. The empty
 it does not overwrite a valid instructor manifest. Do not commit private course
 exports or run CI against them: the repository release stays empty.
 
-For Apache, manually upload the runtime files inside `dist/` into the chosen
-Showcase directory, and approved JSON into **that directory's own**
-`assignments/`. Upload Sxx files first and manifest last. Lite may live elsewhere;
-the loader never assumes their paths match. No Node, Python, PHP, API or database
-runs on Apache. Test the final nested URL, refresh the manifest, select each
-published unit, and verify an unlisted unit is absent. Static JSON exposes its
-answers to browser users; this is not secure anti-cheating.
+For a **new** Apache site, manually upload the runtime files into the chosen
+Showcase directory and approved JSON into **that directory's own** `assignments/`,
+units first and manifest last. Lite may live elsewhere; the loader does not
+assume their paths match. No Node, Python, PHP, API or database runs on Apache.
+Static JSON exposes its answers to browser users; this is not secure anti-cheating.
+
+### Upgrade an existing Apache site without replacing assignments
+
+1. Keep an instructor-controlled backup of the current runtime/index and approved
+   publication outside public directories. Note the previous release for rollback.
+2. Extract the candidate ZIP locally. In `showcase3d/dist/`, identify the new
+   hashed `app-….js` and `app-….css`, `LICENSES.txt`, `build-info.json` and index.
+3. Manually upload the new JS/CSS, license and build-info **first**. Upload
+   **index.html last**. **Leave the server's entire `assignments/` directory
+   untouched. Do not upload the candidate's empty manifest over the live one.**
+   Do not drag the whole dist folder over an existing course publication.
+4. Keep the previous hashed JS/CSS while cached old index pages may reference
+   them. Open the real nested URL with `index.html?v=1.0.0-rc1` or reload it, check
+   relative asset/JSON requests and the console, then refresh the unit manifest.
+   Confirm the same previously published units load and unlisted units stay absent.
+5. Review normal/settings, presenter/debug, both views, questions, wrong-answer
+   resets and map allowance on real Windows hardware. For rollback, restore the
+   prior index/runtime assets while continuing to preserve `assignments/`.
+
+Publication changes are separate: manually upload only newly approved Sxx files
+first and their manifest last. There is no automatic deployment or synchronization.
 
 ## Drive and activate the demonstration labs
 
@@ -125,11 +184,11 @@ answers to browser users; this is not secure anti-cheating.
   increases. A held/repeated E does not reactivate completed labs.
 - All five labs unlock the exit. Drive there, stop and press **E** to finish.
   The completion screen records no submission or personal data. Close it, then
-  use Reset/R or Generate for another drive.
+  use Restart/R for another drive; opt-in presenter tools also offer Generate.
 
 In demo mode, **Reset / R** restarts the current seed and clears speed, steering, keys,
 progress, dialogs and full-map allowance. It keeps your chosen driving view.
-**Generate** uses an optional uint32 seed (0–4294967295),
+In presenter mode, **Generate** uses an optional uint32 seed (0–4294967295),
 or a new random seed if blank. Select any original maze size. Reset keeps the
 same map; Generate/size selection explicitly starts a fresh attempt, including
 30 seconds of map allowance. Invalid seeds preserve the current attempt.
@@ -166,7 +225,7 @@ V closes an open full map, then changes the driving view without restoring time.
 V/M do not dismiss checkpoint dialogs; close the dialog or reset first. Typing
 in the seed field or selecting an option does not trigger shortcuts.
 
-In demo mode, **3D presentation overview** is the existing unlimited developer/presentation
+In presenter demo mode, **3D presentation overview** is the existing unlimited presentation
 camera, clearly separate from the timed gameplay map. It pauses driving and
 keeps position/progress. Drag/wheel inspects the whole architecture; **Return to
 driving** resumes the intended 2D or 3D view at the same vehicle position with zero
@@ -180,25 +239,27 @@ non-colliding presentation objects.
 
 P0 PBR materials, lighting, world UVs and Low/Medium/High definitions remain.
 Scales are 0.70 / 0.85 / 1.00, bounded by 1280×720 / 1600×900 / 1920×1080;
-manual overrides remain capped. Render DPR is deliberately 1 at Windows 150%
+debug-only manual overrides remain capped. Render DPR is deliberately 1 at Windows 150%
 scaling. The UI retains browser CSS sizing. No MSAA, post-processing or CDN.
 Default cap is 30 FPS; 60 FPS is an evaluation setting. Quality changes replace
 material maps and shadow targets, without rebuilding maze geometry or progress.
 
-The collapsible panel reports frame mean/p95, FPS, CPU submission, optional GPU
+The debug-only collapsible panel reports frame mean/p95, FPS, CPU submission, optional GPU
 timer queries, draw/triangle/resource counts and estimated memory. Null GPU time
 means unavailable; CPU time is not GPU time, and estimates are not measured VRAM.
 
 The six-scene benchmark retains the P0 seeds/routes: full maze, smallest maze,
 straight corridor, intersection, terminal, motion/turning. Each warms for 1 s and
 samples for 5 s. It pauses and restores the current attempt; cold setup is labelled
-separately as initial Medium. Choose a device label, repeat at least three warm
-runs, and **Export local JSON** after each. No data is uploaded.
+separately as initial Medium. With `?debug=1`, repeat at least three warm runs and
+**Export local JSON** after each. Renderer identity is browser-reported; no manual
+Device label remains. No data is uploaded.
 
 The instructor qualitatively approved P0 High on a physical UHD 770 as very
 smooth with excellent visuals. **No numerical Intel GPU benchmark has been
 provided.** P1 driving was subsequently approved after physical testing.
-P1.1 navigation is approved; P2 and Arc 140V presentation review remain pending. Cloud SwiftShader performance
+P2 gameplay and Apache/Iris Xe use are approved; P2.1 UI review and numerical
+hardware measurements remain pending. Cloud SwiftShader performance
 is software rendering, not Intel throughput.
 
 Before a presentation, verify offline launch, steering/braking/reverse, all five
@@ -207,7 +268,8 @@ labs and exit, reset/new seeds, mode returns, live quality changes, 1280×800 at
 physical devices. See `docs/3d-p1-results.md` in the repository for the complete
 hardware review procedure, parity evidence and limitations. Navigation-specific
 results are in `docs/3d-p1.1-results.md`; educational/publication review steps and
-P2 evidence are in `docs/3d-p2-results.md`.
+P2 evidence are in `docs/3d-p2-results.md`. Candidate source/tag, UI evidence and
+release checks are in `docs/3d-p2.1-release-results.md`.
 
 ## Development and tests
 
@@ -240,6 +302,7 @@ python -m playwright install chromium
 python showcase3d/tests/browser_showcase.py
 python showcase3d/tests/browser_navigation.py
 python showcase3d/tests/browser_education.py
+python showcase3d/tests/browser_production.py
 python showcase3d/scripts/package.py
 ```
 
@@ -262,7 +325,9 @@ Normal presentation URLs use real animation-frame timing and expose no clock hoo
 The separate navigation suite retains evidence in `test-results/3d-p1.1/`, including
 a complete real-keyboard 3D → 2D → Q1 → 3D → exit recording, actual cumulative timer
 exhaustion, emulated hidden events and actual tab focus loss/return. The original
-P1 browser suite and all Lite tests remain unchanged.
+P1 assertions and all Lite tests are retained. Diagnostic browser tests explicitly
+opt into presenter/debug modes and use Settings for quality changes. The P2
+educational suite runs through the clean player UI.
 
 The separate feature CI runs all Lite regressions, Node source/physics/geometry
 checks, Chromium/WebGL driving, navigation and educational checks, and Windows

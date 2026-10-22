@@ -7,10 +7,15 @@ import hashlib
 import re
 
 root = Path(__file__).resolve().parents[1]
-output = root.parent / 'test-results/3d-p2/showcase3d-p2-static.zip'
+version = json.loads((root/'package.json').read_text())['version']
+if not re.fullmatch(r'\d+\.\d+\.\d+-rc\d+',version):
+    raise RuntimeError('Expected an explicit release-candidate version')
+output = root.parent / f'test-results/3d-p2.1/showcase3d-{version}-static.zip'
 output.parent.mkdir(parents=True, exist_ok=True)
 published = json.loads(subprocess.check_output(['node', str(root/'scripts/check-publication.mjs'), str(root/'dist/assignments')],text=True))
 build_info = json.loads((root/'dist/build-info.json').read_text())
+if build_info.get('version') != version:
+    raise RuntimeError('Release version differs from the built runtime; rebuild first.')
 runtime = build_info['files']
 app_files = [name for name in runtime if re.fullmatch(r'app-[A-Z0-9]{8}\.(js|css)',name)]
 if (set(runtime) != {'index.html','LICENSES.txt',*app_files} or len(app_files)!=2

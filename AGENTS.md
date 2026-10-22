@@ -2,6 +2,23 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved isolated 3D-P2.1 release-candidate supplement — 2026-10-22
+
+The instructor approved P2 gameplay and reports successful university Apache
+deployment and testing from a separate Windows laptop with Intel Iris Xe.
+P2.1 is authorized on `feature/3d-showcase`, starting `8a9061f`: simplify the
+default player UI, retain compact Settings, remove the manual Device selector,
+and expose presentation/diagnostic tools only through explicit presenter/debug
+interfaces. Educational state must guard privileged actions independently of URL
+flags. Preserve all approved rendering, lighting, presets, camera, physics, car,
+assignment formats/validators, gameplay, offline launch and published JSON.
+Keep all existing tests and add production-UI/accessibility/isolation evidence.
+After an actual successful GitHub Actions run, create the new non-overwriting
+annotated `showcase3d-v1.0.0-rc1` tag at that exact tested implementation/build
+commit. Do not tag an untested commit, create a final v1.0.0 tag, deploy, merge
+into `work`/`main`, or begin another phase. See `docs/3d-p2.1-release-results.md`.
+This supersedes the P2 stop below; stop after P2.1 and RC preparation for review.
+
 ## Approved isolated 3D-P2 supplement — 2026-10-22
 
 The instructor approved physical P1.1 navigation and authorized P2 on

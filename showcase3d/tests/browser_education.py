@@ -57,8 +57,8 @@ class EducationBrowserTests(unittest.TestCase):
         cls.browser=cls.pw.chromium.launch(executable_path=executable,args=['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader'])
         (OUT/'browser-version.json').write_text(json.dumps({'browser':cls.browser.version,'executable':executable,'renderer_policy':'SwiftShader functional tests, not Intel FPS'},indent=2));cls.results=[]
 
-    def new_page(self,width=1280,height=800,dpr=1.5,video=False,overrides=None):
-        page=harness.ShowcaseBrowserTests.new_page(self,width,height,dpr,video=video,clock=True)
+    def new_page(self,width=1280,height=800,dpr=1.5,video=False,overrides=None,tools=False,quality='Low',init_script=None):
+        page=harness.ShowcaseBrowserTests.new_page(self,width,height,dpr,video=video,clock=True,tools=tools,init_script=init_script)
         if not hasattr(self,'overrides'):self.overrides={};self.requests=[];self.links=[];self.expected_http=False
         changes=overrides if overrides is not None else {};self.overrides[page]=changes
         def assignments(route):
@@ -74,7 +74,8 @@ class EducationBrowserTests(unittest.TestCase):
                 self.links.append({'url':route.request.url,'method':route.request.method});route.fulfill(content_type='text/html',body='<title>Synthetic external destination</title>TEST ONLY — no actual submission')
             else:route.fallback()
         page.context.route('https://**/*',external)
-        page.click('[data-quality="Low"]');page.locator('#diagnostics summary').click()
+        if quality:harness.choose_quality(page,quality)
+        if page.locator('#diagnostics').is_visible():page.locator('#diagnostics summary').click()
         page.locator('#view').focus();return page
 
     def tearDown(self):

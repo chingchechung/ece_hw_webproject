@@ -7,3 +7,31 @@
 
 /* P2 adds assignment controls/dialogs while preserving the approved scene. */
 #assignment-mode{font-size:12px}#unit-status{display:none;position:absolute;left:24px;bottom:151px;max-width:calc(100% - 48px);font-size:12px;padding:7px 12px;background:#10232be8;border:1px solid #69848b80;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}body[data-challenge=education] #unit-status{display:block}#driving-hud .nearby{max-width:330px}#driving-hud .nearby strong{overflow:hidden;text-overflow:ellipsis}#dialog-overlay section{width:min(620px,94%);max-width:620px;max-height:calc(100% - 24px);overflow:auto;padding:20px 26px}#dialog-overlay h2{font-size:22px;overflow-wrap:anywhere}#dialog-overlay p{line-height:1.5;overflow-wrap:anywhere}.unit-context{color:#c1e9e9!important;font-weight:550}.answer-choices{display:grid;gap:7px;margin-top:12px}.answer-choice{text-align:left;white-space:normal;overflow-wrap:anywhere;padding:9px 12px!important;margin:0!important}.external-link{display:inline-block;color:#b2f3e3;border:1px solid #779b9f;padding:8px 12px;border-radius:4px;text-decoration:none}.external-link:hover{background:#304957}.external-link:focus-visible{outline:2px solid #b6d7d4;outline-offset:2px}.link-notice{font-size:11px;color:#a8bdc8;line-height:1.5}#assignment-picker{width:min(660px,94vw);max-height:90vh;overflow:auto;padding:26px;color:#dce8ec;background:#142b38;border:1px solid #8eafb2;border-radius:6px;box-shadow:0 10px 50px #0008}#assignment-picker::backdrop{background:#07151eb8}#assignment-picker h2{font-weight:500;margin:0 0 12px}#assignment-picker p{line-height:1.6;overflow-wrap:anywhere}#unit-select{min-width:0;max-width:100%;flex:1}#assignment-status{padding:10px;background:#10232b;min-height:44px}.picker-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}#assignment-warning{margin-top:16px;border-left:3px solid #e6c278;padding:0 12px}#offline-note{position:absolute;top:0;left:0;right:0;background:#403b25;color:#fff0b5;font-size:12px;padding:8px 18px;z-index:5}@media(max-width:1050px){#unit-status{left:12px;max-width:calc(100% - 24px)}#assignment-mode{margin-left:auto}#driving-hud .nearby{max-width:270px}}@media(max-height:650px){#unit-status{bottom:128px}#dialog-overlay section{padding:14px 20px}#dialog-overlay h2{font-size:18px;margin:8px 0}}
+
+/* Production chrome: the maze renderer, materials and presets are unchanged. */
+header{min-height:54px;padding:8px 20px;gap:14px;flex-shrink:0}
+.brand{gap:10px;flex-shrink:0}.brand-mark{font-size:20px;padding:3px 6px}h1{font-size:19px;white-space:nowrap}
+.edition{margin-left:4px;color:#c1d9d5;font-size:11px;border-left:1px solid #4b626f;padding-left:14px;white-space:nowrap}
+.header-actions{display:flex;gap:7px;margin-left:auto;align-items:center}.header-actions button{font-size:12px;white-space:nowrap}
+#assignment-mode{font-size:12px}nav{padding:7px 20px;gap:8px;flex-shrink:0}nav button,nav select{padding:7px 10px;font-size:12px}
+#control-hint{margin-left:auto;font-size:11px;color:#abc0c8;white-space:nowrap}
+#tools{flex-shrink:0;max-height:26vh;overflow:auto;background:#10232d;border-bottom:1px solid #344a56}
+#presenter-tools,#developer-tools{display:flex;align-items:center;gap:9px;padding:6px 20px;flex-wrap:wrap}
+#tools strong{font-size:11px;color:#c5d8cb;min-width:63px}#tools button,#tools select,#tools input{padding:5px 8px;font-size:11px}#tools input{width:94px}
+#tools label{font-size:11px}#developer-tools{border-top:1px solid #344a5680}
+#scene-info{max-width:55%;top:16px;left:20px;padding:8px 20px 8px 12px}#scene-info h2{font-size:18px}
+#driving-hud{left:20px;bottom:16px;gap:18px;padding:9px 14px;max-width:calc(100% - 40px)}
+#driving-hud strong{font-size:19px}#driving-hud .nearby strong{font-size:14px}#driving-hud small{font-size:9px}
+#unit-status{left:20px;bottom:97px;max-width:calc(100% - 40px);font-size:11px;padding:6px 10px}
+footer{min-height:27px;padding:5px 20px;flex-shrink:0}footer>span{display:block;font-size:10px}
+#map-banner{top:14px;left:20px;right:20px}body[data-map-open=true] #driving-hud{bottom:47px}
+#graphics-dialog{width:min(460px,94vw);max-height:90vh;overflow:auto;padding:24px;color:#dce8ec;background:#142b38;border:1px solid #8eafb2;border-radius:6px;box-shadow:0 10px 50px #0008}
+#graphics-dialog::backdrop{background:#07151e99}#graphics-dialog h2{font-size:21px;font-weight:500;margin:0 0 12px}
+#graphics-dialog p{font-size:12px;color:#b7cdd5;line-height:1.6}#quality{gap:8px;margin:16px 0}#quality legend{float:none;font-size:12px;line-height:1.5;margin:0 0 8px}#quality button{min-width:82px}
+#settings-close{margin-top:8px}button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid #b6d7d4;outline-offset:2px}
+@media(max-width:1100px){header{padding:8px 14px;gap:10px}.edition{display:inline;font-size:10px;padding-left:10px}.brand-mark{display:none}h1{font-size:17px}nav{padding:7px 14px}#control-hint{display:none}.header-actions{gap:5px}.header-actions button{padding:7px 8px}}
+@media(max-width:800px){header{flex-wrap:wrap}.edition{margin-left:auto}.header-actions{width:100%;margin:0}.header-actions button{flex:1}#driving-hud{left:12px;max-width:calc(100% - 24px);gap:12px}#driving-hud .nearby{max-width:250px}#unit-status{left:12px;max-width:calc(100% - 24px)}}
+@media(max-height:650px){header{min-height:44px;padding-top:5px;padding-bottom:5px}nav{padding-top:5px;padding-bottom:5px}#driving-hud{padding:7px 12px;bottom:12px}#driving-hud strong{font-size:17px}#unit-status{bottom:87px}#dialog-overlay section{padding:14px 20px}#diagnostics pre{max-height:150px;overflow:auto}}
+/* A paused full map must not remain readable behind a native modal. */
+body[data-map-open=true]:has(#graphics-dialog[open]) #map-view,
+body[data-map-open=true]:has(#assignment-picker[open]) #map-view{visibility:hidden}
