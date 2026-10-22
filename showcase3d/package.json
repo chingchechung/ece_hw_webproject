@@ -1,12 +1,16 @@
 {
-  "name": "emi-maze-3d-p0",
-  "version": "0.1.0",
+  "name": "emi-maze-3d-showcase",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test --test-isolation=none tests/*.test.mjs"
   },
-  "dependencies": { "three": "0.180.0" },
-  "devDependencies": { "esbuild": "0.25.12" }
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
 }

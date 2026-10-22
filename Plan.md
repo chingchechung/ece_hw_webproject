@@ -4,6 +4,12 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> Separate showcase continuation, 2026-10-22: P0 is approved after qualitative
+> UHD 770 High-preset review. P1 adapts Lite driving and adds five synthetic
+> checkpoint/exit interactions on `feature/3d-showcase`, preserving Lite and P0
+> visuals. No numerical Intel FPS claim; stop before P2 educational integration.
+> See [3D-P1 results](docs/3d-p1-results.md).
+
 > Separate approved showcase track, 2026-10-22: Phase 3D-P0 on
 > `feature/3d-showcase` preserves reviewed Lite commit
 > `823786bc01b68901455061d5fe31d6076c61f20e` / `lite-v1.0` unchanged.

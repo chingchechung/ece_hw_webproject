@@ -1,4 +1,4 @@
-name: 3D showcase P0
+name: 3D showcase P1
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: showcase3d-windows-launcher-${{ github.run_id }}-${{ github.run_attempt }}
-          path: test-results/3d-p0-windows/
+          path: test-results/3d-p1-windows/
           if-no-files-found: warn
           retention-days: 14
 
@@ -67,17 +67,17 @@ jobs:
           cache-dependency-path: requirements-dev.txt
       - name: Install isolated development dependencies
         run: |
-          mkdir -p test-results/3d-p0
-          npm ci --prefix showcase3d 2>&1 | tee test-results/3d-p0/install.log
-          python -m pip install -r requirements-dev.txt 2>&1 | tee -a test-results/3d-p0/install.log
-          python -m playwright install --with-deps chromium 2>&1 | tee -a test-results/3d-p0/install.log
+          mkdir -p test-results/3d-p1
+          npm ci --prefix showcase3d 2>&1 | tee test-results/3d-p1/install.log
+          python -m pip install -r requirements-dev.txt 2>&1 | tee -a test-results/3d-p1/install.log
+          python -m playwright install --with-deps chromium 2>&1 | tee -a test-results/3d-p1/install.log
       - name: Check geometry, Lite preservation and reproducible static bundle
         run: |
-          npm test --prefix showcase3d 2>&1 | tee test-results/3d-p0/node-tests.log
-          git diff --exit-code -- showcase3d/dist showcase3d/src/maze/maps.json
+          npm test --prefix showcase3d 2>&1 | tee test-results/3d-p1/node-tests.log
+          git diff --exit-code -- showcase3d/dist showcase3d/src/maze/maps.json showcase3d/src/maze/lite-generated.js
       - name: Browser regressions, screenshots, real navigation video and benchmark JSON
         if: ${{ !cancelled() }}
-        run: python showcase3d/tests/browser_showcase.py 2>&1 | tee test-results/3d-p0/browser-tests.log
+        run: python showcase3d/tests/browser_showcase.py 2>&1 | tee test-results/3d-p1/browser-tests.log
       - name: Package the allowlisted offline runtime
         if: ${{ !cancelled() }}
         run: python showcase3d/scripts/package.py
@@ -85,8 +85,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: showcase3d-p0-${{ github.run_id }}-${{ github.run_attempt }}
-          path: test-results/3d-p0/
+          name: showcase3d-p1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/3d-p1/
           if-no-files-found: warn
           retention-days: 14
 

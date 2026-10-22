@@ -62,21 +62,27 @@ function instances(geometry, material, transforms, parent, name) {
   });
   mesh.name = name; mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
 }
-function screenTexture(label, exit = false) {
-  const c = Object.assign(document.createElement('canvas'), { width: 512, height: 256 }), g = c.getContext('2d');
+function paintScreen(c, label, exit = false, state = '') {
+  const g = c.getContext('2d');
   g.fillStyle = '#0c2732'; g.fillRect(0, 0, 512, 256);
-  g.fillStyle = exit ? '#b3e2c3' : '#87d3cd'; g.font = 'bold 52px monospace'; g.fillText(label, 24, 62);
-  g.font = '19px monospace'; g.fillText(exit ? 'DEMONSTRATION / EXIT' : 'SIGNAL ANALYSIS / DEMO', 24, 94);
+  g.fillStyle = state === 'COMPLETE' || state === 'UNLOCKED' ? '#b3e2c3' : state ? '#eed297' : exit ? '#b3e2c3' : '#87d3cd';
+  g.font = 'bold 52px monospace'; g.fillText(label, 24, 62);
+  g.font = '19px monospace'; g.fillText(state || (exit ? 'DEMONSTRATION / EXIT' : 'SIGNAL ANALYSIS / DEMO'), 24, 94);
   g.strokeStyle = '#22434a'; g.lineWidth = 1;
   for (let x = 24; x < 490; x += 32) { g.beginPath(); g.moveTo(x, 112); g.lineTo(x, 230); g.stroke(); }
   for (let y = 112; y < 240; y += 24) { g.beginPath(); g.moveTo(24, y); g.lineTo(490, y); g.stroke(); }
   g.strokeStyle = exit ? '#b2dfae' : '#dbd5a0'; g.lineWidth = 3; g.beginPath();
   for (let x = 24; x < 490; x++) g.lineTo(x, 173 + Math.sin(x * 0.04) * 39);
   g.stroke();
+}
+function screenTexture(label, exit = false) {
+  const c = Object.assign(document.createElement('canvas'), { width: 512, height: 256 });
+  paintScreen(c, label, exit);
   const texture = new THREE.CanvasTexture(c); texture.colorSpace = THREE.SRGBColorSpace; return texture;
 }
 export function buildMazeScene(map, materials) {
   const group = new THREE.Group(), ceilings = new THREE.Group(), extras = [];
+  const screenResources = [];
   group.name = 'deterministic-maze'; group.add(ceilings);
   const runs = wallRuns(map), floors = rectangles(map), solids = rectangles(map, false);
   const add = (geometry, material, name, parent = group) => {
@@ -129,6 +135,7 @@ export function buildMazeScene(map, materials) {
     const texture = screenTexture(`LAB ${String(i + 1).padStart(2, '0')}`);
     const material = new THREE.MeshStandardMaterial({ map: texture, emissiveMap: texture, emissive: '#ffffff', emissiveIntensity: 0.55, roughness: 0.5 });
     extras.push(texture, material);
+    screenResources.push({ texture, material });
     const screen = add(new THREE.PlaneGeometry(1.02, 0.64), material, 'instrument-screen');
     screen.position.set(t.x + Math.sin(t.yaw) * 0.147, 1.47, t.z + Math.cos(t.yaw) * 0.147); screen.rotation.y = t.yaw;
   });
@@ -142,8 +149,30 @@ export function buildMazeScene(map, materials) {
   const texture = screenTexture('EXIT  →', true), material = new THREE.MeshStandardMaterial({ map: texture, emissiveMap: texture, emissive: '#ffffff', emissiveIntensity: 0.5 });
   extras.push(texture, material);
   const sign = add(new THREE.PlaneGeometry(2.4, 0.5), material, 'exit-sign', exitGroup); sign.position.set(0, 2.86, 0.205);
+  let progressKey = '';
   return { group, ceilings, stats: { wallRuns: runs.length, floorRectangles: floors.length,
     openCells: map.driveRoad.bits.filter(Boolean).length },
+    setMaterials(next) {
+      group.traverse(object => {
+        for (const key of Object.keys(materials)) if (object.material === materials[key]) { object.material = next[key]; break; }
+      });
+      materials = next; progressKey = '';
+    },
+    updateProgress(completed, nearby = null, presentation = false) {
+      const key = completed.join(',') + ':' + (nearby?.id || '') + ':' + presentation;
+      if (key === progressKey) return; progressKey = key;
+      screenResources.forEach((r,i) => {
+        const state = presentation ? '' : completed[i] ? 'COMPLETE' : nearby?.index === i ? 'READY / PRESS E WHEN STOPPED' : 'SIGNAL ANALYSIS / DEMO';
+        paintScreen(r.texture.image, `LAB ${String(i+1).padStart(2,'0')}`, false, state);
+        r.texture.needsUpdate = true;
+        r.material.emissiveIntensity = presentation ? .55 : completed[i] ? .8 : nearby?.index === i ? .95 : .55;
+      });
+      const unlocked = completed.every(Boolean);
+      paintScreen(texture.image, 'EXIT  →', true, presentation ? '' : unlocked ? 'UNLOCKED' : 'LOCKED / COMPLETE ALL 5 LABS');
+      texture.needsUpdate = true;
+      beam.material.color.set(presentation ? '#aac3b3' : unlocked ? '#a4dfb8' : '#c4b596');
+      beam.material.emissive.set(presentation ? '#35775d' : unlocked ? '#438d64' : '#4c3c21');
+    },
     dispose() {
       group.traverse(object => { if (object.geometry) object.geometry.dispose(); if (object.isInstancedMesh) object.dispose(); });
       extras.forEach(resource => resource.dispose()); group.removeFromParent();

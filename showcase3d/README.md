@@ -1,86 +1,114 @@
-# Engineering Maze Lab — 3D Showcase P0
+# Engineering Maze Lab — 3D Driving P1
 
-A separate visual feasibility prototype. No real questions, answers, course
-files, submission links, student records or saved progress. Lite is unchanged.
-**Stop at P0 for review; this controller does not implement Lite driving physics.**
+Five **synthetic** laboratory checkpoints, the approved Lite arcade driving
+model, and the approved P0 Three.js/WebGL 2 artwork. No real course questions,
+answer keys, Forms, student records, grades or saved progress. Stop at P1 for
+instructor driving review before any P2 educational integration.
 
-## Present offline on Windows 11
+## Start offline on Windows 11
 
-1. Download the **showcase3d-p0-…** artifact from the latest successful
-   **3D showcase P0** GitHub Actions run on `feature/3d-showcase`.
-2. Extract `showcase3d-p0-static.zip` completely to a local folder. Alternatively,
-   download the feature branch and use its complete `showcase3d/` folder.
-3. Double-click **Start-Showcase.cmd**. The built-in Windows PowerShell/.NET
-   launcher opens `http://127.0.0.1:8787/` in the default browser (or the next
-   free port through 8797). Use Chrome/Edge with graphics acceleration enabled.
-4. Keep the launcher window open; close it or press Ctrl+C when finished.
+1. In GitHub **Actions → 3D showcase P1**, open the successful feature-branch
+   run and download **showcase3d-p1-…**.
+2. Extract its **showcase3d-p1-static.zip** completely to a local folder.
+3. Double-click **Start-Showcase.cmd**. Built-in Windows PowerShell 5.1/.NET
+   starts a server at `http://127.0.0.1:8787/` (next free port through 8797) and
+   opens the default browser. Use Chrome or Edge with graphics acceleration.
+4. Keep the launcher window open. Close it or press Ctrl+C to stop.
 
-No Internet, npm, Node, Python, admin privileges, public hosting or rebuild is
-needed at the venue. Do not double-click `dist/index.html`; ES modules require
-local HTTP. The launcher binds IPv4 loopback and serves **dist only**, never
-teacher drafts or the repository. It uses a process-only PowerShell execution
-policy override, without changing the machine policy. If organizational policy
-blocks scripts, use the optional Python launcher below or ask local IT for an
-approved local-static-server method. Native Windows launcher execution remains
-part of instructor hardware review; Linux testing does not verify PowerShell.
+No Node, npm, Python, rebuilding, Internet, administrator privileges or public
+hosting is required at the venue. Serve the complete committed `dist/` directory
+for static hosting. Do not open `index.html` using `file://`.
 
-Optional cross-platform launcher, Python 3.12 stdlib only:
+The launcher binds IPv4 loopback and serves **dist only**, never repository
+source or teacher drafts. Its execution-policy override is process-only.
+Institutional script policy may require an approved alternative. Optional
+cross-platform launcher with Python 3.12 stdlib: `python serve.py` from the
+extracted package, or `python showcase3d/serve.py` from the repository root.
+Windows-runner HTTP checks do not verify the physical presentation computer.
+
+## Drive and activate the labs
+
+- Click the scene to focus it. **W** accelerates, **S** brakes and then reverses,
+  **A/D** steer (including stationary steering); arrow keys are aliases.
+- Mouse drag adjusts vertical look while driving. Heading follows steering;
+  horizontal mouse look is available in inspection views. No passive camera
+  bob, shaking or motion blur is added.
+- Approach **Q1–Q5 / LAB 01–05**, reduce speed, then press **E** or the activation
+  button. Range is 70 Lite world pixels (3.5 m) around the authoritative station
+  centre; the screen/pedestal sits 1.25 m toward a wall. Walls block activation.
+- Activation requires virtual speed ≤25 in either direction (about 6 on the
+  virtual km/h display). E at higher speed only shows a braking reminder.
+- E activates a synthetic checkpoint once and opens an acknowledgement dialog.
+  Continue driving after closing it. Completed screens turn green and progress
+  increases. A held/repeated E does not reactivate completed labs.
+- All five labs unlock the exit. Drive there, stop and press **E** to finish.
+  The completion screen records no submission or personal data.
+
+**Reset / R** restarts the current seed and clears speed, steering, keys,
+progress and dialogs. **Generate** uses an optional uint32 seed (0–4294967295),
+or a new random seed if blank. Select any original maze size. Reset keeps the
+same map; Generate/size selection clears the attempt. Invalid seeds preserve the
+current attempt. Seed 0 follows Lite's existing fallback to RNG seed 29.
+
+**Overview** pauses driving and keeps position/progress. Drag/wheel inspects the
+whole maze; **Return to driving** resumes at the same vehicle position with zero
+speed. Inspect views stage only the camera and also preserve the vehicle. Mouse
+look never changes vehicle heading. Blur/hiding and dialogs stop the vehicle and
+release controls. The wall collision model is Lite's; synthetic props remain
+non-colliding presentation objects.
+
+## Quality and measurement
+
+P0 PBR materials, lighting, world UVs and Low/Medium/High definitions remain.
+Scales are 0.70 / 0.85 / 1.00, bounded by 1280×720 / 1600×900 / 1920×1080;
+manual overrides remain capped. Render DPR is deliberately 1 at Windows 150%
+scaling. The UI retains browser CSS sizing. No MSAA, post-processing or CDN.
+Default cap is 30 FPS; 60 FPS is an evaluation setting. Quality changes replace
+material maps and shadow targets, without rebuilding maze geometry or progress.
+
+The collapsible panel reports frame mean/p95, FPS, CPU submission, optional GPU
+timer queries, draw/triangle/resource counts and estimated memory. Null GPU time
+means unavailable; CPU time is not GPU time, and estimates are not measured VRAM.
+
+The six-scene benchmark retains the P0 seeds/routes: full maze, smallest maze,
+straight corridor, intersection, terminal, motion/turning. Each warms for 1 s and
+samples for 5 s. It pauses and restores the current attempt; cold setup is labelled
+separately as initial Medium. Choose a device label, repeat at least three warm
+runs, and **Export local JSON** after each. No data is uploaded.
+
+The instructor qualitatively approved P0 High on a physical UHD 770 as very
+smooth with excellent visuals. **No numerical Intel GPU benchmark has been
+provided.** P1 driving on UHD 770 and Arc 140V still needs physical review.
+Cloud SwiftShader performance is software rendering, not Intel throughput.
+
+Before a presentation, verify offline launch, steering/braking/reverse, all five
+labs and exit, reset/new seeds, mode returns, live quality changes, 1280×800 at
+150% scaling, fullscreen and the 1080p projector. Export measurements from both
+physical devices. See `docs/3d-p1-results.md` in the repository for the complete
+hardware review procedure, parity evidence and limitations.
+
+## Development and tests
+
+Pinned Three.js **0.180.0**, esbuild **0.25.12**; Node 24 and exact lockfile:
 
 ```console
-python showcase3d/serve.py
-# From inside a standalone extracted package:
-python serve.py
-```
-
-## Controls and review
-
-W/S move; A/D turn; mouse drag looks; R or Reset returns to the seeded start.
-Focus the scene before keyboard navigation. Movement stops on blur/hiding.
-Overview enables a bounded orbit above the walls; dragging rotates, wheel zooms.
-The Inspect menu stages repeatable real corridor/junction/terminal/exit views.
-The synthetic instruments and exit have no gameplay or collision interaction.
-Fullscreen uses the browser API; F11 is the Windows alternative.
-
-Start UHD 770 review at **Low**, 30 FPS. Start Arc 140V at **Medium**, 30 FPS.
-Low/Medium/High use 0.70/0.85/1.00 render scales, bounded by
-1280×720 / 1600×900 / 1920×1080. These apply to the canvas, excluding toolbar
-space; actual internal height therefore varies. Manual resolution overrides are
-still bounded by each preset. Render DPR is deliberately 1 even at Windows 150%
-scaling; controls retain browser CSS sizing. No MSAA or post-processing.
-60 FPS is an evaluation setting, not a promised result.
-
-The diagnostics panel reports rendered-frame interval mean/p95, FPS, CPU render
-submission time, optional asynchronous GPU timer measurements, draw/triangle/
-resource counts and estimated memory. Estimates are not measured VRAM. Timer
-queries may be unavailable, delayed or invalidated; null means unavailable.
-Do not compare Cloud SwiftShader frame rates with Intel hardware results.
-
-Run the six-scene benchmark with the same preset, cap, window and resolution on
-both machines. Each scenario warms for 1 second and records 5 seconds; repeat
-after a cold page load and at least three times warm. Cold loading/shader times
-are separate fields. Choose the correct device label and **Export local JSON**.
-The exported file stays on the computer; no data is uploaded or stored by the app.
-Cancel preserves completed scenarios and marks the run incomplete in the UI.
-See [the complete two-device procedure](../docs/3d-p0-results.md) in the repository.
-
-## Development / reproducible bundle
-
-Node 24, Python 3.12 for tests. From `showcase3d/`:
-
-```console
+cd showcase3d
 npm ci
 npm run build
 npm test
 ```
 
-`three` **0.180.0**, `esbuild` **0.25.12**, exact lockfile. `dist/` is committed
-and venue-ready; do not edit it by hand. The build uses no timestamps, CDN or
-absolute paths. Tests compare its bytes with two fresh builds. The read-only
-adapter executes the reviewed Lite maze generator with deterministic clock/random
-inputs and records its source hash, seed, topology hash and baseline SHA. It does
-not import course data or change Lite source. `src/maze/maps.json` contains only
-the four synthetic demonstration layouts. Future P1 sharing needs a reviewed
-read-only maze-data boundary, not an independent authoritative generator.
+`dist/` is committed and reproducible. Never edit generated output manually.
+The read-only build adapter exports the approved fixed maps and generates
+`src/maze/lite-generated.js` directly from the immutable Lite generator. Browser
+runtime uses ordinary static JavaScript, with no eval, VM, source fetching or
+second author-maintained maze algorithm. Runtime layouts use a labelled FNV
+fingerprint for diagnostics; the original P0 benchmark maps retain SHA-256 IDs.
+
+All authoritative physics positions remain Lite world pixels; centralized helpers
+convert 14 pixels to 0.7 m only at the rendering boundary. Pure driving equations
+match the actual Lite functions frame by frame, including the .045 s frame cap,
+12× virtual distance, nine-point 6-pixel clearance and collision sliding.
 
 From the repository root:
 
@@ -91,22 +119,18 @@ python showcase3d/tests/browser_showcase.py
 python showcase3d/scripts/package.py
 ```
 
-The separate browser suite forces Chromium SwiftShader for repeatable **Cloud
-functional checks**. It uses the installed Playwright Chromium, falling back to a
-system Chromium in Codex Cloud; `EMI_3D_BROWSER_PATH` overrides the executable.
-Its browser, server, synthetic fixtures and Node dependencies are outside `dist/`.
-Outputs live only under ignored `test-results/3d-p0/`. `window.showcase.snapshot()`
-and `runBenchmark({warmupMs,durationMs})` are local diagnostic interfaces; shortened
-automated captures are functional checks, not the recommended hardware benchmark.
+Test fixtures and infrastructure stay outside `dist/`. The frozen approved P0
+source baseline builds only under ignored `test-results/3d-p1/p0-runtime/` for
+paired real-browser image comparisons. The accepted end-to-end test starts at the
+actual entry and uses real keyboard holds for a complete five-lab/exit route.
+`?testClock=1` explicitly enables a diagnostic simulation clock; only that mode
+exposes `window.showcase.advanceSimulation(seconds)` (bounded to 20 s per call).
+It advances the actual physics using held keyboard input and never sets positions.
+Its accelerated-clock video is functional evidence, not a real-time FPS benchmark.
+Normal presentation URLs use real animation-frame timing and expose no clock hook.
 
-`python showcase3d/scripts/package.py` creates the allowlisted standalone ZIP in
-`test-results/3d-p0/`. The feature-only CI runs these checks and the unchanged
-151-test Lite suite in separate jobs. The stable `work` workflow is byte-identical.
-
-## Scope and limits
-
-Windows/Intel and native PowerShell require instructor verification. No macOS/
-Safari compatibility claim. No shared gameplay, automatic quality adaptation,
-cockpit, reflections post-process, physics engine or course integrations. The
-context-loss handler requests browser recovery and shows a reload instruction
-if recovery fails. Reload/reset are always available through browser controls.
+The separate feature CI runs all Lite regressions, Node source/physics/geometry
+checks, Chromium/WebGL driving and visual checks, and Windows launcher checks.
+Synthetic logs, screenshots, traces, videos, JSON and the static ZIP upload even
+on failure. The stable `work` workflow and Lite implementation remain unchanged.
+Artifacts are retained 14 days. macOS/Safari remain untested.

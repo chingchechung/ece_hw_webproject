@@ -1,0 +1,15 @@
+{
+  "commit": "f685a21e391cdb0848b851e6bf2b72707c77162a",
+  "files": {
+    "index.html": "768ef75d8c89b334c105a89806e2069156a50ce16e8afeffcd8f2b34aa48e74e",
+    "src/camera/controller.js": "b7f2f84d8355d6b4fe0ce32e00451c68232895f406aaf67c63991952c8da7149",
+    "src/main.js": "7d16ac43f016adffc652c3d638a312de425ac43fd1bff8eaeaa1334188186fb5",
+    "src/materials/laboratory.js": "f824bbee123ff7cf7f2c1833cc9b67590edbd4dd3135d14d42c68748a0bc2d88",
+    "src/maze/layout.js": "82423e1e000402e3b3dbb188be54a63938beb521566260d845c12f29ba8b1e06",
+    "src/maze/maps.json": "837a1f664225755228be90001c3aa9713ea954c7e412f8b8bdb46a2f923b021b",
+    "src/performance/metrics.js": "4a1d349163d617bf90e50bd4cf1b22fd14f4db63200122473fe7e06fc912e012",
+    "src/performance/quality.js": "651ae3dae95af1181564ff286cf660649cbecddce45283205bb1e658f9a8daf6",
+    "src/scene/geometry.js": "d63b4d80b884d93f6894e47035c38bb805e148b864a5b03fd658a73f81290cef",
+    "src/style.css": "0392fa95c234e1c91aa50ba4ef73decff1349fb8c068d657abbb6ba86fcf1977"
+  }
+}

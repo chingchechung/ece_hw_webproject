@@ -2,27 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark"><title>EMI Lab · 3D Showcase P0</title>
-  <link rel="icon" href="data:,"><link rel="stylesheet" href="./app-RD2YC7DH.css">
+  <meta name="color-scheme" content="dark"><title>EMI Lab · 3D Driving P1</title>
+  <link rel="icon" href="data:,"><link rel="stylesheet" href="./app-RYFAG6EX.css">
 </head>
 <body>
-  <header><div class="brand"><span class="brand-mark">E<span>∕</span>M</span><div><h1>Engineering Maze Lab</h1><p>3D SHOWCASE · P0</p></div></div><span class="edition">Visual prototype · synthetic content</span><button id="fullscreen">Fullscreen</button></header>
+  <header><div class="brand"><span class="brand-mark">E<span>∕</span>M</span><div><h1>Engineering Maze Lab</h1><p>3D DRIVING · P1</p></div></div><span class="edition">Five synthetic checkpoints · no course data</span><button id="fullscreen">Fullscreen</button></header>
   <nav aria-label="Scene controls">
     <label>Maze <select id="maze"><option value="25x19">25 × 19 · full</option><option value="21x15">21 × 15</option><option value="17x13">17 × 13</option><option value="13x9">13 × 9 · small</option></select></label>
     <fieldset id="quality"><legend>Quality</legend><button data-quality="Low">Low</button><button data-quality="Medium" aria-pressed="true">Medium</button><button data-quality="High">High</button></fieldset>
     <label>Resolution <select id="scale"><option value="auto">Preset</option><option value="0.5">0.50×</option><option value="0.7">0.70×</option><option value="0.85">0.85×</option><option value="1">1.00×</option><option value="1.25">1.25×</option></select></label>
     <label>Limit <select id="fps"><option value="30">30 FPS</option><option value="60">60 FPS · evaluate</option></select></label>
     <button id="camera">Overview</button><button id="reset">Reset · R</button>
+    <label>Seed <input id="seed" inputmode="numeric" placeholder="Random" aria-label="Optional uint32 maze seed"></label><button id="generate">Generate</button>
   </nav>
   <main id="stage">
-    <canvas id="view" tabindex="0" aria-label="3D maze. W/S move, A/D turn, drag to look, R reset."></canvas>
+    <canvas id="view" tabindex="0" aria-label="3D driving. W accelerates, S brakes/reverses, A/D steer, E activates, R resets."></canvas>
     <div class="scene-caption"><span>EMI / ENGINEERING ENVIRONMENTS</span><h2 id="scene-name">Laboratory corridor</h2><p id="seed-label"></p></div>
     <div id="message" role="status">Preparing local WebGL 2 scene…</div>
+    <div id="driving-hud" aria-label="Driving status"><div><strong id="speed">0</strong><small>VIRTUAL km/h</small></div><div><strong id="progress">0 / 5</strong><small>LAB CHECKPOINTS</small></div><div class="nearby"><strong id="nearby">Find Q1–Q5</strong><small id="interaction-hint">W accelerate · S brake / reverse · A/D steer</small></div><button id="interact" hidden>Activate · E</button></div>
+    <div id="dialog-overlay" hidden><section role="dialog" aria-modal="true" aria-labelledby="dialog-title"><span class="dialog-kicker">SYNTHETIC DEMONSTRATION</span><h2 id="dialog-title"></h2><p id="dialog-text"></p><button id="dialog-close">Continue driving</button></section></div>
     <aside id="diagnostics"><details open><summary>Render diagnostics <span id="fps-badge">—</span></summary><pre id="stats"></pre><button id="export">Export local JSON</button></details></aside>
-    <div class="view-controls"><label>Inspect <select id="inspection"><option value="start">First-person / start</option><option value="straight">Straight corridor</option><option value="t-junction">T junction</option><option value="four-way">Four-way junction</option><option value="checkpoint">Laboratory terminal</option><option value="finish">Exit structure</option><option value="wall">Wall close-up</option><option value="floor">Floor close-up</option></select></label><span>W/S move · A/D turn · drag to look</span></div>
+    <div class="view-controls"><label>View <select id="inspection"><option value="driving">Return to driving</option><option value="start">Inspect start</option><option value="straight">Straight corridor</option><option value="t-junction">T junction</option><option value="four-way">Four-way junction</option><option value="checkpoint">Laboratory terminal</option><option value="finish">Exit structure</option><option value="wall">Wall close-up</option><option value="floor">Floor close-up</option></select></label><span id="control-hint">W accelerate · S brake/reverse · A/D steer · E activate</span></div>
   </main>
-  <footer><span id="status">Local assets · no course data · Lite gameplay not connected</span><label>Device <select id="device"><option>Unspecified / Cloud</option><option>Windows · UHD 770</option><option>Windows · Arc 140V</option></select></label><button id="benchmark">Run six-scene benchmark</button><button id="cancel-benchmark" hidden>Cancel</button></footer>
+  <footer><span id="status">Local synthetic demo · no grades or saved progress</span><label>Device <select id="device"><option>Unspecified / Cloud</option><option>Windows · UHD 770</option><option>Windows · Arc 140V</option></select></label><button id="benchmark">Run six-scene benchmark</button><button id="cancel-benchmark" hidden>Cancel</button></footer>
   <noscript>This prototype requires JavaScript and WebGL 2. The separate Lite edition remains available.</noscript>
-  <script type="module" src="./app-PB2RGZYH.js"></script>
+  <script type="module" src="./app-UMZRAWDN.js"></script>
 </body>
 </html>

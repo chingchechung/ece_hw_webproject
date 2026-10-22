@@ -2,6 +2,19 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved isolated 3D-P1 supplement — 2026-10-22
+
+The instructor approved P0 and reports smooth High-quality visuals on a physical
+UHD 770; no numerical FPS was supplied. P1 is authorized on `feature/3d-showcase`
+only: adapt the approved Lite driving equations, add five synthetic checkpoint/
+exit interactions, reset/regeneration, and parity/control-driven browser tests.
+Keep Lite, schemas, validators, GUI and stable CI byte-identical. Preserve the
+P0 art/presets and `showcase3d-p0-approved` tag; keep browser generation free of
+eval via the read-only build-generated data boundary. Use no real course data,
+Forms, login, tracking or persistent progress. See `docs/3d-p1-results.md`.
+This supersedes the P0 stopping point below. Stop after P1 for physical driving
+review on UHD 770 / Arc 140V; do not start P2 or merge into `work`/`main`.
+
 ## Approved isolated 3D-P0 supplement — 2026-10-22
 
 The instructor authorized a separate Three.js/WebGL 2 visual feasibility

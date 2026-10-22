@@ -1,7 +1,7 @@
 export const CELL = 0.7;
 export const HEIGHT = 3.6;
 export const DIRECTIONS = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-export const center = p => ({ x: (4 * p.x + 2) * CELL, z: (4 * p.y + 2) * CELL });
+export const center = p => liteToThree(logicalToLite(p));
 export function road(map, x, z) {
   const { w, h, bits } = map.driveRoad;
   return x >= 0 && z >= 0 && x < w && z < h && bits[z * w + x] === 1;
@@ -108,3 +108,4 @@ export function move(map, pose, distance) {
     if (walkable(map, pose.x, pose.z + dz)) pose.z += dz;
   }
 }
+import { logicalToLite, liteToThree } from '../gameplay/coordinates.js';

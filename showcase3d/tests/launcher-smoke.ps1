@@ -1,7 +1,7 @@
 # Run on a Windows GitHub-hosted runner using Windows PowerShell 5.1.
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$output = Join-Path $repoRoot 'test-results/3d-p0-windows'
+$output = Join-Path $repoRoot 'test-results/3d-p1-windows'
 New-Item -ItemType Directory -Force -Path $output | Out-Null
 $launcher = Join-Path (Split-Path $PSScriptRoot -Parent) 'launch.ps1'
 $process = Start-Process powershell.exe -ArgumentList @('-NoLogo', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $launcher, '-NoBrowser') -PassThru -RedirectStandardOutput (Join-Path $output 'server.log') -RedirectStandardError (Join-Path $output 'server-errors.log')
