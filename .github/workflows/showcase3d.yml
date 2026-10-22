@@ -1,0 +1,128 @@
+name: 3D showcase P0
+
+on:
+  push:
+    branches: [feature/3d-showcase]
+    paths:
+      - showcase3d/**
+      - .github/workflows/showcase3d.yml
+      - .github/workflows/ci.yml
+      - student/**
+      - tools/**
+      - schemas/**
+      - tests/**
+      - js/**
+      - assignments/**
+      - emi_maze_dualview_v1.2/**
+      - emi_maze_dualview_v1.2.zip
+      - requirements-dev.txt
+  pull_request:
+    branches: [work]
+    paths: [showcase3d/**, .github/workflows/showcase3d.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-launcher:
+    name: Windows PowerShell 5.1 / offline launcher
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check built-in launcher, relative bundle, HEAD MIME and dist-only boundary
+        shell: powershell
+        run: ./showcase3d/tests/launcher-smoke.ps1
+      - name: Upload Windows launcher evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: showcase3d-windows-launcher-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/3d-p0-windows/
+          if-no-files-found: warn
+          retention-days: 14
+
+  showcase:
+    name: WebGL 2 functional checks / software Chromium
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: showcase3d/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install isolated development dependencies
+        run: |
+          mkdir -p test-results/3d-p0
+          npm ci --prefix showcase3d 2>&1 | tee test-results/3d-p0/install.log
+          python -m pip install -r requirements-dev.txt 2>&1 | tee -a test-results/3d-p0/install.log
+          python -m playwright install --with-deps chromium 2>&1 | tee -a test-results/3d-p0/install.log
+      - name: Check geometry, Lite preservation and reproducible static bundle
+        run: |
+          npm test --prefix showcase3d 2>&1 | tee test-results/3d-p0/node-tests.log
+          git diff --exit-code -- showcase3d/dist showcase3d/src/maze/maps.json
+      - name: Browser regressions, screenshots, real navigation video and benchmark JSON
+        if: ${{ !cancelled() }}
+        run: python showcase3d/tests/browser_showcase.py 2>&1 | tee test-results/3d-p0/browser-tests.log
+      - name: Package the allowlisted offline runtime
+        if: ${{ !cancelled() }}
+        run: python showcase3d/scripts/package.py
+      - name: Upload synthetic showcase evidence and standalone ZIP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: showcase3d-p0-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/3d-p0/
+          if-no-files-found: warn
+          retention-days: 14
+
+  lite-preservation:
+    name: Unchanged Lite / Python 3.12 / Tk / Chromium
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      EMI_BROWSER: chromium
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install unchanged Lite test dependencies
+        run: |
+          mkdir -p test-results/ci
+          sudo apt-get update 2>&1 | tee test-results/ci/install.log
+          sudo apt-get install -y python3-tk xvfb xauth fonts-noto-cjk 2>&1 | tee -a test-results/ci/install.log
+          python -m pip install -r requirements-dev.txt 2>&1 | tee -a test-results/ci/install.log
+          python -m playwright install --with-deps chromium 2>&1 | tee -a test-results/ci/install.log
+      - name: Run all 151 approved Lite regressions
+        run: xvfb-run -a -s "-screen 0 1440x1000x24 -nolisten tcp" python tests/run_ci.py
+      - name: Upload synthetic Lite evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lite-preservation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14

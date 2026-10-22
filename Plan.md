@@ -4,6 +4,14 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> Separate approved showcase track, 2026-10-22: Phase 3D-P0 on
+> `feature/3d-showcase` preserves reviewed Lite commit
+> `823786bc01b68901455061d5fe31d6076c61f20e` / `lite-v1.0` unchanged.
+> Three.js/WebGL 2 and a development build are authorized only for the isolated
+> static `showcase3d/` prototype. No course gameplay integration or merge into
+> `work`/`main`; stop for Windows UHD 770 / Arc 140V review. See
+> [3D-P0 results](docs/3d-p0-results.md).
+
 > Approved authoring revision, 2026-10-20: see `docs/data-contract-v2.md` and
 > `docs/phase-2-multianswer-results.md`. Public v1 remains supported. V2 permits
 > three/four options and multiple teacher-accepted labels while each student

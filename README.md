@@ -2,6 +2,19 @@
 
 Read [AGENTS.md](AGENTS.md) and [Plan.md](Plan.md) before development.
 
+The separate **3D Showcase P0** lives on `feature/3d-showcase`, under
+[`showcase3d/`](showcase3d/README.md). It includes a committed offline static
+runtime and a Windows one-click launcher. It has synthetic laboratory markers
+and prototype navigation; Lite course gameplay is not connected. The reviewed
+Lite educational baseline is tagged **`lite-v1.0`** at
+`823786bc01b68901455061d5fe31d6076c61f20e`; `work` remains unchanged.
+See [screenshots, tests and the two-device review checklist](docs/3d-p0-results.md).
+In GitHub **Actions → 3D showcase P0 → latest feature-branch run**, inspect both
+jobs and download **showcase3d-p0-…** for the venue-ready static ZIP, screenshots,
+real-browser video, traces and local benchmark JSON. The separate **lite-preservation-…**
+artifact contains the unchanged Lite regression results. Artifacts are retained
+14 days and are available even after test failure; check job status first.
+
 The offline Tkinter/ttk teacher editor supports S01–S12,
 private incomplete drafts, four/five questions, local Allow Play, validated unit
 exports and a public manifest containing only allowed units with current exports.

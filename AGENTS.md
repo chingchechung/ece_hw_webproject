@@ -2,6 +2,20 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved isolated 3D-P0 supplement — 2026-10-22
+
+The instructor authorized a separate Three.js/WebGL 2 visual feasibility
+prototype on `feature/3d-showcase`. The reviewed Phase 5B.1 Lite baseline is
+`823786bc01b68901455061d5fe31d6076c61f20e`, tagged `lite-v1.0` without replacing
+any tag. Keep `student/`, teacher tools, schemas, shared validators, original
+prototype, existing tests and the stable work-branch CI byte-identical.
+Pinned development bundling is authorized only inside `showcase3d/`; its static
+runtime must work offline without Node/npm. Use synthetic markers, a read-only
+build adapter to Lite topology, isolated prototype controls and separate CI.
+Cloud software rendering does not establish Intel hardware performance.
+See `docs/3d-p0-results.md`. Stop after P0 for physical Windows hardware review;
+do not merge into `work`/`main` or start P1 assignment/physics integration.
+
 ## Approved v2 authoring supplement — 2026-10-20
 
 The instructor approved the multi-accepted-answer revision documented in

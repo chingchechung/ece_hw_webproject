@@ -1,0 +1,12 @@
+{
+  "phase": "3D-P0",
+  "three": "0.180.0",
+  "esbuild": "0.25.12",
+  "liteBaseline": "823786bc01b68901455061d5fe31d6076c61f20e",
+  "files": {
+    "LICENSES.txt": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+    "app-4JUWX4SJ.js": "9f952db5d22c3aaf05498e06cf84d975e9f8caad5af49bafc60658226e1745b7",
+    "app-RD2YC7DH.css": "49374e7f6256bb154788bc5a247fbf0f54c0dc53b9eff0eaf9fbc9fa650cb8ae",
+    "index.html": "85c96648a5a2e04a09b8dea1e07ef7c1079c502a286b21db841efa4bd09dafc4"
+  }
+}
