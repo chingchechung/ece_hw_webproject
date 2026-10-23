@@ -1,0 +1,66 @@
+name: Recover verified v1.0.0 publication
+
+on:
+  push:
+    branches: [release/v1.0.0-publication]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: publish-v1.0.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'chingchechung/ece_hw_webproject'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Only this final-tag publisher can create the explicitly authorized Release.
+    # Unified regression jobs retain read-only tokens; no repository secrets.
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Check out the commit explicitly; checkout must not rewrite a local tag.
+          ref: adf0d2d343d36d61d13a222b410e3068a00458ea
+          persist-credentials: false
+      - name: Verify the original immutable annotated release tag
+        run: |
+          test "$(git cat-file -t refs/tags/v1.0.0)" = tag
+          test "$(git rev-parse refs/tags/v1.0.0)" = 8bf5b2c6088ebba3534264d8166300e8c4e1ed5f
+          test "$(git rev-parse 'refs/tags/v1.0.0^{commit}')" = adf0d2d343d36d61d13a222b410e3068a00458ea
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: showcase3d/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild the exact verified source
+        run: |
+          npm ci --prefix showcase3d
+          npm run build --prefix showcase3d
+          git diff --exit-code -- showcase3d/dist showcase3d/src/maze
+      - name: Verify main CI, package, upload, download-check and publish stable Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python release/publish.py
+      - name: Upload separately labelled release verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v1.0.0-release-verification-${{ github.run_id }}
+          path: |
+            test-results/release/verification.json
+            test-results/release/release-notes.md
+          if-no-files-found: warn
+          retention-days: 14
