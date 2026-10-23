@@ -22,6 +22,12 @@ def api(path):
     return json.loads(command('gh', 'api', f'repos/{REPOSITORY}/{path}'))
 
 
+def list_releases():
+    pages = json.loads(command('gh', 'api', '--paginate', '--slurp',
+        f'repos/{REPOSITORY}/releases?per_page=100'))
+    return [release for page in pages for release in page]
+
+
 def verified_run(runs, sha):
     for run in runs:
         if (run['head_sha'] == sha and run['head_branch'] == 'main'
@@ -61,9 +67,7 @@ def publish():
     if main != sha:
         raise RuntimeError('Remote main changed; do not release another source')
     # v1.0.0 is a new release only. Never edit or replace an existing release.
-    releases = json.loads(command('gh', 'api', '--paginate', '--slurp',
-        f'repos/{REPOSITORY}/releases?per_page=100'))
-    if any(release['tag_name'] == TAG for page in releases for release in page):
+    if any(release['tag_name'] == TAG for release in list_releases()):
         raise RuntimeError('v1.0.0 release already exists; stop without changing it')
     runs = api(f'actions/workflows/showcase3d.yml/runs?branch=main&event=push&head_sha={sha}&per_page=100')
     run = verified_run(runs['workflow_runs'], sha)
@@ -95,7 +99,7 @@ def publish():
 Tested main release commit: `{sha}`
 Annotated tag: `{TAG}`
 Successful full main CI: {run['html_url']}
-All 257 automated tests, four CLI manifests and seven Windows launcher checks pass.
+All 258 automated tests, four CLI manifests and seven Windows launcher checks pass.
 Historical Lite/P0/3D RC tags are preserved. No gameplay, visuals, physics, GUI or assignment rules changed during stabilization.
 
 ### SHA-256
@@ -111,7 +115,11 @@ Historical Lite/P0/3D RC tags are preserved. No gameplay, visuals, physics, GUI 
     command('gh', 'release', 'create', TAG, *(str(p) for p in paths), '--repo', REPOSITORY,
             '--verify-tag', '--draft', '--title', 'Engineering Maze Lab v1.0.0',
             '--notes-file', str(notes_file))
-    release = api(f'releases/tags/{TAG}')
+    # Tag lookup returns published releases only. Resolve this new draft by ID.
+    drafts = [release for release in list_releases() if release['tag_name'] == TAG]
+    if len(drafts) != 1 or not drafts[0]['draft']:
+        raise RuntimeError('Expected exactly one newly created draft release')
+    release = api(f'releases/{drafts[0]["id"]}')
     verify_assets(release['assets'], expected)
     # Download the uploaded bytes and compare too; do not rely only on API metadata.
     downloaded = evidence / 'downloaded'
