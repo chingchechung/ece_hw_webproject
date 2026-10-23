@@ -23,8 +23,8 @@
       "reason": "Expect the localized game script cache key; renderer/material versions and every slash behavior assertion retained."
     },
     "tests/browser_student.py": {
-      "sha256": "9cff8281a999a483ba4282ab002ae5b031d22fc5a7257ae8e091e6c6b61af849",
-      "reason": "English status/error assertions replace Chinese expectations; all loading and safety assertions retained."
+      "sha256": "adc31f2f6a73ff7b3c8d3814af86802016f1023bbc2cd4cb38022aa98b8995d0",
+      "reason": "English status/error assertions and deterministic HTTP request gates for cancellation; all existing loading/safety assertions retained."
     },
     "tests/test_drive_contract.py": {
       "sha256": "8739f306cd9a72c543689a20c3c3246d27fa274fb31e9dcd9120bfb3cb4850c4",

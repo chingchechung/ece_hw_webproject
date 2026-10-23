@@ -51,13 +51,21 @@ class StaticHandler(SimpleHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        delay = self.server.delays.get(urlsplit(self.path).path, 0)
+        path = urlsplit(self.path).path
+        gate = getattr(self.server, 'gates', {}).get(path)
+        if gate:
+            gate['started'].set()
+            gate['release'].wait(30)
+        delay = self.server.delays.get(path, 0)
         if delay:
             time.sleep(delay)
         try:
             super().do_GET()
         except (BrokenPipeError, ConnectionResetError):
             pass  # A superseded fetch is deliberately aborted by the loader.
+        finally:
+            if gate:
+                gate['finished'].set()
 
     def end_headers(self):
         if self.path.endswith('.json'):
@@ -89,6 +97,7 @@ class StudentBrowserHarness(unittest.TestCase):
                                          partial(StaticHandler, directory=self.base))
         self.server.daemon_threads = True
         self.server.delays = {}
+        self.server.gates = {}
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
         self.origin = f'http://127.0.0.1:{self.server.server_port}'
@@ -114,6 +123,8 @@ class StudentBrowserHarness(unittest.TestCase):
                                    self._testMethodName, self.errors)
         finally:
             self.context.close()
+            for gate in self.server.gates.values():
+                gate['release'].set()
         self.server.shutdown()
         self.server.server_close()
         self.thread.join()
@@ -377,20 +388,34 @@ class StudentBrowserTests(StudentBrowserHarness):
 
     def test_overlapping_loads_refresh_and_network_failure(self):
         self.publish(fixture(1, 'S01'), fixture(2, 'S02'))
-        self.server.delays[self.prefix + 'assignments/S01.json'] = .6
+        path = self.prefix + 'assignments/S01.json'
+        first = {name: threading.Event() for name in ('started', 'release', 'finished')}
+        self.server.gates[path] = first
         self.open()
         self.click_load()
+        self.assertTrue(first['started'].wait(5), 'First S01 request must be in flight')
         self.page.select_option('#unitSelect', 'S02')
         self.click_load()
         self.page.wait_for_function("studentTest.state().assignment?.unitId==='S02'")
+        first['release'].set()
+        self.assertTrue(first['finished'].wait(5), 'Release the superseded S01 response')
         self.page.wait_for_timeout(750)
         self.assertEqual(self.state()['assignment']['unitId'], 'S02')
+        second = {name: threading.Event() for name in ('started', 'release', 'finished')}
+        self.server.gates[path] = second
         self.page.click('#unitLabel')
         self.page.select_option('#unitSelect', 'S01')
         self.click_load()
+        self.assertTrue(second['started'].wait(5), 'Reloaded S01 must still be pending')
         self.publish(fixture(2, 'S02'))
+        # Exceed the former .6-second delay deliberately. Only the explicit
+        # gate controls completion, independent of runner/Playwright timing.
+        self.page.wait_for_timeout(750)
+        self.assertFalse(second['finished'].is_set())
         self.page.click('#refreshManifest')
         self.page.wait_for_function("document.querySelector('#unitSelect').value==='S02'")
+        second['release'].set()
+        self.assertTrue(second['finished'].wait(5), 'Release S01 only after refresh cancelled it')
         self.page.wait_for_timeout(750)
         self.assertEqual(self.state()['assignment']['unitId'], 'S02')
         self.page.route('**/assignments/S02.json', lambda route: route.abort('failed'))
