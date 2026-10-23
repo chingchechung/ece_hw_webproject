@@ -538,6 +538,15 @@
       "offsets": [
         26870
       ]
+    },
+    {
+      "before": "1.0.0-rc1",
+      "after": "1.0.0",
+      "offsets": [
+        109,
+        26723,
+        26877
+      ]
     }
   ],
   "student/js/assignment-loader.js": [

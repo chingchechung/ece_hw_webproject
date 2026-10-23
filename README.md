@@ -2,7 +2,7 @@
 
 Read [AGENTS.md](AGENTS.md) and [Plan.md](Plan.md) before development.
 
-The **unified 1.0.0-rc1 candidate** on `feature/3d-showcase` contains both
+The **Engineering Maze Lab 1.0.0 release** on `main` contains both
 independently deployable editions: **English Lite** in [`student/`](student/)
 and the approved **3D educational/showcase edition** in
 [`showcase3d/`](showcase3d/README.md). Both use the unchanged v1/v2 validators,
@@ -17,7 +17,7 @@ from the approved P2.1.1 fullscreen fix. **V** switches views; the 3D **M** key
 opens its cumulative 30-second full map. The separate synthetic demo and Windows
 `Start-Showcase.cmd` launcher remain available.
 
-Build the reproducible **Engineering-Maze-Lab-1.0.0-rc1.zip** and the existing 3D
+Build the reproducible **Engineering-Maze-Lab-1.0.0.zip** and the existing 3D
 Windows ZIP with the commands in the [unified packaging and Apache guide](release/README.md).
 The unified ZIP contains `lite/`, `3d/`, a guide and a hashed release inventory;
 it excludes teacher tools, schemas, tests, private drafts and credentials.
@@ -25,8 +25,8 @@ For upgrades, copy runtime files first and index last, **preserving every live
 `assignments/` file, including its manifest**. Never overwrite a live manifest
 with the package's empty bootstrap manifest. Deployment remains manual.
 
-In GitHub **Actions → Unified release candidate — Lite + 3D**, select the run
-for the candidate's exact SHA and inspect all three jobs, including every step:
+In GitHub **Actions → Unified release — Lite + 3D**, select the run
+for the release's exact SHA and inspect all three jobs, including every step:
 English Lite/Python/Tk/Chromium, WebGL/educational/cross-edition checks, and the
 Windows PowerShell launcher. Scroll to **Artifacts**, download and extract:
 
@@ -38,20 +38,25 @@ Windows PowerShell launcher. Scroll to **Artifacts**, download and extract:
 - **showcase3d-windows-launcher-…**: Windows HTTP/launcher evidence.
 
 Artifacts upload even on failure and expire after 14 days. Read the
-[combined readiness report](docs/unified-release-results.md) for actual run URLs,
-counts, source commit, hashes, changed files and review limitations. The work
+[stable release report](docs/v1.0.0-release-results.md) for actual run URLs,
+counts, release commit, hashes, changed files and limitations. The work
 branch's existing **Regression tests** workflow remains available separately.
-No automatic deployment, repository secrets or write-enabled Actions token is used.
+The regression workflow uses read-only tokens and never deploys. A separate
+`Publish verified v1.0.0` workflow runs only when the new final tag is pushed;
+its release job alone has `contents: write` / `actions: read`, using the built-in
+token to verify exact main CI, upload both ZIPs to a draft, download-check their
+SHA-256 hashes, then publish stable. It refuses an existing release and adds no
+repository secrets or Apache deployment.
 
 The historical **`lite-v1.0`** baseline at `823786b`, **`showcase3d-p0-approved`**
 at `f685a21` and **`showcase3d-v1.0.0-rc1`** at `94c8a03` remain immutable.
 The 69-file historical Lite manifest stays frozen; explicit English UI/test
 expectations and reversible UI edits supplement it. Exact generator and driving
-parity checks remain active. The unified candidate is identified by its source
-SHA and ZIP; it does not move the older 3D tag.
-**Stop for instructor review. Do not merge into `work`/`main` or create the final
-`v1.0.0` tag.** The eventual approved `main` commit and single release tag will
-contain both editions together.
+parity checks remain active. The stable `v1.0.0` tag identifies the verified main release commit and both
+editions together. The instructor accepted both on university Apache and actual
+Windows hardware. Download the two ZIPs and verify their SHA-256 checksums from
+the [GitHub Release](https://github.com/chingchechung/ece_hw_webproject/releases/tag/v1.0.0).
+Historical phase reports below retain their original review status.
 
 The offline Tkinter/ttk teacher editor supports S01–S12,
 private incomplete drafts, four/five questions, local Allow Play, validated unit
@@ -64,14 +69,14 @@ student site supporting both versions. Phase 5A adds original laboratory-themed
 approved 2D pixel artwork and atmosphere/interaction feedback. Phase 5B enhances
 the first-person driving artwork while preserving the shared gameplay and physics.
 Phase 5B.1 adds realistic cached materials and fixes Windows reduced-motion slash suppression.
-Historical Phase 5B.1 behavior remains covered by the unified candidate regressions.
+Historical Phase 5B.1 behavior remains covered by the unified release regressions.
 
 ## Teacher editor — Windows 11
 
 1. Install [Python 3.12 for Windows](https://www.python.org/downloads/windows/).
    Keep the installer’s **Tcl/Tk and IDLE** component enabled. No pip packages
    are required for the application.
-2. Obtain the unified candidate's **feature/3d-showcase** branch, keeping `tools/` and `schemas/`
+2. Obtain the **v1.0.0** source tag (or the stable **main** branch), keeping `tools/` and `schemas/`
    together. In PowerShell, change to the extracted/cloned project folder.
 3. Check Tkinter, close its demo window, then launch the editor:
 

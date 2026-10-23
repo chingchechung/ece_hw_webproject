@@ -30,13 +30,13 @@ class ProductionUiTests(unittest.TestCase):
     def setUpClass(cls):
         education.EducationBrowserTests.setUpClass.__func__(cls)
         subprocess.run(['python','showcase3d/scripts/package.py'],cwd=ROOT,check=True)
-        archive=OUT/'showcase3d-1.0.0-rc1-static.zip'
+        archive=OUT/'showcase3d-1.0.0-static.zip'
         with ZipFile(archive) as zipped:
             assert len(zipped.namelist())==11
             assert all(name.startswith('showcase3d/') for name in zipped.namelist())
             assert json.loads(zipped.read('showcase3d/dist/assignments/manifest.json'))=={'schemaVersion':1,'units':[]}
             info=json.loads(zipped.read('showcase3d/dist/build-info.json'))
-            assert info['version']=='1.0.0-rc1'
+            assert info['version']=='1.0.0'
             for name in info['files']:
                 assert zipped.read('showcase3d/dist/'+name)==(ROOT/'showcase3d/dist'/name).read_bytes()
             zipped.extractall(Path(cls.temp.name)/'nested/release')

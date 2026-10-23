@@ -1,6 +1,6 @@
 {
   "name": "emi-maze-3d-showcase",
-  "version": "1.0.0-rc1",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {

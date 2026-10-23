@@ -1,23 +1,22 @@
-# Engineering Maze Lab — v1.0.0-rc1
+# Engineering Maze Lab — v1.0.0
 
 The approved dual-view driving and P0 Three.js/WebGL 2 artwork now support
 **Educational Assignment Mode** alongside **3D Demonstration Mode**. The release
 contains an empty public manifest: no course questions, instructor drafts or
 student information. Educational play uses the same published v1/v2 JSON as Lite.
 The instructor approved P2 gameplay after successful university Apache deployment
-and testing from a separate Windows/Iris Xe laptop. This P2.1 candidate cleans
+and testing from a separate Windows/Iris Xe laptop. The approved P2.1 interface cleans
 the player interface while preserving that gameplay and all approved rendering.
-Review the cleaned interface on Windows and Apache before a final v1.0.0 release.
+Both editions passed final instructor acceptance on Apache and actual Windows hardware.
 No numerical Intel performance result was supplied.
 
 ## Start offline on Windows 11
 
-1. Use the annotated **showcase3d-v1.0.0-rc1** tag and its matching verified run
-   in GitHub **Actions → 3D showcase release candidate**. The
-   [latest candidate results](https://github.com/chingchechung/ece_hw_webproject/blob/feature/3d-showcase/docs/3d-p2.1-release-results.md)
-   identify the exact source commit, run and artifacts.
-2. Download **showcase3d-p2.1-…**. Under `3d-p2.1/`, extract
-   **showcase3d-1.0.0-rc1-static.zip** completely to a local folder.
+1. Download the stable **v1.0.0** release from
+   [GitHub Releases](https://github.com/chingchechung/ece_hw_webproject/releases/tag/v1.0.0).
+   Verify the archive SHA-256 against the release notes. The source tag and
+   complete main CI identify the tested release; older RC tags are historical.
+2. Extract **showcase3d-1.0.0-static.zip** completely to a local folder.
 3. Double-click **Start-Showcase.cmd**. Built-in Windows PowerShell 5.1/.NET
    starts a server at `http://127.0.0.1:8787/` (next free port through 8797) and
    opens the default browser. Use Chrome or Edge with graphics acceleration.
@@ -150,14 +149,14 @@ Static JSON exposes its answers to browser users; this is not secure anti-cheati
 
 1. Keep an instructor-controlled backup of the current runtime/index and approved
    publication outside public directories. Note the previous release for rollback.
-2. Extract the candidate ZIP locally. In `showcase3d/dist/`, identify the new
+2. Extract the release ZIP locally. In `showcase3d/dist/`, identify the new
    hashed `app-….js` and `app-….css`, `LICENSES.txt`, `build-info.json` and index.
 3. Manually upload the new JS/CSS, license and build-info **first**. Upload
    **index.html last**. **Leave the server's entire `assignments/` directory
-   untouched. Do not upload the candidate's empty manifest over the live one.**
+   untouched. Do not upload the release's empty manifest over the live one.**
    Do not drag the whole dist folder over an existing course publication.
 4. Keep the previous hashed JS/CSS while cached old index pages may reference
-   them. Open the real nested URL with `index.html?v=1.0.0-rc1` or reload it, check
+   them. Open the real nested URL with `index.html?v=1.0.0` or reload it, check
    relative asset/JSON requests and the console, then refresh the unit manifest.
    Confirm the same previously published units load and unlisted units stay absent.
 5. Review normal/settings, presenter/debug, both views, questions, wrong-answer
@@ -258,8 +257,8 @@ Device label remains. No data is uploaded.
 The instructor qualitatively approved P0 High on a physical UHD 770 as very
 smooth with excellent visuals. **No numerical Intel GPU benchmark has been
 provided.** P1 driving was subsequently approved after physical testing.
-P2 gameplay and Apache/Iris Xe use are approved; P2.1 UI review and numerical
-hardware measurements remain pending. Cloud SwiftShader performance
+P2/P2.1 and both final editions are accepted after instructor Apache/Windows
+testing. Numerical hardware measurements remain unavailable. Cloud SwiftShader performance
 is software rendering, not Intel throughput.
 
 Before a presentation, verify offline launch, steering/braking/reverse, all five

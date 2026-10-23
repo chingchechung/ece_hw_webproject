@@ -2,6 +2,18 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved final stable integration — 2026-10-23
+
+The instructor accepted both editions after university Apache and physical Windows
+checks and explicitly authorizes stable 1.0.0 promotion, full feature/main CI,
+fast-forward integration into main, a new annotated v1.0.0 tag at the exact tested
+main release commit, and a stable GitHub Release with both verified ZIPs. This
+supersedes earlier stop/no-merge/no-final-tag instructions below for this release.
+Preserve all approved gameplay/UI/rendering/physics, authoring tools, validators,
+privacy protections and historical tags. No force push, history replacement,
+automatic Apache deployment or new development phase. See
+`docs/v1.0.0-release-results.md`; report any actual access blocker precisely.
+
 ## Approved unified English release supplement — 2026-10-23
 
 The instructor authorizes Lite application-owned English localization and a

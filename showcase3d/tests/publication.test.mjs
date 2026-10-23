@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, cpSync, symlinkSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, cpSync, symlinkSync, readFileSync, writeFileSync, rmSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,9 +49,26 @@ test('isolated graphics rebuild retains published files byte-for-byte and fails 
     // Packaging must not sweep arbitrary files from the public runtime root.
     writeFileSync(join(app,'dist/ignored-draft.json'),'TEST ONLY — not an approved publication');
     execFileSync('python',[join(app,'scripts/package.py')],{stdio:'pipe'});
-    const archive=join(temp,'test-results/3d-p2.1/showcase3d-1.0.0-rc1-static.zip');
+    const archive=join(temp,'test-results/3d-p2.1/showcase3d-1.0.0-static.zip');
     const contents=JSON.parse(execFileSync('python',['-c',"import json,sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); print(json.dumps({'names':z.namelist(),'unit':z.read('showcase3d/dist/assignments/S02.json').decode()}))",archive],{encoding:'utf8'}));
     assert.equal(contents.names.length,12);assert.ok(!contents.names.some(name=>name.includes('ignored-draft')));assert.equal(contents.unit,bytes.toString());
+    const firstArchive=readFileSync(archive);
+    utimesSync(join(app,'README.md'),1700000000,1700000000);
+    execFileSync('python',[join(app,'scripts/package.py')],{stdio:'pipe'});
+    assert.deepEqual(readFileSync(archive),firstArchive,'ZIP bytes must ignore filesystem timestamps');
+    const packagePath=join(app,'package.json'),infoPath=join(app,'dist/build-info.json');
+    const originalPackage=readFileSync(packagePath),originalInfo=readFileSync(infoPath);
+    for(const version of ['0.0.0','1.0.0-rc0','12.34.56-rc12']){
+      writeFileSync(packagePath,JSON.stringify({...JSON.parse(originalPackage),version}));
+      writeFileSync(infoPath,JSON.stringify({...JSON.parse(originalInfo),version}));
+      execFileSync('python',[join(app,'scripts/package.py')],{stdio:'pipe'});
+      assert.ok(readFileSync(join(temp,`test-results/3d-p2.1/showcase3d-${version}-static.zip`)).length);
+    }
+    for(const version of ['01.0.0','1.00.0','1.0.01','1.0.0-rc01','1.0.0-beta1','1.0.0+private','../1.0.0']){
+      writeFileSync(packagePath,JSON.stringify({...JSON.parse(originalPackage),version}));
+      assert.throws(()=>execFileSync('python',[join(app,'scripts/package.py')],{stdio:'pipe'}),/stable SemVer/);
+    }
+    writeFileSync(packagePath,originalPackage);writeFileSync(infoPath,originalInfo);
     const html=readFileSync(join(app,'dist/index.html'));writeFileSync(join(directory,'manifest.json'),'broken');assert.throws(build);
     assert.deepEqual(readFileSync(join(app,'dist/index.html')),html);assert.deepEqual(readFileSync(join(directory,'S02.json')),bytes);
   }finally{rmSync(temp,{recursive:true,force:true});}

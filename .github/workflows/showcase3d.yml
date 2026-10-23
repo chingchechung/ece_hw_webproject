@@ -1,25 +1,10 @@
-name: Unified release candidate — Lite + 3D
+name: Unified release — Lite + 3D
 
 on:
   push:
-    branches: [feature/3d-showcase]
-    paths:
-      - showcase3d/**
-      - .github/workflows/showcase3d.yml
-      - .github/workflows/ci.yml
-      - student/**
-      - tools/**
-      - schemas/**
-      - tests/**
-      - js/**
-      - assignments/**
-      - emi_maze_dualview_v1.2/**
-      - emi_maze_dualview_v1.2.zip
-      - requirements-dev.txt
-      - release/**
+    branches: [main, feature/3d-showcase]
   pull_request:
-    branches: [work]
-    paths: [showcase3d/**, student/**, tests/**, release/**, .github/workflows/showcase3d.yml]
+    branches: [main, work]
   workflow_dispatch:
 
 permissions:
@@ -101,7 +86,7 @@ jobs:
       - name: Package the allowlisted offline runtime
         if: ${{ !cancelled() }}
         run: python showcase3d/scripts/package.py
-      - name: Upload unified candidate and synthetic cross-edition evidence
+      - name: Upload unified release and synthetic cross-edition evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:

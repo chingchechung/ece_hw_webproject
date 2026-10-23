@@ -86,6 +86,29 @@ class UnifiedReleaseTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'runtime hash'):
             packager.package(self.root)
 
+    def test_stable_and_rc_versions_and_rejected_noncanonical_versions(self):
+        version_file = self.root / 'release/version.json'
+        build_file = self.root / 'showcase3d/dist/build-info.json'
+        html_file = self.root / 'student/index.html'
+        original_html = html_file.read_text()
+        original_version = json.loads(version_file.read_text())['version']
+        for version in ('0.0.0', '1.0.0', '12.34.56', '1.0.0-rc0', '1.0.0-rc12'):
+            with self.subTest(version=version):
+                version_file.write_text(json.dumps({'version': version,
+                    'editions': {'lite': version, '3d': version}}))
+                info = json.loads(build_file.read_text())
+                info['version'] = version
+                build_file.write_text(json.dumps(info))
+                html_file.write_text(original_html.replace(original_version, version))
+                self.assertTrue(packager.package(self.root).is_file())
+        for version in ('v1.0.0', '1.١.0', '01.0.0', '1.00.0', '1.0.01', '1.0.0-rc01',
+                        '1.0.0-rc', '1.0.0-beta1', '1.0.0+private', '1.0.0\\n', '../1.0.0'):
+            with self.subTest(version=version):
+                version_file.write_text(json.dumps({'version': version,
+                    'editions': {'lite': version, '3d': version}}))
+                with self.assertRaisesRegex(ValueError, 'stable SemVer'):
+                    packager.package(self.root)
+
     def test_mismatched_versions_and_traversal_build_paths_are_rejected(self):
         file = self.root / 'release/version.json'
         data = json.loads(file.read_text())

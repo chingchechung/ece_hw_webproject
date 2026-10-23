@@ -4,6 +4,14 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> Final release authorization, 2026-10-23: both editions passed instructor
+> Apache/physical-Windows acceptance. Promote metadata and packages to stable
+> 1.0.0, verify the complete suite on feature and actual main, fast-forward main,
+> then annotate v1.0.0 at the tested main release commit and publish both ZIPs.
+> This supersedes previous review stops for this release only. Preserve all
+> approved functionality/history/privacy; no new gameplay phase or deployment.
+> See [stable release results](docs/v1.0.0-release-results.md).
+
 > Unified release continuation, 2026-10-23: keep Lite and 3D together on
 > `feature/3d-showcase`. Localize Lite UI to English and remove its technical
 > badge; preserve instructor JSON and all gameplay/art/physics. Retain the

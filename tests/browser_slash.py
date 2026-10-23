@@ -287,7 +287,7 @@ class SlashTests(VisualHarness):
         self.load('S01')
         versions=self.page.evaluate("({game:document.documentElement.dataset.gameRelease,renderer:MazeRpgVisuals.release,materials:MazeDriveMaterials.release,scripts:Array.from(document.scripts,s=>s.getAttribute('src'))})")
         self.assertEqual(versions['game'],'5b1-1');self.assertEqual(versions['renderer'],'5b1-1');self.assertEqual(versions['materials'],'5b1-1')
-        for name,version in [(name,'1.0.0-rc1' if name=='game.js' else '5b1-1') for name in paths]:
+        for name,version in [(name,'1.0.0' if name=='game.js' else '5b1-1') for name in paths]:
             self.assertIn('./js/'+name+'?v='+version,versions['scripts'])
             self.assertTrue(any(u.endswith('/js/'+name+'?v='+version) for u in self.requests))
         self.assert_no_scroll();self.save('deployment-cache.json',versions)

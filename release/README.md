@@ -1,9 +1,11 @@
-# Engineering Maze Lab — unified release candidate
+# Engineering Maze Lab — v1.0.0
 
-This candidate contains both educational editions under one version, 1.0.0-rc1.
+This stable distribution contains both educational editions under one version, 1.0.0.
 The English Lite UI retains the approved 5B.1 renderer and gameplay. The approved
-3D runtime retains the P2.1.1 fullscreen fix. Final main/v1.0.0 publication awaits
-instructor approval. The historical 3D rc1 tag is not moved by this preparation.
+3D runtime retains the P2.1.1 fullscreen fix. Both editions passed instructor acceptance on university Apache and physical
+Windows hardware. Historical Lite/P0/3D RC tags remain unchanged. Download the
+two distributions from the GitHub v1.0.0 Release; see its exact commit, CI evidence
+and archive SHA-256 checksums before installing.
 
 ## Reproduce the packages
 
@@ -16,14 +18,16 @@ python release/package.py
 python showcase3d/scripts/package.py
 ```
 
-The unified ZIP is `test-results/unified-release/Engineering-Maze-Lab-1.0.0-rc1.zip`.
+The unified ZIP is `test-results/unified-release/Engineering-Maze-Lab-1.0.0.zip`.
 It contains `Engineering-Maze-Lab/lite/`, `Engineering-Maze-Lab/3d/`, this README,
 and `release-info.json` with versions and SHA-256 hashes of all packaged runtime
 files. ZIP entry order, timestamps and permissions are fixed; identical inputs
 produce identical ZIP bytes. Python/zlib versions should also match for identical
 compressed bytes across machines. The builder rejects symlinks, unexpected files,
 nonempty manifests, changed 3D build hashes and inconsistent component versions.
-It reads only the explicit runtime allowlists. It never rewrites source/live JSON.
+Stable SemVer and explicit -rcN versions are accepted; leading-zero components
+and other prerelease/build suffixes are rejected. Both ZIP builders use fixed
+entry metadata for reproducibility. It reads only the explicit runtime allowlists. It never rewrites source/live JSON.
 
 Both default manifests are empty. No course questions, private drafts, test
 fixtures, student data, credentials, teacher tools or schemas enter this ZIP.
@@ -34,7 +38,7 @@ edition's `assignments/` directory. Both editions accept the same public v1/v2
 formats, four/five questions and single-choice accepted-label semantics.
 
 The separate Windows package remains
-`test-results/3d-p2.1/showcase3d-1.0.0-rc1-static.zip`. Extract it, keep `dist/`
+`test-results/3d-p2.1/showcase3d-1.0.0-static.zip`. Extract it, keep `dist/`
 beside `Start-Showcase.cmd`, and double-click that launcher. It uses Windows
 PowerShell's local static server; Node/Python installation is unnecessary.
 See its included guide for local port, shutdown and troubleshooting instructions.
@@ -80,8 +84,8 @@ unit JSON first and the matching public manifest last. Never upload draft files.
    an already open page. Roll back runtime files/index from the backup if needed,
    again preserving the current assignments directory.
 
-There is no automatic upload or deployment. This RC has automated Chromium
+There is no automatic upload or deployment. This release has automated Chromium
 coverage on Ubuntu and a Windows launcher check. Software WebGL results do not
-establish Intel GPU performance. The instructor's prior physical Windows/Iris Xe
-review applies to the preserved 3D runtime. Optional macOS/WebKit testing is
+establish Intel GPU performance. The instructor accepted both editions on university Apache and actual Windows
+hardware; no new numerical GPU performance measurement is claimed. Optional macOS/WebKit testing is
 described in the source README; Safari compatibility is not claimed.

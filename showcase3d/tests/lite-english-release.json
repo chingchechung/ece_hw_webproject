@@ -3,8 +3,8 @@
   "historicalManifestSha256": "2b44633918740e57080c7a0da4053e12552a9f81330c828980c0c0dafe2bb42d",
   "overrides": {
     "student/index.html": {
-      "sha256": "01710603914f3be665fcc15ae045c3afffeb9d64d77c2d8c4d27d837ba247ef9",
-      "reason": "English UI, removed technical badge, lang/version metadata and localized-script cache invalidation only; CSS and controls unchanged."
+      "sha256": "291dae17fbe0533e8db78d6d63134b018c943376f25f176c65902369e53380a3",
+      "reason": "English UI, removed technical badge, lang/version metadata and localized-script cache invalidation only; CSS and controls unchanged. Stable v1.0.0 application metadata/cache-version promotion only."
     },
     "student/js/assignment-loader.js": {
       "sha256": "0678d5698890c6f3cae0f9bc43a3174b3de1f6223a343a1fd0a4478caebafbe5",
@@ -19,16 +19,16 @@
       "reason": "English status and reset assertions replace Chinese expectations; all gameplay assertions retained."
     },
     "tests/browser_slash.py": {
-      "sha256": "71cf8e25f35b9c0bfa44f5c97a2221456fe68e6bafc84f603d31432d0aa95cb7",
-      "reason": "Expect the localized game script cache key; renderer/material versions and every slash behavior assertion retained."
+      "sha256": "763a4d66315c98fab0f9cbeb05f02bb4aa741206cb6653907126ce9d020ca1c3",
+      "reason": "Expect the localized game script cache key; renderer/material versions and every slash behavior assertion retained. Stable v1.0.0 application metadata/cache-version promotion only."
     },
     "tests/browser_student.py": {
       "sha256": "adc31f2f6a73ff7b3c8d3814af86802016f1023bbc2cd4cb38022aa98b8995d0",
       "reason": "English status/error assertions and deterministic HTTP request gates for cancellation; all existing loading/safety assertions retained."
     },
     "tests/test_drive_contract.py": {
-      "sha256": "8739f306cd9a72c543689a20c3c3246d27fa274fb31e9dcd9120bfb3cb4850c4",
-      "reason": "Reverse only audited UI strings before original source-region hashes; expect localized script cache key."
+      "sha256": "cd719df83318261640fe4fce8b2cefd6b1e691d406c6fb0d51a32a7e7ceae3e2",
+      "reason": "Reverse only audited UI strings before original source-region hashes; expect localized script cache key. Stable v1.0.0 application metadata/cache-version promotion only."
     }
   }
 }

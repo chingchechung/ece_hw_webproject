@@ -1,6 +1,6 @@
 """Make a venue-ready static ZIP; never includes the repository or private data."""
 from pathlib import Path
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 import json
 import subprocess
 import hashlib
@@ -8,8 +8,8 @@ import re
 
 root = Path(__file__).resolve().parents[1]
 version = json.loads((root/'package.json').read_text())['version']
-if not re.fullmatch(r'\d+\.\d+\.\d+-rc\d+',version):
-    raise RuntimeError('Expected an explicit release-candidate version')
+if not re.fullmatch(r'(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-rc(?:0|[1-9][0-9]*))?',version):
+    raise RuntimeError('Expected a stable SemVer or explicit -rcN release version')
 output = root.parent / f'test-results/3d-p2.1/showcase3d-{version}-static.zip'
 output.parent.mkdir(parents=True, exist_ok=True)
 published = json.loads(subprocess.check_output(['node', str(root/'scripts/check-publication.mjs'), str(root/'dist/assignments')],text=True))
@@ -28,9 +28,13 @@ for name, digest in runtime.items():
 files = [*(root/'dist'/name for name in sorted([*runtime,'build-info.json'])),
     *(root/'dist/assignments'/name for name in published), *(root / name for name in (
     'Start-Showcase.cmd', 'launch.ps1', 'serve.py', 'README.md', 'THIRD_PARTY.md'))]
-with ZipFile(output, 'w', compression=ZIP_DEFLATED) as archive:
-    for path in files:
+with ZipFile(output, 'w', compression=ZIP_DEFLATED, compresslevel=9) as archive:
+    for path in sorted(files):
         if path.is_symlink() or not path.is_file():
             raise RuntimeError(f'Missing required static package file: {path}')
-        archive.write(path, f'showcase3d/{path.relative_to(root)}')
+        entry = ZipInfo(f'showcase3d/{path.relative_to(root).as_posix()}',
+                        date_time=(1980, 1, 1, 0, 0, 0))
+        entry.create_system = 3
+        entry.external_attr = 0o100644 << 16
+        archive.writestr(entry, path.read_bytes(), compress_type=ZIP_DEFLATED, compresslevel=9)
 print(output)

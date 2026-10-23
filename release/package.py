@@ -36,8 +36,8 @@ def read_tree(directory, allowed):
 
 def package(root=ROOT, destination=None):
     version = json.loads((root / 'release/version.json').read_text(encoding='utf-8'))
-    if not re.fullmatch(r'\d+\.\d+\.\d+-rc\d+', version['version']):
-        raise ValueError('Only an explicit release candidate may be packaged')
+    if not re.fullmatch(r'(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-rc(?:0|[1-9][0-9]*))?', version['version']):
+        raise ValueError('Expected a stable SemVer or explicit -rcN release version')
     if set(version['editions']) != {'lite', '3d'} or any(
             value != version['version'] for value in version['editions'].values()):
         raise ValueError('Both editions must share the unified release version')

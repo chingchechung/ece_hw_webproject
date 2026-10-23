@@ -41,7 +41,7 @@ class UnifiedBrowserTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.base = Path(self.temp.name)
-        with ZipFile(OUT / 'Engineering-Maze-Lab-1.0.0-rc1.zip') as archive:
+        with ZipFile(OUT / 'Engineering-Maze-Lab-1.0.0.zip') as archive:
             archive.extractall(self.base / '~teacher/course')
         self.site = self.base / '~teacher/course/Engineering-Maze-Lab'
         self.server = ThreadingHTTPServer(('127.0.0.1', 0), partial(StaticHandler, directory=self.base))

@@ -1,6 +1,6 @@
 {
   "phase": "3D-P2.1",
-  "version": "1.0.0-rc1",
+  "version": "1.0.0",
   "three": "0.180.0",
   "esbuild": "0.25.12",
   "liteBaseline": "823786bc01b68901455061d5fe31d6076c61f20e",
