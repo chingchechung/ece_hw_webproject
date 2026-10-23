@@ -4,13 +4,14 @@ import unittest
 from pathlib import Path
 
 from drive_reference import DRIVE_REFERENCE
+from tests.lite_localization import historical_source
 
 ROOT=Path(__file__).resolve().parents[1]
 
 
 class DrivingPreservationTests(unittest.TestCase):
     def test_protected_gameplay_and_2d_sources_match_approved_phase5a3(self):
-        source=(ROOT/'student/js/game.js').read_text()
+        source=historical_source('student/js/game.js')
         # Normalize only the authorized reduced-motion scheduling change. All
         # other gameplay/input bytes must still match the approved source.
         source=source.replace('t>=pending.revealAt)', 't>=pending.revealAt||motionPreference.matches)')
@@ -38,7 +39,7 @@ class DrivingPreservationTests(unittest.TestCase):
                          '01bfa3e151cdadf1b8166c97ed2e462600fe0f5f855535fa8ff148e34b3eafc2')
         html=(ROOT/'student/index.html').read_text()
         self.assertIn('./js/drive-materials.js?v=5b1-1',html)
-        self.assertIn('./js/game.js?v=5b1-1',html)
+        self.assertIn('./js/game.js?v=1.0.0-rc1',html)
         self.assertIn('./js/rpg-renderer.js?v=5b1-1',html)
 
 

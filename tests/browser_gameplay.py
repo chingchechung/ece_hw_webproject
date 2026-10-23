@@ -27,7 +27,7 @@ class GameplayTests(BrowserSupport):
             route.fulfill(response=response,body=source)
         self.page.route('**/js/game.js*',inject)
         self.page.goto(self.url+('index.html' if index else ''))
-        self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('正在讀取')")
+        self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('Reading')")
 
     def tearDown(self):
         folder=ROOT/'test-results/phase-4'
@@ -159,7 +159,7 @@ class GameplayTests(BrowserSupport):
         self.page.select_option('#unitSelect','S02')
         self.page.click('#loadUnit')
         self.assertTrue(self.page.is_visible('#switchWarning'))
-        self.assertIn('重置',self.page.inner_text('#switchMessage'))
+        self.assertIn('reset',self.page.inner_text('#switchMessage'))
         self.assertFalse(any(u.endswith('/S02.json') for u in self.requests))
         self.page.click('#cancelSwitch')
         self.assertEqual(self.state()['player'],paused['player'])
@@ -170,14 +170,14 @@ class GameplayTests(BrowserSupport):
         # Refresh can remove the active unit without destroying its loaded attempt.
         self.page.click('#unitLabel');self.publish(b)
         self.page.click('#refreshManifest')
-        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('不在公開清單')")
+        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('no longer published')")
         self.assertEqual(self.state()['unit'],a)
         self.page.click('#returnToMaze')
         self.assertTrue(self.state()['done'][0])
         self.page.click('#unitLabel')
         (self.assignment_dir/'S02.json').write_text('{bad')
         self.click_load()
-        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('可重試')")
+        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('You can retry')")
         self.assertEqual(self.state()['unit'],a)
         self.page.keyboard.press('Escape')
         self.assertTrue(self.state()['done'][0])
@@ -204,7 +204,7 @@ class GameplayTests(BrowserSupport):
         self.page.click('#unitLabel')
         (self.assignment_dir/'manifest.json').write_text('{bad')
         self.page.click('#refreshManifest')
-        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('請重新整理')")
+        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('Please refresh')")
         self.page.click('#returnToMaze')
         self.assertEqual(self.state()['unit'],original['unit'])
 

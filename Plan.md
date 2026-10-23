@@ -4,6 +4,15 @@
 > Baseline: `emi_maze_dualview_v1.2` (existing working prototype).  
 > Execution: Codex should work in the existing project repository and read `AGENTS.md` before making changes.
 
+> Unified release continuation, 2026-10-23: keep Lite and 3D together on
+> `feature/3d-showcase`. Localize Lite UI to English and remove its technical
+> badge; preserve instructor JSON and all gameplay/art/physics. Retain the
+> historical Lite baseline with explicit current-English preservation checks.
+> Build a reproducible two-edition candidate, verify both complete suites and
+> actual CI, and document safe independent Apache upgrades. See
+> [unified release results](docs/unified-release-results.md). Stop for review;
+> do not merge or create the final release tag.
+
 > P2.1 release preparation: the instructor approved P2 after Apache deployment
 > and Windows/Iris Xe testing. Clean the default UI, consolidate graphics in
 > Settings and retain opt-in presenter/debug tools with educational guards.

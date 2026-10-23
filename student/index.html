@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="application-version" content="1.0.0-rc1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>Digital Electronics Maze Quest — 雙視角迷宮駕駛體驗版 v1.2</title>
+  <title>Engineering Maze Lab — Lite</title>
   <style>
     :root{--bg:#08101c;--panel:#0e1a2b;--panel2:#132139;--stroke:#29415d;--muted:#a0b2c7;--text:#edf6ff;--teal:#58e3c1;--gold:#ffce70;--red:#fb818c;--blue:#78bcff}
     *{box-sizing:border-box}
@@ -216,98 +217,97 @@
 <body>
 <div class="shell">
   <header class="top">
-    <div><div class="eyebrow">DIGITAL ELECTRONICS · EMI QUEST · UNIT ASSIGNMENTS</div><h1>電路迷宮｜雙視角作業</h1><div class="sub">選擇已發布單元，完成題目後開啟該單元 Google Form。</div></div>
-    <span class="tag">● 靜態 HTML ／ 無後端 ／ 不記錄學生資料</span>
+    <div><div class="eyebrow">DIGITAL ELECTRONICS · EMI QUEST · UNIT ASSIGNMENTS</div><h1>Engineering Maze Lab — Lite</h1><div class="sub">Select a published unit, complete its questions, then open its Google Form.</div></div>
   </header>
   <main class="layout">
-    <section class="gamebox" aria-label="迷宮遊戲">
+    <section class="gamebox" aria-label="Maze game">
       <div class="bar">
-        <div class="pill">挑戰 <strong id="roundN">1</strong></div>
-        <div class="pill">迷宮 <strong id="mazeSize">25 × 19</strong>（邏輯格）</div>
-        <button class="btn" id="unitLabel" type="button" title="選擇單元">單元</button>
-        <div class="progress-strip" id="progressStrip" aria-label="題目通關進度"><span class="progress-strip-label">作業 0/4</span></div>
-        <label class="zoom-control" for="zoomSelect" title="只放大迷宮與人物，不影響瀏覽器或網頁文字">
-          <span class="zoom-label">鏡頭</span>
-          <select id="zoomSelect" aria-label="迷宮鏡頭縮放倍率">
+        <div class="pill">Attempt <strong id="roundN">1</strong></div>
+        <div class="pill">Maze <strong id="mazeSize">25 × 19</strong> (cells)</div>
+        <button class="btn" id="unitLabel" type="button" title="Select unit">Unit</button>
+        <div class="progress-strip" id="progressStrip" aria-label="Question progress"><span class="progress-strip-label">Questions 0/4</span></div>
+        <label class="zoom-control" for="zoomSelect" title="Zoom the 2D maze and character; keep page text at its normal size">
+          <span class="zoom-label">Zoom</span>
+          <select id="zoomSelect" aria-label="2D maze zoom">
             <option value="1.5" selected>150%</option>
             <option value="1.75">175%</option>
           </select>
         </label>
-        <label class="zoom-control atmosphere-control atmosphere-hud" for="atmosphereSelect" title="2D atmosphere / 迷宮氣氛">
-          <span>氣氛</span><select id="atmosphereSelect" aria-label="2D atmosphere">
+        <label class="zoom-control atmosphere-control atmosphere-hud" for="atmosphereSelect" title="2D atmosphere">
+          <span>Atmosphere</span><select id="atmosphereSelect" aria-label="2D atmosphere">
             <option value="off">Off</option><option value="normal">Normal</option><option value="strong" selected>Strong</option>
           </select>
         </label>
         <div class="grow"></div>
-        <button class="btn primary" id="modeToggle" type="button" title="按 V 切換 2D／駕駛視角">🚗 切換駕駛（V）</button>
-        <button class="btn" id="panelToggle" type="button" aria-controls="sidePanel" aria-expanded="false">☰ 進度／說明</button>
-        <button class="btn" id="mapToggle" type="button" title="每輪挑戰可看 30 秒；答錯或按重新開始會恢復 30 秒">老師視角：30秒</button>
-        <button class="btn" id="resetBtn" type="button">重新開始</button>
+        <button class="btn primary" id="modeToggle" type="button" title="Press V to switch between 2D and driving">🚗 Drive (V)</button>
+        <button class="btn" id="panelToggle" type="button" aria-controls="sidePanel" aria-expanded="false">☰ Progress / Help</button>
+        <button class="btn" id="mapToggle" type="button" title="30 seconds per attempt; a wrong answer or Restart restores the allowance">Full map: 30s</button>
+        <button class="btn" id="resetBtn" type="button">Restart</button>
       </div>
       <div class="gamearea" id="gamearea">
-        <canvas id="maze" tabindex="0" aria-label="方向鍵或 WASD 移動；E 能量揮擊，靠近題目時答題"></canvas>
-        <div class="corner" id="status">方向鍵 / WASD 移動</div>
-        <div id="driveDashboard" aria-label="駕駛速度與操作提示" class="drive-dashboard" hidden><span class="drive-label">MAZE DRIVE · 2 LANES · 12× DISTANCE</span><span class="drive-speed"><b id="speedValue">0</b> <small>km/h</small></span><span class="drive-label" style="color:#e2d8a4">行駛 <b id="tripValue">0.00</b> km</span><span class="drive-keys">W 油門　S 煞車　A/D 轉向　E 停車答題　V 切換</span></div>
-        <div class="map-timer" id="mapTimer" aria-label="老師視角剩餘時間"><div class="map-timer-row"><span>🧭 地圖剩餘時間</span><strong id="mapSeconds">30s</strong></div><div class="map-timer-track"><span id="mapTimeFill"></span></div></div>
-        <canvas class="minimap" id="minimap" width="174" height="140" aria-label="限時老師視角迷你地圖"></canvas>
-        <div class="overlay-tip" id="interactTip">靠近題目按 E 開始</div>
+        <canvas id="maze" tabindex="0" aria-label="Arrow keys or WASD to move; E for an energy slash or a nearby question"></canvas>
+        <div class="corner" id="status">Arrow keys / WASD to move</div>
+        <div id="driveDashboard" aria-label="Driving speed and controls" class="drive-dashboard" hidden><span class="drive-label">MAZE DRIVE · 2 LANES · 12× DISTANCE</span><span class="drive-speed"><b id="speedValue">0</b> <small>km/h</small></span><span class="drive-label" style="color:#e2d8a4">Trip <b id="tripValue">0.00</b> km</span><span class="drive-keys">W accelerate · S brake · A/D steer · Stop + E to answer · V switch</span></div>
+        <div class="map-timer" id="mapTimer" aria-label="Full-map time remaining"><div class="map-timer-row"><span>🧭 Map time remaining</span><strong id="mapSeconds">30s</strong></div><div class="map-timer-track"><span id="mapTimeFill"></span></div></div>
+        <canvas class="minimap" id="minimap" width="174" height="140" aria-label="Time-limited full-map preview"></canvas>
+        <div class="overlay-tip" id="interactTip">Approach a question and press E</div>
         <div class="toast" id="toast"></div>
       </div>
       <div class="game-foot">
-        <span id="controlsFoot">移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　能量 / 答題 <kbd>E</kbd>　視角 <kbd>V</kbd></span>
-        <span class="legend"><span><span class="dot q"></span>未完成題目</span><span><span class="dot done"></span>已完成</span><span><span class="dot end"></span>終點</span></span>
+        <span id="controlsFoot">Move <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Slash / Answer <kbd>E</kbd> · View <kbd>V</kbd></span>
+        <span class="legend"><span><span class="dot q"></span>Question</span><span><span class="dot done"></span>Completed</span><span><span class="dot end"></span>Exit</span></span>
       </div>
-      <div class="mobile-controls" aria-label="手機觸控操作"><div class="dpad"><button class="up" data-key="arrowup" aria-label="上">↑</button><button class="left" data-key="arrowleft" aria-label="左">←</button><button class="down" data-key="arrowdown" aria-label="下">↓</button><button class="right" data-key="arrowright" aria-label="右">→</button></div><button class="btn primary" id="touchInteract" style="margin-left:15px">能量 / 答題</button></div>
+      <div class="mobile-controls" aria-label="Touch controls"><div class="dpad"><button class="up" data-key="arrowup" aria-label="Up">↑</button><button class="left" data-key="arrowleft" aria-label="Left">←</button><button class="down" data-key="arrowdown" aria-label="Down">↓</button><button class="right" data-key="arrowright" aria-label="Right">→</button></div><button class="btn primary" id="touchInteract" style="margin-left:15px">Slash / Answer</button></div>
     </section>
     <div class="panel-scrim" id="panelScrim"></div>
-    <aside class="panel panel-drawer" id="sidePanel" aria-label="作業進度與操作說明" aria-hidden="true">
-      <div class="drawer-head"><strong>作業進度與遊戲說明</strong><button class="btn" id="panelClose" type="button">✕ 關閉</button></div>
-      <div class="drawer-mobile-tools"><button class="btn" id="drawerModeToggle" type="button">🚗 進入駕駛視角</button><button class="btn" id="drawerMapToggle" type="button">老師視角：30秒</button><button class="btn" id="drawerResetBtn" type="button">重新開始</button></div>
+    <aside class="panel panel-drawer" id="sidePanel" aria-label="Question progress and instructions" aria-hidden="true">
+      <div class="drawer-head"><strong>Progress and help</strong><button class="btn" id="panelClose" type="button">✕ Close</button></div>
+      <div class="drawer-mobile-tools"><button class="btn" id="drawerModeToggle" type="button">🚗 Drive</button><button class="btn" id="drawerMapToggle" type="button">Full map: 30s</button><button class="btn" id="drawerResetBtn" type="button">Restart</button></div>
       <label class="zoom-control atmosphere-control drawer-atmosphere" for="drawerAtmosphereSelect">
-        <span>2D 氣氛 / Atmosphere</span><select id="drawerAtmosphereSelect" aria-label="2D atmosphere in progress panel">
+        <span>2D Atmosphere</span><select id="drawerAtmosphereSelect" aria-label="2D atmosphere in progress panel">
           <option value="off">Off</option><option value="normal">Normal</option><option value="strong" selected>Strong</option>
         </select>
       </label>
-      <p class="desc">老師視角每輪可使用 <b>30 秒</b>；開啟時倒數，關閉時暫停。同一輪用完後不能再開啟；<b>答錯進入下一輪</b>或按下<b>重新開始</b>都會重置為 30 秒。切換單元或重新載入單元會開始新的挑戰。</p>
+      <p class="desc">The full map has <b>30 seconds per attempt</b>. Time runs while it is open and pauses when closed. Once used up, it stays unavailable for that attempt. A <b>wrong answer</b> or <b>Restart</b> restores 30 seconds. Switching or reloading a unit starts a new attempt.</p>
 
       <div class="quest-column">
-        <div class="section-title">UNIT QUEST / 單元作業</div>
-        <div class="metric"><div><div class="num" id="doneCount" style="color:var(--teal)">0 / 4</div><div class="lbl">已通過題目</div></div><div><div class="num" id="failureCount" style="color:var(--gold)">0</div><div class="lbl">累積答錯次數</div></div></div>
+        <div class="section-title">UNIT ASSIGNMENT</div>
+        <div class="metric"><div><div class="num" id="doneCount" style="color:var(--teal)">0 / 4</div><div class="lbl">Questions completed</div></div><div><div class="num" id="failureCount" style="color:var(--gold)">0</div><div class="lbl">Wrong answers</div></div></div>
         <div class="questlist" id="questlist"></div>
-        <div class="callout" id="finalStatus">請先載入已發布單元。</div>
+        <div class="callout" id="finalStatus">Load a published unit to begin.</div>
       </div>
       <div class="hr"></div>
       <div>
-        <div class="section-title">HOW TO PLAY / 遊戲說明</div>
-        <ol class="steps"><li>按 <b>V</b> 可隨時切換 2D 走迷宮與迷宮駕駛視角；兩者使用<b>同一張地圖與題目位置</b>。</li><li>駕駛時 W 加速、S 煞車／倒車、A/D 轉向，<b>車速接近 0</b> 且靠近題目時按 E 答題。</li><li>駕駛模式是輕量 2.5D Canvas 畫法，不需 WebGL 或外部程式庫。</li><li>沿著寬敞迷宮通道探索，尋找 <b style="color:var(--gold)">Q1–Q4／Q5</b>。每輪題目位置與題號分布都會變化。</li><li>2D 按 <b>E</b> 可施放能量弧；靠近未通過題目時才會答題。氣氛 Off 不播放動畫。點選影片在 <b>新的 YouTube 分頁</b> 開啟。</li><li>回到迷宮，從 A–C 或 A–D 選擇一個答案；答對可自由觀看英文解答影片。</li><li><b>答錯任何一題</b>，全部題目歸零，但下一輪迷宮縮小。</li><li>答對全部題目，再找到紫色終點。</li></ol>
-        <div class="desc">上方「鏡頭」只調整 2D 迷宮放大倍率，建議保持瀏覽器 100% 縮放；本版提供 150% 與 175% 兩種視野。</div><div class="desc">每個單元有四或五題，各題選擇一個答案。已發布的單元可再次練習；表單是否接受回覆由 Google Forms 管理。</div>
+        <div class="section-title">HOW TO PLAY</div>
+        <ol class="steps"><li>Press <b>V</b> to switch between 2D walking and driving. Both use <b>the same maze and question positions</b>.</li><li>Drive with W to accelerate, S to brake / reverse and A/D to steer. <b>Stop near a question</b>, then press E to answer.</li><li>Driving uses a lightweight 2.5D view.</li><li>Explore the corridors to find <b style="color:var(--gold)">Q1–Q4 / Q5</b>. Question positions and numbering change each attempt.</li><li>In 2D, press <b>E</b> for an energy slash; near an unfinished question, it opens the question. Atmosphere Off disables the animation. Videos open in a <b>new YouTube tab</b>.</li><li>Return to the maze and choose one answer, A–C or A–D. Any accepted answer passes. The English explanation video is optional.</li><li>A <b>wrong answer</b> clears all question progress and starts a smaller maze.</li><li>Complete all questions, then find the purple exit.</li></ol>
+        <div class="desc">Zoom adjusts only the 2D maze: choose 150% or 175%. Keep browser zoom at 100%.</div><div class="desc">Each unit has four or five questions. Choose one answer per question. Revisit any published unit for review. Google Forms determines whether submissions are open.</div>
 
       </div>
     </aside>
   </main>
 
 </div>
-<div class="veil" id="veil" role="dialog" aria-modal="true" aria-label="迷宮題目"><div class="dialog" id="dialog" tabindex="-1"></div></div>
+<div class="veil" id="veil" role="dialog" aria-modal="true" aria-label="Maze question"><div class="dialog" id="dialog" tabindex="-1"></div></div>
 <div class="veil show" id="assignmentPanel" role="dialog" aria-modal="true" aria-labelledby="assignmentHeading">
   <div class="dialog">
-    <h2 id="assignmentHeading">選擇單元 / Select unit</h2>
-    <p id="assignmentStatus" role="status" aria-live="polite">正在讀取公開單元清單…</p>
-    <label for="unitSelect">已發布單元</label>
+    <h2 id="assignmentHeading">Select unit</h2>
+    <p id="assignmentStatus" role="status" aria-live="polite">Reading published units…</p>
+    <label for="unitSelect">Published units</label>
     <select id="unitSelect" disabled></select>
     <div id="switchWarning" hidden>
       <p id="switchMessage" role="alert"></p>
-      <div class="modalbuttons"><button class="btn warn" id="confirmSwitch" type="button">確定開始新挑戰</button><button class="btn" id="cancelSwitch" type="button">取消，返回目前挑戰</button></div>
+      <div class="modalbuttons"><button class="btn warn" id="confirmSwitch" type="button">Start new attempt</button><button class="btn" id="cancelSwitch" type="button">Cancel and return</button></div>
     </div>
-    <div class="modalbuttons"><button class="btn" id="returnToMaze" type="button" hidden>返回目前挑戰</button></div>
-    <div class="modalbuttons"><button class="btn primary" id="loadUnit" type="button" disabled>載入單元</button><button class="btn" id="refreshManifest" type="button">重新整理清單</button></div>
+    <div class="modalbuttons"><button class="btn" id="returnToMaze" type="button" hidden>Return to attempt</button></div>
+    <div class="modalbuttons"><button class="btn primary" id="loadUnit" type="button" disabled>Load unit</button><button class="btn" id="refreshManifest" type="button">Refresh list</button></div>
   </div>
 </div>
 <script src="./js/assignment-rules.js"></script>
 <script src="./js/assignment-validator.js"></script>
-<script src="./js/assignment-loader.js"></script>
+<script src="./js/assignment-loader.js?v=1.0.0-rc1"></script>
 <script src="./js/rpg-renderer.js?v=5b1-1"></script>
 <script src="./js/drive-materials.js?v=5b1-1"></script>
-<script src="./js/game.js?v=5b1-1"></script>
+<script src="./js/game.js?v=1.0.0-rc1"></script>
 
 </body>
 </html>

@@ -2,6 +2,21 @@
 
 You are working on **Digital Electronics EMI Maze Quest**, based on the existing `emi_maze_dualview_v1.2` HTML5 prototype. Read `Plan.md` first and implement its phases in order. These instructions apply to the repository and all subdirectories, unless a more specific `AGENTS.md` adds constraints.
 
+## Approved unified English release supplement — 2026-10-23
+
+The instructor authorizes Lite application-owned English localization and a
+reproducible two-edition release candidate on `feature/3d-showcase`. This
+supersedes current-Lite byte-identity requirements below only for the three
+localized UI files and documented test expectations. Preserve the immutable
+69-file historical manifest / `lite-v1.0` tag and exact generator/physics parity.
+Keep all approved 3D source/runtime, schemas, validators, GUI, art and gameplay.
+Package both editions with empty manifests by default; keep teacher tools and
+schemas in source only. Verify complete Lite/3D suites and actual GitHub Actions.
+See `docs/unified-release-results.md` and `release/README.md`. Stop for instructor
+review. No merge into `work`/`main`, no replacement of historical tags and no
+final `v1.0.0` tag. The existing 3D rc1 tag remains historical; this candidate is
+identified by its exact source commit and unified ZIP, without creating a tag.
+
 ## Approved isolated 3D-P2.1 release-candidate supplement — 2026-10-22
 
 The instructor approved P2 gameplay and reports successful university Apache

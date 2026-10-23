@@ -13,10 +13,33 @@ test('read-only adapter is pinned to the reviewed generator and deterministic', 
   assert.deepEqual(data, exportMaps());
   assert.deepEqual(data, JSON.parse(readFileSync(new URL('../src/maze/maps.json', import.meta.url))));
 });
-test('69 approved Lite implementation/test/contract files remain byte-identical', () => {
-  const manifest = JSON.parse(readFileSync(new URL('lite-baseline.json', import.meta.url)));
+test('69-file historical Lite baseline stays frozen; only audited English UI/test changes differ', () => {
+  const historical = readFileSync(new URL('lite-baseline.json', import.meta.url));
+  const manifest = JSON.parse(historical);
+  const release = JSON.parse(readFileSync(new URL('lite-english-release.json', import.meta.url)));
+  const edits = JSON.parse(readFileSync(new URL('../../tests/fixtures/lite-english-ui.json', import.meta.url)));
+  assert.equal(release.historicalManifestSha256, '2b44633918740e57080c7a0da4053e12552a9f81330c828980c0c0dafe2bb42d');
+  assert.equal(sha256(historical), release.historicalManifestSha256);
+  assert.equal(release.baseline, baseline);
   assert.equal(Object.keys(manifest).length, 69);
-  for (const [path, hash] of Object.entries(manifest)) assert.equal(sha256(readFileSync(new URL(`../../${path}`, import.meta.url))), hash, path);
+  assert.deepEqual(Object.keys(edits).sort(), ['student/index.html', 'student/js/assignment-loader.js', 'student/js/game.js']);
+  assert.deepEqual(Object.keys(release.overrides).sort(), [...Object.keys(edits),
+    'tests/browser_gameplay.py', 'tests/browser_slash.py', 'tests/browser_student.py', 'tests/test_drive_contract.py'].sort());
+  for (const [path, hash] of Object.entries(manifest)) {
+    const actual = readFileSync(new URL(`../../${path}`, import.meta.url));
+    const override = release.overrides[path];
+    if (override) assert.ok(override.reason.length > 20, path);
+    assert.equal(sha256(actual), override?.sha256 ?? hash, path);
+    if (edits[path]) {
+      let source = Array.from(actual.toString('utf8'));
+      for (const edit of edits[path].toReversed()) for (const offset of edit.offsets.toReversed()) {
+        const after = Array.from(edit.after);
+        assert.equal(source.slice(offset, offset + after.length).join(''), edit.after, path);
+        source.splice(offset, after.length, ...Array.from(edit.before));
+      }
+      assert.equal(sha256(source.join('')), hash, `UI edits must recover every historical byte: ${path}`);
+    }
+  }
 });
 function winding(geometry) {
   const p = geometry.attributes.position.array, n = geometry.attributes.normal.array, idx = geometry.index.array;

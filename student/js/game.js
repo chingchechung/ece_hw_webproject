@@ -111,11 +111,11 @@
   function newRound(resetAll){
     if(!assignment)return;
     resetMapBudget();
-    if(resetAll)failures=0;var sz=MAZE_SIZES[Math.min(failures,MAZE_SIZES.length-1)];current=generateMaze(sz[0],sz[1]);buildDriveRoad(current);done=Array(MAX_QUESTS).fill(false);var start=worldCenter(1,1);current.player={x:start.x,y:start.y,dir:'down',moving:false,walk:0};driveSpeed=0;driveAngle=chooseDriveHeading(start.x,start.y,Math.PI/2);driveDistance=0;el('tripValue').textContent='0.00';el('speedValue').textContent='0';camera.x=0;camera.y=0;nearItem=null;hideDialog();pressed={};syncHUD();fitCamera();notify(failures?'新迷宮已縮小：'+sz[0]+' × '+sz[1]+'（邏輯格）':'新的迷宮已產生。開始探索！')}
+    if(resetAll)failures=0;var sz=MAZE_SIZES[Math.min(failures,MAZE_SIZES.length-1)];current=generateMaze(sz[0],sz[1]);buildDriveRoad(current);done=Array(MAX_QUESTS).fill(false);var start=worldCenter(1,1);current.player={x:start.x,y:start.y,dir:'down',moving:false,walk:0};driveSpeed=0;driveAngle=chooseDriveHeading(start.x,start.y,Math.PI/2);driveDistance=0;el('tripValue').textContent='0.00';el('speedValue').textContent='0';camera.x=0;camera.y=0;nearItem=null;hideDialog();pressed={};syncHUD();fitCamera();notify(failures?'New smaller maze: '+sz[0]+' × '+sz[1]+' (cells)':'New maze ready. Start exploring!')}
   function syncHUD(){el('roundN').textContent=failures+1;el('mazeSize').textContent=current.width+' × '+current.height;el('failureCount').textContent=failures;el('doneCount').textContent=done.filter(Boolean).length+' / '+MAX_QUESTS;
-    el('progressStrip').innerHTML='<span class="progress-strip-label">作業 '+done.filter(Boolean).length+'/'+MAX_QUESTS+'</span>'+done.map(function(ok,i){return '<span class="progress-dot '+(ok?'passed':'')+'" title="Q'+(i+1)+(ok?' 已完成':' 未完成')+'">'+(ok?'✓':(i+1))+'</span>'}).join('');
-    el('questlist').innerHTML=QUESTIONS.map(function(q,i){return '<div class="quest '+(done[i]?'done':'')+'"><div class="seal">'+(done[i]?'✓':'Q'+(i+1))+'</div><div><div class="qtitle">'+escapeHtml(q.title||q.id)+'</div><div class="qstatus">'+(done[i]?'已通過 · Passed':'尚未通過 · Find in maze')+'</div></div></div>'}).join('');
-    var all=done.every(Boolean);el('finalStatus').textContent=all?'全部題目已通過！找到紫色終點即可開啟表單。':'終點尚未解鎖。完成全部 '+MAX_QUESTS+' 題才可通關。';
+    el('progressStrip').innerHTML='<span class="progress-strip-label">Questions '+done.filter(Boolean).length+'/'+MAX_QUESTS+'</span>'+done.map(function(ok,i){return '<span class="progress-dot '+(ok?'passed':'')+'" title="Q'+(i+1)+(ok?' completed':' unfinished')+'">'+(ok?'✓':(i+1))+'</span>'}).join('');
+    el('questlist').innerHTML=QUESTIONS.map(function(q,i){return '<div class="quest '+(done[i]?'done':'')+'"><div class="seal">'+(done[i]?'✓':'Q'+(i+1))+'</div><div><div class="qtitle">'+escapeHtml(q.title||q.id)+'</div><div class="qstatus">'+(done[i]?'Passed':'Find in maze')+'</div></div></div>'}).join('');
+    var all=done.every(Boolean);el('finalStatus').textContent=all?'All questions completed! Find the purple exit to open the Form.':'Exit locked. Complete all '+MAX_QUESTS+' questions to finish.';
     el('finalStatus').style.borderColor=all?'#38b99f':'#466655';
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -142,8 +142,8 @@
   function findNearby(){var nearest=null,best=gameMode==='drive'?70:50;
     current.stations.forEach(function(s,i){if(done[i])return;var pt=worldCenter(s.x,s.y),dist=Math.hypot(pt.x-current.player.x,pt.y-current.player.y);if(dist<best){nearest={type:'question',index:i};best=dist}});
     var exit=worldCenter(current.exit.x,current.exit.y),d=Math.hypot(exit.x-current.player.x,exit.y-current.player.y);if(d<best){nearest={type:'finish'};best=d}
-    nearItem=nearest;var tip=el('interactTip');if(nearest){tip.textContent=nearest.type==='finish'?(done.every(Boolean)?'★ 終點已解鎖：按 E 完成作業':'🔒 終點需通過全部 '+MAX_QUESTS+' 題才能啟用'):'● 找到 Q'+(nearest.index+1)+'：按 E 或點擊題目';tip.classList.add('show')}else tip.classList.remove('show');
-    el('status').textContent=gameMode==='drive'?(nearest?'接近 '+(nearest.type==='finish'?'終點':'Q'+(nearest.index+1))+' · 停車按 E':'迷宮駕駛 · W 加速、A/D 轉向、V 切換'): (nearest?(nearest.type==='finish'?'已抵達終點':'已找到 Q'+(nearest.index+1)):'方向鍵 / WASD 移動 · 按 E 互動');
+    nearItem=nearest;var tip=el('interactTip');if(nearest){tip.textContent=nearest.type==='finish'?(done.every(Boolean)?'★ Exit unlocked: press E to finish':'🔒 Exit locked: complete all '+MAX_QUESTS+' questions'):'● Found Q'+(nearest.index+1)+': press E or click the question';tip.classList.add('show')}else tip.classList.remove('show');
+    el('status').textContent=gameMode==='drive'?(nearest?'Near '+(nearest.type==='finish'?'Exit':'Q'+(nearest.index+1))+' · Stop and press E':'Driving · W accelerate, A/D steer, V switch'): (nearest?(nearest.type==='finish'?'Exit reached':'Found Q'+(nearest.index+1)):'Arrow keys / WASD to move · E to interact');
   }
   // BEGIN 2D VISUALS — artwork reads shared state; gameplay and driving stay here.
   var rpgVisuals=MazeRpgVisuals.create(TILE);
@@ -214,17 +214,17 @@
   }
   function updateMapControls(){
     var seconds=Math.ceil(Math.max(0,mapRemainingMs)/1000),expired=mapRemainingMs<=0;
-    var label=expired?'老師視角：已用完':(showMap?'關閉地圖 · '+seconds+'s':'老師視角：'+seconds+'s');
+    var label=expired?'Full map: used up':(showMap?'Close map · '+seconds+'s':'Full map: '+seconds+'s');
     var btn=el('mapToggle'),drawer=el('drawerMapToggle');
     btn.textContent=label;drawer.textContent=label;btn.disabled=expired;drawer.disabled=expired;
-    btn.setAttribute('aria-label',expired?'老師視角時間已用完':('老師視角剩餘 '+seconds+' 秒；'+(showMap?'點擊關閉':'點擊開啟')));
+    btn.setAttribute('aria-label',expired?'Full-map allowance used up':('Full map: '+seconds+' seconds; '+(showMap?'click to close':'click to open')));
     el('mapSeconds').textContent=seconds+'s';
     el('mapTimeFill').style.width=(100*mapRemainingMs/MAP_LIMIT_MS)+'%';
     el('mapTimer').classList.toggle('show',showMap);
   }
   function setMapVisible(visible){
     if(!current)return;
-    if(visible&&mapRemainingMs<=0){notify('老師視角 30 秒已用完。');return}
+    if(visible&&mapRemainingMs<=0){notify('The 30-second full-map allowance is used up.');return}
     showMap=visible&&mapRemainingMs>0;mapLastTick=performance.now();
     mini.classList.toggle('show',showMap);
     updateMapControls();
@@ -235,7 +235,7 @@
     // Only time that the map can actually be viewed counts.
     if(showMap&&!assignmentPaused&&!document.hidden&&!modalOpen&&!pendingInteraction&&!el('sidePanel').classList.contains('open')){
       mapRemainingMs=Math.max(0,mapRemainingMs-elapsed);
-      if(mapRemainingMs===0){setMapVisible(false);notify('老師視角 30 秒已使用完畢，地圖已自動關閉。')}
+      if(mapRemainingMs===0){setMapVisible(false);notify('The 30-second full-map allowance is used up. Map closed.')}
     }
     updateMapControls();
   }
@@ -271,12 +271,12 @@
       var c=Math.cos(driveAngle),ss=Math.sin(driveAngle);current.player.dir=Math.abs(c)>Math.abs(ss)?(c>0?'right':'left'):(ss>0?'down':'up');fitCamera();
     }
     document.body.classList.toggle('drive-mode',gameMode==='drive');
-    el('modeToggle').textContent=gameMode==='drive'?'🚶 返回 2D（V）':'🚗 切換駕駛（V）';
-    el('drawerModeToggle').textContent=gameMode==='drive'?'🚶 返回 2D':'🚗 進入駕駛視角';
+    el('modeToggle').textContent=gameMode==='drive'?'🚶 2D (V)':'🚗 Drive (V)';
+    el('drawerModeToggle').textContent=gameMode==='drive'?'🚶 2D':'🚗 Drive';
     el('driveDashboard').hidden=gameMode!=='drive';
-    el('controlsFoot').innerHTML=gameMode==='drive'?'駕駛 <kbd>W</kbd> 油門 <kbd>S</kbd> 煞車 <kbd>A</kbd><kbd>D</kbd> 轉向　停車互動 <kbd>E</kbd>　切換 <kbd>V</kbd>':'移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　能量 / 答題 <kbd>E</kbd>　視角 <kbd>V</kbd>';
-    el('touchInteract').textContent=gameMode==='drive'?'互動 / 答題':'能量 / 答題';
-    notify(gameMode==='drive'?'已進入雙線道迷宮駕駛模式（W 加速，A/D 轉彎）':'已返回 2D 迷宮，位置與題目進度都保留。');
+    el('controlsFoot').innerHTML=gameMode==='drive'?'Drive <kbd>W</kbd> accelerate <kbd>S</kbd> brake <kbd>A</kbd><kbd>D</kbd> steer · Stop + <kbd>E</kbd> interact · <kbd>V</kbd> switch':'Move <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Slash / Answer <kbd>E</kbd> · View <kbd>V</kbd>';
+    el('touchInteract').textContent=gameMode==='drive'?'Interact / Answer':'Slash / Answer';
+    notify(gameMode==='drive'?'Driving mode: W accelerate, A/D steer':'Returned to 2D. Position and question progress preserved.');
     canvas.focus({preventScroll:true});findNearby();
   }
   function updateDrive(dt){
@@ -600,9 +600,9 @@
   function frame(t){var dt=Math.min((t-lastFrame)/1000||.016,.045);lastFrame=t;updateMapBudget(t);update(dt);if(!pendingInteraction){if(gameMode==='2d'){render(t/1000)}else if(t-driveRenderAt>=32){driveRenderAt=t;renderDrive(t/1000)}}requestAnimationFrame(frame)}
   function showDialog(html){clearInteractionCue();modalOpen=true;pressed={};driveSpeed=0;el('dialog').innerHTML=html;el('veil').classList.add('show');el('dialog').focus()}
   function hideDialog(){clearInteractionCue();modalOpen=false;activeQuestion=-1;el('veil').classList.remove('show');el('dialog').innerHTML=''}
-  function videoCard(url,isExplanation){return '<div class="videobox"><div><div class="video-title">'+(isExplanation?'🎬 English Explanation (optional)':'🎬 English Question Video')+'</div><small>影片在新的分頁開啟，返回此頁繼續作答。</small></div><a class="video-link" target="_blank" rel="noopener noreferrer" href="'+escapeHtml(url)+'">▶ 開啟 YouTube ↗</a></div>'}
+  function videoCard(url,isExplanation){return '<div class="videobox"><div><div class="video-title">'+(isExplanation?'🎬 English Explanation (optional)':'🎬 English Question Video')+'</div><small>Video opens in a new tab. Return here to continue.</small></div><a class="video-link" target="_blank" rel="noopener noreferrer" href="'+escapeHtml(url)+'">▶ Open YouTube ↗</a></div>'}
   function openQuestion(index){if(!assignment||!QUESTIONS[index]||done[index])return;activeQuestion=index;var q=QUESTIONS[index];
-    showDialog('<div class="modalhead"><span class="chip">ENGLISH QUESTION · Q'+(index+1)+' / '+MAX_QUESTS+'</span><button class="btn" id="dialogClose">✕ 返回迷宮</button></div><h2>'+escapeHtml(q.title||q.id)+'</h2><p class="modaltext">先在 YouTube 新分頁觀看題目影片，回到迷宮選擇一個答案。</p>'+videoCard(q.questionVideoUrl,false)+'<div class="question">'+escapeHtml(q.prompt||'')+'</div><div class="answers">'+q.options.map(function(c,i){return '<button class="answer" type="button" data-answer="'+String.fromCharCode(65+i)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+escapeHtml(c)+'</button>'}).join('')+'</div><p class="muted">選擇一個答案即可。答錯會清除全部通關狀態，重新產生較小的迷宮。</p>');
+    showDialog('<div class="modalhead"><span class="chip">ENGLISH QUESTION · Q'+(index+1)+' / '+MAX_QUESTS+'</span><button class="btn" id="dialogClose">✕ Return to maze</button></div><h2>'+escapeHtml(q.title||q.id)+'</h2><p class="modaltext">Watch the question video in a new YouTube tab, then return and choose one answer.</p>'+videoCard(q.questionVideoUrl,false)+'<div class="question">'+escapeHtml(q.prompt||'')+'</div><div class="answers">'+q.options.map(function(c,i){return '<button class="answer" type="button" data-answer="'+String.fromCharCode(65+i)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+escapeHtml(c)+'</button>'}).join('')+'</div><p class="muted">Choose one answer. A wrong answer clears all progress and starts a smaller maze.</p>');
     el('dialogClose').addEventListener('click',hideDialog);
     Array.from(el('dialog').querySelectorAll('[data-answer]')).forEach(function(btn){btn.addEventListener('click',function(){chooseAnswer(index,btn.dataset.answer)})});
   }
@@ -612,15 +612,15 @@
     if(!AssignmentValidator.acceptsAnswer(q,choice)){
       failures++;newRound(false);
       var sz=MAZE_SIZES[Math.min(failures,MAZE_SIZES.length-1)];
-      showDialog('<span class="chip" style="background:#ff9ba7">WRONG ANSWER</span><h2>答錯了，整局重新挑戰</h2><p class="modaltext">所有題目通關紀錄已清空，老師視角已恢復為 30 秒。新的迷宮已產生，題目內容與答案不變。</p><div class="question">第 '+(failures+1)+' 輪地圖：'+sz[0]+' × '+sz[1]+' 邏輯格</div><div class="modalbuttons"><button class="btn primary" id="nextRound">開始下一輪 →</button></div>');
+      showDialog('<span class="chip" style="background:#ff9ba7">WRONG ANSWER</span><h2>Wrong answer · new attempt</h2><p class="modaltext">All question progress cleared. Full-map allowance restored to 30 seconds. A new maze is ready with the same questions and answers.</p><div class="question">Attempt '+(failures+1)+': '+sz[0]+' × '+sz[1]+' cells</div><div class="modalbuttons"><button class="btn primary" id="nextRound">Start next attempt →</button></div>');
       el('nextRound').addEventListener('click',hideDialog);return;
     }
     done[index]=true;syncHUD();var all=done.every(Boolean);
-    showDialog('<span class="chip" style="background:#6cecc2">CORRECT ANSWER ✓</span><h2>答對了！Q'+(index+1)+' 通過</h2><div class="question">'+escapeHtml(q.explanationText||'')+'</div><p class="modaltext">可以選擇觀看英文解答影片，也可以直接繼續探索。</p>'+videoCard(q.explanationVideoUrl,true)+'<div class="modalbuttons"><button class="btn primary" id="continueMaze">'+(all?'全部完成，前往紫色終點 →':'返回迷宮，繼續尋找題目 →')+'</button></div>');
-    el('continueMaze').addEventListener('click',function(){hideDialog();notify(all?'全部答對了！現在可以前往紫色終點。':'Q'+(index+1)+' 通過！可繼續探索其他題目。')});
+    showDialog('<span class="chip" style="background:#6cecc2">CORRECT ANSWER ✓</span><h2>Correct! Q'+(index+1)+' passed</h2><div class="question">'+escapeHtml(q.explanationText||'')+'</div><p class="modaltext">Watch the optional English explanation or continue exploring.</p>'+videoCard(q.explanationVideoUrl,true)+'<div class="modalbuttons"><button class="btn primary" id="continueMaze">'+(all?'All completed · find the purple exit →':'Return to maze · find more questions →')+'</button></div>');
+    el('continueMaze').addEventListener('click',function(){hideDialog();notify(all?'All questions completed! Find the purple exit.':'Q'+(index+1)+' passed! Keep exploring for other questions.')});
   }
-  function finish(){if(!assignment||!done.every(Boolean)){notify('請先通過所有題目，終點才能解鎖。');return}
-    showDialog('<span class="chip" style="background:#9fe4d4">ALL QUESTS COMPLETED</span><h2>🎉 全部題目通過！</h2><p class="modaltext">'+escapeHtml(assignment.unitId+' · '+assignment.title)+'</p><div class="question">本輪成功：第 '+(failures+1)+' 次挑戰<br>已通過：'+MAX_QUESTS+' / '+MAX_QUESTS+'</div><div class="modalbuttons"><a class="video-link" href="'+escapeHtml(FORM_URL)+'" target="_blank" rel="noopener noreferrer">開啟 Google Form ↗</a></div><div class="modalbuttons"><button class="btn primary" id="again">重新玩一次</button><button class="btn" id="closeFinish">返回迷宮</button></div>');
+  function finish(){if(!assignment||!done.every(Boolean)){notify('Complete all questions to unlock the exit.');return}
+    showDialog('<span class="chip" style="background:#9fe4d4">ALL QUESTS COMPLETED</span><h2>🎉 All questions completed!</h2><p class="modaltext">'+escapeHtml(assignment.unitId+' · '+assignment.title)+'</p><div class="question">Successful attempt: '+(failures+1)+'<br>Completed: '+MAX_QUESTS+' / '+MAX_QUESTS+'</div><div class="modalbuttons"><a class="video-link" href="'+escapeHtml(FORM_URL)+'" target="_blank" rel="noopener noreferrer">Open Google Form ↗</a></div><div class="modalbuttons"><button class="btn primary" id="again">Play again</button><button class="btn" id="closeFinish">Return to maze</button></div>');
     el('again').addEventListener('click',function(){newRound(true)});el('closeFinish').addEventListener('click',hideDialog);
   }
   function interact(){
@@ -629,7 +629,7 @@
       freeSlash();if(nearItem)finish();return;
     }
     if(!nearItem)return;
-    if(gameMode==='drive'&&Math.abs(driveSpeed)>25){notify('請先減速停車，再按 E 開啟題目。');return;}
+    if(gameMode==='drive'&&Math.abs(driveSpeed)>25){notify('Brake to a stop, then press E to open the question.');return;}
     if(nearItem.type==='question'){
       if(gameMode==='2d')presentInteraction(nearItem.index);else openQuestion(nearItem.index);
     }else if(gameMode==='2d')presentInteraction(null);else finish();
@@ -666,7 +666,7 @@
   });
   el('zoomSelect').addEventListener('change',function(){
     var next=Number(this.value);if([1.5,1.75].indexOf(next)<0)return;
-    gameZoom=next;fitCamera();notify('迷宮鏡頭已調整為 '+Math.round(gameZoom*100)+'%（網頁介面不變）');canvas.focus({preventScroll:true});
+    gameZoom=next;fitCamera();notify('Maze zoom: '+Math.round(gameZoom*100)+'% (page text unchanged)');canvas.focus({preventScroll:true});
   });
   el('panelToggle').addEventListener('click',function(){togglePanel(!el('sidePanel').classList.contains('open'))});
   el('panelClose').addEventListener('click',function(){togglePanel(false)});
@@ -688,12 +688,12 @@
     hideDialog();togglePanel(false);resetMapBudget();
     ctx.clearRect(0,0,viewport.w,viewport.h);
     clearTimeout(toastTimer);el('toast').classList.remove('show');
-    el('unitLabel').textContent='單元';el('unitLabel').title='選擇單元';
+    el('unitLabel').textContent='Unit';el('unitLabel').title='Select unit';
     el('roundN').textContent='1';el('mazeSize').textContent='—';
     el('doneCount').textContent='0 / 0';el('failureCount').textContent='0';
-    el('progressStrip').textContent='請選擇單元';el('questlist').replaceChildren();
-    el('finalStatus').textContent='請先載入已發布單元。';
-    el('interactTip').classList.remove('show');el('status').textContent='請選擇單元';
+    el('progressStrip').textContent='Select unit';el('questlist').replaceChildren();
+    el('finalStatus').textContent='Load a published unit to begin.';
+    el('interactTip').classList.remove('show');el('status').textContent='Select unit';
     el('tripValue').textContent='0.00';el('speedValue').textContent='0';
   }
   var loader=AssignmentLoader.create({
@@ -710,7 +710,7 @@
     el('unitLabel').textContent=unit.unitId;
     var unitTitle=document.createElement('span');unitTitle.className='unit-title';
     unitTitle.textContent=' · '+unit.title;el('unitLabel').appendChild(unitTitle);
-    el('unitLabel').title=unit.unitId+' · '+unit.title+'（選擇單元）';
+    el('unitLabel').title=unit.unitId+' · '+unit.title+' (Select unit)';
     newRound(true);
   }});
   el('unitLabel').addEventListener('click',loader.open);

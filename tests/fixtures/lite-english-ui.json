@@ -1,0 +1,1215 @@
+{
+  "student/index.html": [
+    {
+      "before": "lang=\"zh-Hant\"",
+      "after": "lang=\"en\"",
+      "offsets": [
+        22
+      ]
+    },
+    {
+      "before": "Digital Electronics Maze Quest — 雙視角迷宮駕駛體驗版 v1.2",
+      "after": "Engineering Maze Lab — Lite",
+      "offsets": [
+        189
+      ]
+    },
+    {
+      "before": "<meta charset=\"utf-8\">",
+      "after": "<meta charset=\"utf-8\">\n  <meta name=\"application-version\" content=\"1.0.0-rc1\">",
+      "offsets": [
+        42
+      ]
+    },
+    {
+      "before": "電路迷宮｜雙視角作業",
+      "after": "Engineering Maze Lab — Lite",
+      "offsets": [
+        18258
+      ]
+    },
+    {
+      "before": "選擇已發布單元，完成題目後開啟該單元 Google Form。",
+      "after": "Select a published unit, complete its questions, then open its Google Form.",
+      "offsets": [
+        18307
+      ]
+    },
+    {
+      "before": "    <span class=\"tag\">● 靜態 HTML ／ 無後端 ／ 不記錄學生資料</span>\n",
+      "after": "",
+      "offsets": [
+        18395
+      ]
+    },
+    {
+      "before": "迷宮遊戲",
+      "after": "Maze game",
+      "offsets": [
+        18472
+      ]
+    },
+    {
+      "before": "挑戰 <strong",
+      "after": "Attempt <strong",
+      "offsets": [
+        18534
+      ]
+    },
+    {
+      "before": "迷宮 <strong",
+      "after": "Maze <strong",
+      "offsets": [
+        18605
+      ]
+    },
+    {
+      "before": "（邏輯格）",
+      "after": " (cells)",
+      "offsets": [
+        18648
+      ]
+    },
+    {
+      "before": "選擇單元 / Select unit",
+      "after": "Select unit",
+      "offsets": [
+        24539
+      ]
+    },
+    {
+      "before": "選擇單元",
+      "after": "Select unit",
+      "offsets": [
+        18727
+      ]
+    },
+    {
+      "before": ">單元<",
+      "after": ">Unit<",
+      "offsets": [
+        18739
+      ]
+    },
+    {
+      "before": "題目通關進度",
+      "after": "Question progress",
+      "offsets": [
+        18821
+      ]
+    },
+    {
+      "before": "作業 0/4",
+      "after": "Questions 0/4",
+      "offsets": [
+        18875
+      ]
+    },
+    {
+      "before": "只放大迷宮與人物，不影響瀏覽器或網頁文字",
+      "after": "Zoom the 2D maze and character; keep page text at its normal size",
+      "offsets": [
+        18962
+      ]
+    },
+    {
+      "before": "迷宮鏡頭縮放倍率",
+      "after": "2D maze zoom",
+      "offsets": [
+        19121
+      ]
+    },
+    {
+      "before": "鏡頭",
+      "after": "Zoom",
+      "offsets": [
+        19065,
+        24125
+      ]
+    },
+    {
+      "before": "2D atmosphere / 迷宮氣氛",
+      "after": "2D atmosphere",
+      "offsets": [
+        19377
+      ]
+    },
+    {
+      "before": "氣氛",
+      "after": "Atmosphere",
+      "offsets": [
+        19409,
+        22648,
+        23941
+      ]
+    },
+    {
+      "before": "按 V 切換 2D／駕駛視角",
+      "after": "Press V to switch between 2D and driving",
+      "offsets": [
+        19757
+      ]
+    },
+    {
+      "before": "🚗 切換駕駛（V）",
+      "after": "🚗 Drive (V)",
+      "offsets": [
+        19799
+      ]
+    },
+    {
+      "before": "☰ 進度／說明",
+      "after": "☰ Progress / Help",
+      "offsets": [
+        19927
+      ]
+    },
+    {
+      "before": "每輪挑戰可看 30 秒；答錯或按重新開始會恢復 30 秒",
+      "after": "30 seconds per attempt; a wrong answer or Restart restores the allowance",
+      "offsets": [
+        20018
+      ]
+    },
+    {
+      "before": "老師視角：30秒",
+      "after": "Full map: 30s",
+      "offsets": [
+        20092,
+        22526
+      ]
+    },
+    {
+      "before": "重新開始",
+      "after": "Restart",
+      "offsets": [
+        20171,
+        22605,
+        23107
+      ]
+    },
+    {
+      "before": "方向鍵或 WASD 移動；E 能量揮擊，靠近題目時答題",
+      "after": "Arrow keys or WASD to move; E for an energy slash or a nearby question",
+      "offsets": [
+        20295
+      ]
+    },
+    {
+      "before": "方向鍵 / WASD 移動",
+      "after": "Arrow keys / WASD to move",
+      "offsets": [
+        20417
+      ]
+    },
+    {
+      "before": "駕駛速度與操作提示",
+      "after": "Driving speed and controls",
+      "offsets": [
+        20494
+      ]
+    },
+    {
+      "before": "行駛 <b",
+      "after": "Trip <b",
+      "offsets": [
+        20746
+      ]
+    },
+    {
+      "before": "W 油門　S 煞車　A/D 轉向　E 停車答題　V 切換",
+      "after": "W accelerate · S brake · A/D steer · Stop + E to answer · V switch",
+      "offsets": [
+        20812
+      ]
+    },
+    {
+      "before": "老師視角剩餘時間",
+      "after": "Full-map time remaining",
+      "offsets": [
+        20949
+      ]
+    },
+    {
+      "before": "🧭 地圖剩餘時間",
+      "after": "🧭 Map time remaining",
+      "offsets": [
+        21007
+      ]
+    },
+    {
+      "before": "限時老師視角迷你地圖",
+      "after": "Time-limited full-map preview",
+      "offsets": [
+        21230
+      ]
+    },
+    {
+      "before": "靠近題目按 E 開始",
+      "after": "Approach a question and press E",
+      "offsets": [
+        21321
+      ]
+    },
+    {
+      "before": "移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　能量 / 答題 <kbd>E</kbd>　視角 <kbd>V</kbd>",
+      "after": "Move <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Slash / Answer <kbd>E</kbd> · View <kbd>V</kbd>",
+      "offsets": [
+        21479
+      ]
+    },
+    {
+      "before": "未完成題目",
+      "after": "Question",
+      "offsets": [
+        21704
+      ]
+    },
+    {
+      "before": "已完成",
+      "after": "Completed",
+      "offsets": [
+        21755
+      ]
+    },
+    {
+      "before": "終點",
+      "after": "Exit",
+      "offsets": [
+        21806,
+        24406
+      ]
+    },
+    {
+      "before": "手機觸控操作",
+      "after": "Touch controls",
+      "offsets": [
+        21885
+      ]
+    },
+    {
+      "before": "aria-label=\"上\"",
+      "after": "aria-label=\"Up\"",
+      "offsets": [
+        21957
+      ]
+    },
+    {
+      "before": "aria-label=\"左\"",
+      "after": "aria-label=\"Left\"",
+      "offsets": [
+        22025
+      ]
+    },
+    {
+      "before": "aria-label=\"下\"",
+      "after": "aria-label=\"Down\"",
+      "offsets": [
+        22095
+      ]
+    },
+    {
+      "before": "aria-label=\"右\"",
+      "after": "aria-label=\"Right\"",
+      "offsets": [
+        22167
+      ]
+    },
+    {
+      "before": "能量 / 答題",
+      "after": "Slash / Answer",
+      "offsets": [
+        22274
+      ]
+    },
+    {
+      "before": "作業進度與操作說明",
+      "after": "Question progress and instructions",
+      "offsets": [
+        22436
+      ]
+    },
+    {
+      "before": "作業進度與遊戲說明",
+      "after": "Progress and help",
+      "offsets": [
+        22531
+      ]
+    },
+    {
+      "before": "✕ 關閉",
+      "after": "✕ Close",
+      "offsets": [
+        22607
+      ]
+    },
+    {
+      "before": "🚗 進入駕駛視角",
+      "after": "🚗 Drive",
+      "offsets": [
+        22725
+      ]
+    },
+    {
+      "before": "2D Atmosphere / Atmosphere",
+      "after": "2D Atmosphere",
+      "offsets": [
+        23010
+      ]
+    },
+    {
+      "before": "老師視角每輪可使用 <b>30 秒</b>；開啟時倒數，關閉時暫停。同一輪用完後不能再開啟；<b>答錯進入下一輪</b>或按下<b>Restart</b>都會重置為 30 秒。切換單元或重新載入單元會開始新的挑戰。",
+      "after": "The full map has <b>30 seconds per attempt</b>. Time runs while it is open and pauses when closed. Once used up, it stays unavailable for that attempt. A <b>wrong answer</b> or <b>Restart</b> restores 30 seconds. Switching or reloading a unit starts a new attempt.",
+      "offsets": [
+        23295
+      ]
+    },
+    {
+      "before": "UNIT QUEST / 單元作業",
+      "after": "UNIT ASSIGNMENT",
+      "offsets": [
+        23633
+      ]
+    },
+    {
+      "before": "已通過題目",
+      "after": "Questions completed",
+      "offsets": [
+        23774
+      ]
+    },
+    {
+      "before": "累積答錯次數",
+      "after": "Wrong answers",
+      "offsets": [
+        23895
+      ]
+    },
+    {
+      "before": "請先載入已發布單元。",
+      "after": "Load a published unit to begin.",
+      "offsets": [
+        24026
+      ]
+    },
+    {
+      "before": "HOW TO PLAY / 遊戲說明",
+      "after": "HOW TO PLAY",
+      "offsets": [
+        24153
+      ]
+    },
+    {
+      "before": "按 <b>V</b> 可隨時切換 2D 走迷宮與迷宮駕駛視角；兩者使用<b>同一張地圖與題目位置</b>。",
+      "after": "Press <b>V</b> to switch between 2D walking and driving. Both use <b>the same maze and question positions</b>.",
+      "offsets": [
+        24201
+      ]
+    },
+    {
+      "before": "駕駛時 W 加速、S 煞車／倒車、A/D 轉向，<b>車速接近 0</b> 且靠近題目時按 E 答題。",
+      "after": "Drive with W to accelerate, S to brake / reverse and A/D to steer. <b>Stop near a question</b>, then press E to answer.",
+      "offsets": [
+        24320
+      ]
+    },
+    {
+      "before": "駕駛模式是輕量 2.5D Canvas 畫法，不需 WebGL 或外部程式庫。",
+      "after": "Driving uses a lightweight 2.5D view.",
+      "offsets": [
+        24448
+      ]
+    },
+    {
+      "before": "沿著寬敞迷宮通道探索，尋找 <b style=\"color:var(--gold)\">Q1–Q4／Q5</b>。每輪題目位置與題號分布都會變化。",
+      "after": "Explore the corridors to find <b style=\"color:var(--gold)\">Q1–Q4 / Q5</b>. Question positions and numbering change each attempt.",
+      "offsets": [
+        24494
+      ]
+    },
+    {
+      "before": "2D 按 <b>E</b> 可施放能量弧；靠近未通過題目時才會答題。Atmosphere Off 不播放動畫。點選影片在 <b>新的 YouTube 分頁</b> 開啟。",
+      "after": "In 2D, press <b>E</b> for an energy slash; near an unfinished question, it opens the question. Atmosphere Off disables the animation. Videos open in a <b>new YouTube tab</b>.",
+      "offsets": [
+        24631
+      ]
+    },
+    {
+      "before": "回到迷宮，從 A–C 或 A–D 選擇一個答案；答對可自由觀看英文解答影片。",
+      "after": "Return to the maze and choose one answer, A–C or A–D. Any accepted answer passes. The English explanation video is optional.",
+      "offsets": [
+        24814
+      ]
+    },
+    {
+      "before": "<b>答錯任何一題</b>，全部題目歸零，但下一輪迷宮縮小。",
+      "after": "A <b>wrong answer</b> clears all question progress and starts a smaller maze.",
+      "offsets": [
+        24947
+      ]
+    },
+    {
+      "before": "答對全部題目，再找到紫色Exit。",
+      "after": "Complete all questions, then find the purple exit.",
+      "offsets": [
+        25033
+      ]
+    },
+    {
+      "before": "上方「Zoom」只調整 2D 迷宮放大倍率，建議保持瀏覽器 100% 縮放；本版提供 150% 與 175% 兩種視野。",
+      "after": "Zoom adjusts only the 2D maze: choose 150% or 175%. Keep browser zoom at 100%.",
+      "offsets": [
+        25120
+      ]
+    },
+    {
+      "before": "每個單元有四或五題，各題選擇一個答案。已發布的單元可再次練習；表單是否接受回覆由 Google Forms 管理。",
+      "after": "Each unit has four or five questions. Choose one answer per question. Revisit any published unit for review. Google Forms determines whether submissions are open.",
+      "offsets": [
+        25222
+      ]
+    },
+    {
+      "before": "迷宮題目",
+      "after": "Maze question",
+      "offsets": [
+        25508
+      ]
+    },
+    {
+      "before": "正在讀取公開單元清單…",
+      "after": "Reading published units…",
+      "offsets": [
+        25828
+      ]
+    },
+    {
+      "before": "已發布單元",
+      "after": "Published units",
+      "offsets": [
+        25885
+      ]
+    },
+    {
+      "before": "確定開始新挑戰",
+      "after": "Start new attempt",
+      "offsets": [
+        26128
+      ]
+    },
+    {
+      "before": "取消，返回目前挑戰",
+      "after": "Cancel and return",
+      "offsets": [
+        26206
+      ]
+    },
+    {
+      "before": "返回目前挑戰",
+      "after": "Return to attempt",
+      "offsets": [
+        26339
+      ]
+    },
+    {
+      "before": "載入單元",
+      "after": "Load unit",
+      "offsets": [
+        26467
+      ]
+    },
+    {
+      "before": "重新整理清單",
+      "after": "Refresh list",
+      "offsets": [
+        26540
+      ]
+    },
+    {
+      "before": "./js/assignment-loader.js\"",
+      "after": "./js/assignment-loader.js?v=1.0.0-rc1\"",
+      "offsets": [
+        26699
+      ]
+    },
+    {
+      "before": "./js/game.js?v=5b1-1",
+      "after": "./js/game.js?v=1.0.0-rc1",
+      "offsets": [
+        26870
+      ]
+    }
+  ],
+  "student/js/assignment-loader.js": [
+    {
+      "before": "無法讀取 ",
+      "after": "Unable to read ",
+      "offsets": [
+        2061
+      ]
+    },
+    {
+      "before": "，請檢查連線後重試。",
+      "after": ". Check your connection and retry.",
+      "offsets": [
+        2088
+      ]
+    },
+    {
+      "before": " 讀取失敗（HTTP ",
+      "after": " could not be loaded (HTTP ",
+      "offsets": [
+        2182
+      ]
+    },
+    {
+      "before": "）。",
+      "after": ").",
+      "offsets": [
+        2232
+      ]
+    },
+    {
+      "before": " 不是有效的 JSON。",
+      "after": " is not valid JSON.",
+      "offsets": [
+        2390
+      ]
+    },
+    {
+      "before": " 驗證失敗：",
+      "after": " failed validation: ",
+      "offsets": [
+        2514
+      ]
+    },
+    {
+      "before": ".join('；')",
+      "after": ".join('; ')",
+      "offsets": [
+        2613
+      ]
+    },
+    {
+      "before": "正在讀取公開單元清單…",
+      "after": "Reading published units…",
+      "offsets": [
+        2734
+      ]
+    },
+    {
+      "before": "請選擇單元。已發布的單元也可再次練習。",
+      "after": "Select a unit. Revisit any published unit for review.",
+      "offsets": [
+        3075
+      ]
+    },
+    {
+      "before": "目前沒有已發布的單元。可稍後重新整理清單。",
+      "after": "No published units. Refresh the list later.",
+      "offsets": [
+        3133
+      ]
+    },
+    {
+      "before": " 目前挑戰的單元已不在公開清單，無法重新載入；可返回本次已載入的挑戰或選擇其他單元。",
+      "after": " The current unit is no longer published and cannot be reloaded. Return to your loaded attempt or select another unit.",
+      "offsets": [
+        3318
+      ]
+    },
+    {
+      "before": " 請重新整理清單。",
+      "after": " Please refresh the list.",
+      "offsets": [
+        3561
+      ]
+    },
+    {
+      "before": "正在載入 ",
+      "after": "Loading ",
+      "offsets": [
+        3667
+      ]
+    },
+    {
+      "before": " 可重試載入、選擇其他單元或重新整理清單。",
+      "after": " You can retry, select another unit or refresh the list.",
+      "offsets": [
+        4334
+      ]
+    },
+    {
+      "before": "新單元驗證成功後才會取代目前挑戰；可取消返回。",
+      "after": "The new unit replaces this attempt only after validation. Cancel to return.",
+      "offsets": [
+        4612
+      ]
+    },
+    {
+      "before": "確定開始 ",
+      "after": "Start ",
+      "offsets": [
+        4776
+      ]
+    },
+    {
+      "before": "？新單元驗證成功後，目前挑戰的迷宮、進度及地圖時間將被重置。",
+      "after": "? After validation, the maze, progress and map allowance will reset.",
+      "offsets": [
+        4802
+      ]
+    },
+    {
+      "before": "請選擇單元。目前挑戰已暫停，可取消並返回；開始新單元前會請你確認。",
+      "after": "Select a unit. Your attempt is paused; cancel to return. Confirm before starting a new unit.",
+      "offsets": [
+        6003
+      ]
+    }
+  ],
+  "student/js/game.js": [
+    {
+      "before": "新迷宮已縮小：",
+      "after": "New smaller maze: ",
+      "offsets": [
+        7642
+      ]
+    },
+    {
+      "before": "（邏輯格）",
+      "after": " (cells)",
+      "offsets": [
+        7681
+      ]
+    },
+    {
+      "before": "新的迷宮已產生。開始探索！",
+      "after": "New maze ready. Start exploring!",
+      "offsets": [
+        7692
+      ]
+    },
+    {
+      "before": "作業 ",
+      "after": "Questions ",
+      "offsets": [
+        8031
+      ]
+    },
+    {
+      "before": " 已完成",
+      "after": " completed",
+      "offsets": [
+        8197
+      ]
+    },
+    {
+      "before": " 未完成",
+      "after": " unfinished",
+      "offsets": [
+        8210
+      ]
+    },
+    {
+      "before": "已通過 · Passed",
+      "after": "Passed",
+      "offsets": [
+        8519
+      ]
+    },
+    {
+      "before": "尚未通過 · Find in maze",
+      "after": "Find in maze",
+      "offsets": [
+        8528
+      ]
+    },
+    {
+      "before": "全部題目已通過！找到紫色終點即可開啟表單。",
+      "after": "All questions completed! Find the purple exit to open the Form.",
+      "offsets": [
+        8643
+      ]
+    },
+    {
+      "before": "終點尚未解鎖。完成全部 ",
+      "after": "Exit locked. Complete all ",
+      "offsets": [
+        8709
+      ]
+    },
+    {
+      "before": " 題才可通關。",
+      "after": " questions to finish.",
+      "offsets": [
+        8749
+      ]
+    },
+    {
+      "before": "★ 終點已解鎖：按 E 完成作業",
+      "after": "★ Exit unlocked: press E to finish",
+      "offsets": [
+        12019
+      ]
+    },
+    {
+      "before": "🔒 終點需通過全部 ",
+      "after": "🔒 Exit locked: complete all ",
+      "offsets": [
+        12056
+      ]
+    },
+    {
+      "before": " 題才能啟用",
+      "after": " questions",
+      "offsets": [
+        12098
+      ]
+    },
+    {
+      "before": "● 找到 Q",
+      "after": "● Found Q",
+      "offsets": [
+        12112
+      ]
+    },
+    {
+      "before": "：按 E 或點擊題目",
+      "after": ": press E or click the question",
+      "offsets": [
+        12142
+      ]
+    },
+    {
+      "before": "接近 ",
+      "after": "Near ",
+      "offsets": [
+        12294
+      ]
+    },
+    {
+      "before": "終點",
+      "after": "Exit",
+      "offsets": [
+        12327,
+        12433,
+        42840,
+        42983,
+        43104
+      ]
+    },
+    {
+      "before": " · 停車按 E",
+      "after": " · Stop and press E",
+      "offsets": [
+        12357
+      ]
+    },
+    {
+      "before": "迷宮駕駛 · W 加速、A/D 轉向、V 切換",
+      "after": "Driving · W accelerate, A/D steer, V switch",
+      "offsets": [
+        12379
+      ]
+    },
+    {
+      "before": "已抵達Exit",
+      "after": "Exit reached",
+      "offsets": [
+        12461
+      ]
+    },
+    {
+      "before": "已找到 Q",
+      "after": "Found Q",
+      "offsets": [
+        12476
+      ]
+    },
+    {
+      "before": "方向鍵 / WASD 移動 · 按 E 互動",
+      "after": "Arrow keys / WASD to move · E to interact",
+      "offsets": [
+        12505
+      ]
+    },
+    {
+      "before": "老師視角：已用完",
+      "after": "Full map: used up",
+      "offsets": [
+        15923
+      ]
+    },
+    {
+      "before": "關閉地圖 · ",
+      "after": "Close map · ",
+      "offsets": [
+        15952
+      ]
+    },
+    {
+      "before": "老師視角：",
+      "after": "Full map: ",
+      "offsets": [
+        15979
+      ]
+    },
+    {
+      "before": "老師視角時間已用完",
+      "after": "Full-map allowance used up",
+      "offsets": [
+        16203
+      ]
+    },
+    {
+      "before": "老師視角剩餘 ",
+      "after": "Full map: ",
+      "offsets": [
+        16233
+      ]
+    },
+    {
+      "before": " 秒；",
+      "after": " seconds; ",
+      "offsets": [
+        16254
+      ]
+    },
+    {
+      "before": "點擊關閉",
+      "after": "click to close",
+      "offsets": [
+        16276
+      ]
+    },
+    {
+      "before": "點擊開啟",
+      "after": "click to open",
+      "offsets": [
+        16293
+      ]
+    },
+    {
+      "before": "老師視角 30 秒已用完。",
+      "after": "The 30-second full-map allowance is used up.",
+      "offsets": [
+        16590
+      ]
+    },
+    {
+      "before": "老師視角 30 秒已使用完畢，地圖已自動關閉。",
+      "after": "The 30-second full-map allowance is used up. Map closed.",
+      "offsets": [
+        17239
+      ]
+    },
+    {
+      "before": "🚶 返回 2D（V）",
+      "after": "🚶 2D (V)",
+      "offsets": [
+        19718
+      ]
+    },
+    {
+      "before": "🚗 切換駕駛（V）",
+      "after": "🚗 Drive (V)",
+      "offsets": [
+        19729
+      ]
+    },
+    {
+      "before": "🚶 返回 2D",
+      "after": "🚶 2D",
+      "offsets": [
+        19802
+      ]
+    },
+    {
+      "before": "🚗 進入駕駛視角",
+      "after": "🚗 Drive",
+      "offsets": [
+        19809
+      ]
+    },
+    {
+      "before": "駕駛 <kbd>W</kbd> 油門 <kbd>S</kbd> 煞車 <kbd>A</kbd><kbd>D</kbd> 轉向　停車互動 <kbd>E</kbd>　切換 <kbd>V</kbd>",
+      "after": "Drive <kbd>W</kbd> accelerate <kbd>S</kbd> brake <kbd>A</kbd><kbd>D</kbd> steer · Stop + <kbd>E</kbd> interact · <kbd>V</kbd> switch",
+      "offsets": [
+        19924
+      ]
+    },
+    {
+      "before": "移動 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>　能量 / 答題 <kbd>E</kbd>　視角 <kbd>V</kbd>",
+      "after": "Move <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · Slash / Answer <kbd>E</kbd> · View <kbd>V</kbd>",
+      "offsets": [
+        20059
+      ]
+    },
+    {
+      "before": "互動 / 答題",
+      "after": "Interact / Answer",
+      "offsets": [
+        20273
+      ]
+    },
+    {
+      "before": "能量 / 答題",
+      "after": "Slash / Answer",
+      "offsets": [
+        20293
+      ]
+    },
+    {
+      "before": "已進入雙線道迷宮駕駛模式（W 加速，A/D 轉彎）",
+      "after": "Driving mode: W accelerate, A/D steer",
+      "offsets": [
+        20341
+      ]
+    },
+    {
+      "before": "已返回 2D 迷宮，位置與題目進度都保留。",
+      "after": "Returned to 2D. Position and question progress preserved.",
+      "offsets": [
+        20381
+      ]
+    },
+    {
+      "before": "影片在新的分頁開啟，返回此頁繼續作答。",
+      "after": "Video opens in a new tab. Return here to continue.",
+      "offsets": [
+        40840
+      ]
+    },
+    {
+      "before": "▶ 開啟 YouTube ↗",
+      "after": "▶ Open YouTube ↗",
+      "offsets": [
+        40995
+      ]
+    },
+    {
+      "before": "✕ 返回迷宮",
+      "after": "✕ Return to maze",
+      "offsets": [
+        41306
+      ]
+    },
+    {
+      "before": "先在 YouTube 新分頁觀看題目影片，回到迷宮選擇一個答案。",
+      "after": "Watch the question video in a new YouTube tab, then return and choose one answer.",
+      "offsets": [
+        41396
+      ]
+    },
+    {
+      "before": "選擇一個答案即可。答錯會清除全部通關狀態，重新產生較小的迷宮。",
+      "after": "Choose one answer. A wrong answer clears all progress and starts a smaller maze.",
+      "offsets": [
+        41836
+      ]
+    },
+    {
+      "before": "答錯了，整局重新挑戰",
+      "after": "Wrong answer · new attempt",
+      "offsets": [
+        42534
+      ]
+    },
+    {
+      "before": "所有題目通關紀錄已清空，老師視角已恢復為 30 秒。新的迷宮已產生，題目內容與答案不變。",
+      "after": "All question progress cleared. Full-map allowance restored to 30 seconds. A new maze is ready with the same questions and answers.",
+      "offsets": [
+        42586
+      ]
+    },
+    {
+      "before": "第 ",
+      "after": "Attempt ",
+      "offsets": [
+        42742,
+        43887
+      ]
+    },
+    {
+      "before": " 輪地圖：",
+      "after": ": ",
+      "offsets": [
+        42766
+      ]
+    },
+    {
+      "before": " 邏輯格",
+      "after": " cells",
+      "offsets": [
+        42789
+      ]
+    },
+    {
+      "before": "開始下一輪 →",
+      "after": "Start next attempt →",
+      "offsets": [
+        42870
+      ]
+    },
+    {
+      "before": "答對了！Q",
+      "after": "Correct! Q",
+      "offsets": [
+        43131
+      ]
+    },
+    {
+      "before": " 通過",
+      "after": " passed",
+      "offsets": [
+        43154,
+        43574
+      ]
+    },
+    {
+      "before": "可以選擇觀看英文解答影片，也可以直接繼續探索。",
+      "after": "Watch the optional English explanation or continue exploring.",
+      "offsets": [
+        43252
+      ]
+    },
+    {
+      "before": "全部完成，前往紫色Exit →",
+      "after": "All completed · find the purple exit →",
+      "offsets": [
+        43438
+      ]
+    },
+    {
+      "before": "返回迷宮，繼續尋找題目 →",
+      "after": "Return to maze · find more questions →",
+      "offsets": [
+        43479
+      ]
+    },
+    {
+      "before": "全部答對了！現在可以前往紫色Exit。",
+      "after": "All questions completed! Find the purple exit.",
+      "offsets": [
+        43624
+      ]
+    },
+    {
+      "before": " passed！可繼續探索其他題目。",
+      "after": " passed! Keep exploring for other questions.",
+      "offsets": [
+        43687
+      ]
+    },
+    {
+      "before": "請先通過所有題目，Exit才能解鎖。",
+      "after": "Complete all questions to unlock the exit.",
+      "offsets": [
+        43807
+      ]
+    },
+    {
+      "before": "🎉 全部題目通過！",
+      "after": "🎉 All questions completed!",
+      "offsets": [
+        43953
+      ]
+    },
+    {
+      "before": "本輪成功：Attempt ",
+      "after": "Successful attempt: ",
+      "offsets": [
+        44087
+      ]
+    },
+    {
+      "before": " 次挑戰<br>已通過：",
+      "after": "<br>Completed: ",
+      "offsets": [
+        44123
+      ]
+    },
+    {
+      "before": "開啟 Google Form ↗",
+      "after": "Open Google Form ↗",
+      "offsets": [
+        44297
+      ]
+    },
+    {
+      "before": "重新玩一次",
+      "after": "Play again",
+      "offsets": [
+        44390
+      ]
+    },
+    {
+      "before": "返回迷宮",
+      "after": "Return to maze",
+      "offsets": [
+        44446
+      ]
+    },
+    {
+      "before": "請先減速停車，再按 E 開啟題目。",
+      "after": "Brake to a stop, then press E to open the question.",
+      "offsets": [
+        44974
+      ]
+    },
+    {
+      "before": "迷宮鏡頭已調整為 ",
+      "after": "Maze zoom: ",
+      "offsets": [
+        47729
+      ]
+    },
+    {
+      "before": "%（網頁介面不變）",
+      "after": "% (page text unchanged)",
+      "offsets": [
+        47768
+      ]
+    },
+    {
+      "before": "textContent='單元'",
+      "after": "textContent='Unit'",
+      "offsets": [
+        49696
+      ]
+    },
+    {
+      "before": "選擇單元",
+      "after": "Select unit",
+      "offsets": [
+        49738,
+        49931,
+        50101,
+        51058
+      ]
+    },
+    {
+      "before": "請Select unit",
+      "after": "Select unit",
+      "offsets": [
+        49930,
+        50099
+      ]
+    },
+    {
+      "before": "請先載入已發布單元。",
+      "after": "Load a published unit to begin.",
+      "offsets": [
+        50013
+      ]
+    },
+    {
+      "before": "（Select unit）",
+      "after": " (Select unit)",
+      "offsets": [
+        51076
+      ]
+    }
+  ]
+}

@@ -2,44 +2,56 @@
 
 Read [AGENTS.md](AGENTS.md) and [Plan.md](Plan.md) before development.
 
-The separate **3D Showcase release candidate** lives on `feature/3d-showcase`, under
-[`showcase3d/`](showcase3d/README.md). It preserves the approved 3D art, physics
-and dual-view navigation, the original top-down car and educational assignments
-through the unchanged Lite v1/v2 validators. P2.1 simplifies the default UI to
-essential driving controls and compact **Settings**. Presenter tools use
-`?presenter=1`; diagnostics/benchmarks use `?debug=1`, and both remain blocked
-during educational assignments. The manual Device selector is removed.
-Students choose one
-answer; any accepted label passes. Units have four/five real question checkpoints,
-wrong-answer shrinking mazes, videos and a final Google Form link. Only explicitly
-published units load. **The release manifest is empty**; the separate synthetic
-demo remains available offline. **V** switches views; **M** uses the shared
-cumulative 30-second full-map allowance. The committed static bundle runs with
-**Start-Showcase.cmd**; no Node/npm is needed at the venue. See the guide for
-explicit local publication and manual Apache upload instructions.
+The **unified 1.0.0-rc1 candidate** on `feature/3d-showcase` contains both
+independently deployable editions: **English Lite** in [`student/`](student/)
+and the approved **3D educational/showcase edition** in
+[`showcase3d/`](showcase3d/README.md). Both use the unchanged v1/v2 validators,
+four/five-question assignments and one selected answer; any accepted label
+passes. All manifests ship empty. Instructor JSON is displayed verbatim.
+The offline instructor GUI and shared schemas remain in `tools/` and `schemas/`.
 
-Lite remains tagged **`lite-v1.0`** at
-`823786bc01b68901455061d5fe31d6076c61f20e`; `work` is unchanged. Approved P0 is
-preserved by **`showcase3d-p0-approved`** at
-`f685a21e391cdb0848b851e6bf2b72707c77162a`. The instructor reports P0 High is
-smooth on UHD 770 and has approved P2 gameplay after university Apache deployment
-and separate Windows/Iris Xe laptop testing. No numerical Intel FPS was supplied.
-Review the cleaned P2.1 UI before a final release. The non-overwriting annotated
-**`showcase3d-v1.0.0-rc1`** tag identifies the exact implementation/build commit
-that passed candidate checks; no final `v1.0.0` tag or merge is made.
-See [candidate results, changed files and review checklist](docs/3d-p2.1-release-results.md).
+Lite's application-owned interface is now English, with its technical badge
+removed. Its approved 2D artwork, slash, atmosphere, 2.5D driving, maze generator,
+physics, progress and map allowance are preserved. The 3D runtime is unchanged
+from the approved P2.1.1 fullscreen fix. **V** switches views; the 3D **M** key
+opens its cumulative 30-second full map. The separate synthetic demo and Windows
+`Start-Showcase.cmd` launcher remain available.
 
-In GitHub **Actions → 3D showcase release candidate**, inspect the verified run
-listed in the candidate report and all three jobs. Download **showcase3d-p2.1-…**
-for `3d-p2.1/showcase3d-1.0.0-rc1-static.zip`, screenshots,
-real-browser videos, traces and benchmark JSON; **showcase3d-windows-launcher-…**
-contains PowerShell HTTP checks, and **lite-preservation-…** contains the unchanged
-Lite suite's evidence. Artifacts upload even on failure and remain for 14 days.
-For an Apache upgrade, upload new hashed runtime assets first and index last;
-**leave the live `assignments/` directory untouched**, including its manifest.
-Do not replace it with the release's empty bootstrap manifest. The guide includes
-manual verification and rollback instructions. No automatic deployment is
-configured. Stop after P2.1 and candidate preparation for instructor review.
+Build the reproducible **Engineering-Maze-Lab-1.0.0-rc1.zip** and the existing 3D
+Windows ZIP with the commands in the [unified packaging and Apache guide](release/README.md).
+The unified ZIP contains `lite/`, `3d/`, a guide and a hashed release inventory;
+it excludes teacher tools, schemas, tests, private drafts and credentials.
+For upgrades, copy runtime files first and index last, **preserving every live
+`assignments/` file, including its manifest**. Never overwrite a live manifest
+with the package's empty bootstrap manifest. Deployment remains manual.
+
+In GitHub **Actions → Unified release candidate — Lite + 3D**, select the run
+for the candidate's exact SHA and inspect all three jobs, including every step:
+English Lite/Python/Tk/Chromium, WebGL/educational/cross-edition checks, and the
+Windows PowerShell launcher. Scroll to **Artifacts**, download and extract:
+
+- **unified-release-…**: unified ZIP, English interface screenshots, traces,
+  cross-edition JSON evidence and browser test logs.
+- **showcase3d-p2.1-…**: the existing 3D Windows ZIP, screenshots, route videos,
+  traces and benchmark JSON.
+- **lite-regressions-…**: Python, GUI and all Lite browser suite logs/results.
+- **showcase3d-windows-launcher-…**: Windows HTTP/launcher evidence.
+
+Artifacts upload even on failure and expire after 14 days. Read the
+[combined readiness report](docs/unified-release-results.md) for actual run URLs,
+counts, source commit, hashes, changed files and review limitations. The work
+branch's existing **Regression tests** workflow remains available separately.
+No automatic deployment, repository secrets or write-enabled Actions token is used.
+
+The historical **`lite-v1.0`** baseline at `823786b`, **`showcase3d-p0-approved`**
+at `f685a21` and **`showcase3d-v1.0.0-rc1`** at `94c8a03` remain immutable.
+The 69-file historical Lite manifest stays frozen; explicit English UI/test
+expectations and reversible UI edits supplement it. Exact generator and driving
+parity checks remain active. The unified candidate is identified by its source
+SHA and ZIP; it does not move the older 3D tag.
+**Stop for instructor review. Do not merge into `work`/`main` or create the final
+`v1.0.0` tag.** The eventual approved `main` commit and single release tag will
+contain both editions together.
 
 The offline Tkinter/ttk teacher editor supports S01–S12,
 private incomplete drafts, four/five questions, local Allow Play, validated unit
@@ -52,14 +64,14 @@ student site supporting both versions. Phase 5A adds original laboratory-themed
 approved 2D pixel artwork and atmosphere/interaction feedback. Phase 5B enhances
 the first-person driving artwork while preserving the shared gameplay and physics.
 Phase 5B.1 adds realistic cached materials and fixes Windows reduced-motion slash suppression.
-Stop after Phase 5B.1 for instructor review.
+Historical Phase 5B.1 behavior remains covered by the unified candidate regressions.
 
 ## Teacher editor — Windows 11
 
 1. Install [Python 3.12 for Windows](https://www.python.org/downloads/windows/).
    Keep the installer’s **Tcl/Tk and IDLE** component enabled. No pip packages
    are required for the application.
-2. Obtain the repository's **work** branch, keeping `tools/` and `schemas/`
+2. Obtain the unified candidate's **feature/3d-showcase** branch, keeping `tools/` and `schemas/`
    together. In PowerShell, change to the extracted/cloned project folder.
 3. Check Tkinter, close its demo window, then launch the editor:
 

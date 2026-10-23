@@ -1,0 +1,34 @@
+{
+  "baseline": "823786bc01b68901455061d5fe31d6076c61f20e",
+  "historicalManifestSha256": "2b44633918740e57080c7a0da4053e12552a9f81330c828980c0c0dafe2bb42d",
+  "overrides": {
+    "student/index.html": {
+      "sha256": "01710603914f3be665fcc15ae045c3afffeb9d64d77c2d8c4d27d837ba247ef9",
+      "reason": "English UI, removed technical badge, lang/version metadata and localized-script cache invalidation only; CSS and controls unchanged."
+    },
+    "student/js/assignment-loader.js": {
+      "sha256": "0678d5698890c6f3cae0f9bc43a3174b3de1f6223a343a1fd0a4478caebafbe5",
+      "reason": "Application-owned loading, validation and confirmation text in English; loader logic and data values unchanged."
+    },
+    "student/js/game.js": {
+      "sha256": "da2558a6c38ee3cbf6fc47c9a68f5966c27612dcb99f64a7a1a3c9b3b535054d",
+      "reason": "Application-owned interface strings in English only; exact reversible ledger retains historical logic and artwork."
+    },
+    "tests/browser_gameplay.py": {
+      "sha256": "9e8d825c2165b5dcf67c7cd494dbef76cc52788022efb54d5219041eb26c9703",
+      "reason": "English status and reset assertions replace Chinese expectations; all gameplay assertions retained."
+    },
+    "tests/browser_slash.py": {
+      "sha256": "71cf8e25f35b9c0bfa44f5c97a2221456fe68e6bafc84f603d31432d0aa95cb7",
+      "reason": "Expect the localized game script cache key; renderer/material versions and every slash behavior assertion retained."
+    },
+    "tests/browser_student.py": {
+      "sha256": "9cff8281a999a483ba4282ab002ae5b031d22fc5a7257ae8e091e6c6b61af849",
+      "reason": "English status/error assertions replace Chinese expectations; all loading and safety assertions retained."
+    },
+    "tests/test_drive_contract.py": {
+      "sha256": "8739f306cd9a72c543689a20c3c3246d27fa274fb31e9dcd9120bfb3cb4850c4",
+      "reason": "Reverse only audited UI strings before original source-region hashes; expect localized script cache key."
+    }
+  }
+}

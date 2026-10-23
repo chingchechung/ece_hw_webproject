@@ -48,40 +48,40 @@
         });
       } catch (error) {
         if (error.name === 'AbortError') throw error;
-        throw new Error('無法讀取 ' + file + '，請檢查連線後重試。');
+        throw new Error('Unable to read ' + file + '. Check your connection and retry.');
       }
-      if (!response.ok) throw new Error(file + ' 讀取失敗（HTTP ' + response.status + '）。');
+      if (!response.ok) throw new Error(file + ' could not be loaded (HTTP ' + response.status + ').');
       try { return await response.json(); }
       catch (error) {
         if (error.name === 'AbortError') throw error;
-        throw new Error(file + ' 不是有效的 JSON。');
+        throw new Error(file + ' is not valid JSON.');
       }
     }
     function validate(issues, file) {
-      if (issues.length) throw new Error(file + ' 驗證失敗：' + issues.slice(0, 3)
-        .map(issue => issue.path + ': ' + issue.message).join('；'));
+      if (issues.length) throw new Error(file + ' failed validation: ' + issues.slice(0, 3)
+        .map(issue => issue.path + ': ' + issue.message).join('; '));
     }
     async function refreshManifest() {
       units = [];
       choices();
-      const token = begin('正在讀取公開單元清單…');
+      const token = begin('Reading published units…');
       try {
         const data = await read('manifest.json', controller.signal);
         if (token !== generation) return;
         validate(validator.validateManifest(data), 'manifest.json');
         units = validator.normalizeManifest(data).units;
         choices();
-        status.textContent = units.length ? '請選擇單元。已發布的單元也可再次練習。' : '目前沒有已發布的單元。可稍後重新整理清單。';
+        status.textContent = units.length ? 'Select a unit. Revisit any published unit for review.' : 'No published units. Refresh the list later.';
         if (callbacks.hasAssignment() && !units.some(unit => unit.unitId === callbacks.activeUnitId())) {
-          status.textContent += ' 目前挑戰的單元已不在公開清單，無法重新載入；可返回本次已載入的挑戰或選擇其他單元。';
+          status.textContent += ' The current unit is no longer published and cannot be reloaded. Return to your loaded attempt or select another unit.';
         }
       } catch (error) {
         if (token !== generation) return;
-        status.textContent = error.message + ' 請重新整理清單。';
+        status.textContent = error.message + ' Please refresh the list.';
       }
     }
     async function loadUnit(entry) {
-      const token = begin('正在載入 ' + entry.unitId + '…');
+      const token = begin('Loading ' + entry.unitId + '…');
       try {
         const data = await read(entry.file, controller.signal);
         if (token !== generation) return;
@@ -95,16 +95,16 @@
         document.getElementById('maze').focus({preventScroll: true});
       } catch (error) {
         if (token !== generation) return;
-        status.textContent = error.message + ' 可重試載入、選擇其他單元或重新整理清單。';
+        status.textContent = error.message + ' You can retry, select another unit or refresh the list.';
       }
     }
     function requestLoad() {
       const entry = units.find(unit => unit.unitId === select.value);
       if (!entry) return;
       if (!callbacks.hasAssignment()) { loadUnit(entry); return; }
-      begin('新單元驗證成功後才會取代目前挑戰；可取消返回。');
+      begin('The new unit replaces this attempt only after validation. Cancel to return.');
       pending = entry;
-      document.getElementById('switchMessage').textContent = '確定開始 ' + entry.unitId + '？新單元驗證成功後，目前挑戰的迷宮、進度及地圖時間將被重置。';
+      document.getElementById('switchMessage').textContent = 'Start ' + entry.unitId + '? After validation, the maze, progress and map allowance will reset.';
       warning.hidden = false;
       confirm.focus({preventScroll: true});
     }
@@ -132,7 +132,7 @@
     });
     refresh.addEventListener('click', refreshManifest);
     return Object.freeze({start: refreshManifest, open: function () {
-      begin('請選擇單元。目前挑戰已暫停，可取消並返回；開始新單元前會請你確認。');
+      begin('Select a unit. Your attempt is paused; cancel to return. Confirm before starting a new unit.');
       choices();
       select.focus({preventScroll: true});
     }});

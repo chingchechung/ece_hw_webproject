@@ -140,7 +140,7 @@ class StudentBrowserHarness(unittest.TestCase):
                 route.fulfill(response=response, body=source)
             self.page.route('**/js/game.js*', inject)
         self.page.goto(self.url + ('index.html' if index else ''))
-        self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('正在讀取')")
+        self.page.wait_for_function("!document.querySelector('#assignmentStatus').textContent.includes('Reading')")
 
     def click_load(self):
         self.page.click('#loadUnit')
@@ -168,7 +168,7 @@ class StudentBrowserHarness(unittest.TestCase):
 class StudentBrowserTests(StudentBrowserHarness):
     def test_empty_production_bundle_and_relative_assets_without_hooks(self):
         self.open(hooks=False)
-        self.assertIn('沒有已發布', self.page.inner_text('#assignmentStatus'))
+        self.assertIn('No published units', self.page.inner_text('#assignmentStatus'))
         self.assertTrue(self.page.is_disabled('#loadUnit'))
         self.page.keyboard.press('v')
         self.page.keyboard.press('e')
@@ -301,7 +301,7 @@ class StudentBrowserTests(StudentBrowserHarness):
                 else:
                     self.write('S01.json', data)
                 self.click_load()
-                self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('可重試')")
+                self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('You can retry')")
                 self.assertEqual(self.state()['assignment'], previous)
                 self.assertTrue(self.page.is_visible('#assignmentPanel'))
                 self.write('S01.json', valid)
@@ -326,7 +326,7 @@ class StudentBrowserTests(StudentBrowserHarness):
                 else:
                     self.write('manifest.json', data)
                 self.page.click('#refreshManifest')
-                self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('請重新整理')")
+                self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('Please refresh')")
                 self.assertTrue(self.page.is_disabled('#loadUnit'))
                 self.assertEqual(self.page.locator('#unitSelect option').count(), 0)
                 self.assertEqual(self.state()['assignment'], valid)
@@ -363,7 +363,7 @@ class StudentBrowserTests(StudentBrowserHarness):
         self.page.click('#unitLabel')
         self.publish()
         self.page.click('#refreshManifest')
-        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('沒有已發布')")
+        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('No published units')")
         # Same bundle also works from the server root.
         for child in self.site.iterdir():
             destination = self.base / child.name
@@ -372,7 +372,7 @@ class StudentBrowserTests(StudentBrowserHarness):
             else:
                 shutil.copy2(child, destination)
         self.page.goto(self.origin + '/')
-        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('沒有已發布')")
+        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('No published units')")
         self.assertTrue(self.page.is_disabled('#loadUnit'))
 
     def test_overlapping_loads_refresh_and_network_failure(self):
@@ -395,7 +395,7 @@ class StudentBrowserTests(StudentBrowserHarness):
         self.assertEqual(self.state()['assignment']['unitId'], 'S02')
         self.page.route('**/assignments/S02.json', lambda route: route.abort('failed'))
         self.click_load()
-        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('檢查連線')")
+        self.page.wait_for_function("document.querySelector('#assignmentStatus').textContent.includes('Check your connection')")
         self.assertEqual(self.state()['assignment']['unitId'], 'S02')
         self.page.unroute('**/assignments/S02.json')
         self.load('S02')
