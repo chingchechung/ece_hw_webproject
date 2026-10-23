@@ -18,7 +18,7 @@ def main():
     handler = partial(SimpleHTTPRequestHandler, directory=str(root))
     with ThreadingHTTPServer(('127.0.0.1', args.port), handler) as server:
         url = f'http://127.0.0.1:{server.server_port}/'
-        print(f'Engineering Maze Lab / v1.0.0-rc1: {url}\nOnly dist/ is served. Ctrl+C stops the local server.', flush=True)
+        print(f'Engineering Maze Lab / v1.0.0: {url}\nOnly dist/ is served. Ctrl+C stops the local server.', flush=True)
         if not args.no_browser:
             threading.Timer(0.3, lambda: webbrowser.open(url)).start()
         try:

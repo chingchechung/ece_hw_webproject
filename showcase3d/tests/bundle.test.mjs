@@ -33,6 +33,9 @@ test('entry resources are relative and complete; no CDN imports or fetches', () 
 });
 test('venue launcher and packaging serve/include only the standalone dist allowlist', () => {
   const ps = readFileSync(`${root}/launch.ps1`, 'utf8'), pack = readFileSync(`${root}/scripts/package.py`, 'utf8');
+  const version=JSON.parse(readFileSync(`${root}/package.json`)).version;
+  assert.ok(ps.includes(`Engineering Maze Lab / v${version}`));
+  assert.ok(readFileSync(`${root}/serve.py`,'utf8').includes(`Engineering Maze Lab / v${version}`));
   assert.match(ps, /IPAddress\]::Loopback/); assert.match(ps, /Join-Path \$PSScriptRoot 'dist'/);
   assert.match(ps, /OrdinalIgnoreCase/); assert.match(ps, /403 Forbidden/);
   assert.ok(!/node|npm|teacher_data|assignments/i.test(ps.replace(/^#.*$/gm, '')));
