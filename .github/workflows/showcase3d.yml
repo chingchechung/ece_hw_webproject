@@ -25,6 +25,12 @@ on:
 permissions:
   contents: read
 
+# Explicit bash enables -o pipefail, so tee cannot hide a failed test command.
+# The Windows launcher step retains its explicit PowerShell override.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   windows-launcher:
     name: Windows PowerShell 5.1 / offline launcher
