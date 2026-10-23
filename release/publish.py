@@ -57,7 +57,7 @@ def publish():
     sha = command('git', 'rev-parse', f'{TAG}^{{commit}}')
     if command('git', 'rev-parse', 'HEAD') != sha:
         raise RuntimeError('Checkout is not the exact tagged source')
-    main = command('git', 'ls-remote', 'origin', 'refs/heads/main').split()[0]
+    main = api('git/ref/heads/main')['object']['sha']
     if main != sha:
         raise RuntimeError('Remote main changed; do not release another source')
     # v1.0.0 is a new release only. Never edit or replace an existing release.
@@ -123,7 +123,7 @@ Historical Lite/P0/3D RC tags are preserved. No gameplay, visuals, physics, GUI 
         if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
             raise RuntimeError(f'Downloaded release ZIP differs: {name}')
     # Recheck main immediately before making the stable release public.
-    if command('git', 'ls-remote', 'origin', 'refs/heads/main').split()[0] != sha:
+    if api('git/ref/heads/main')['object']['sha'] != sha:
         raise RuntimeError('Main changed during packaging; leave the draft for review')
     command('gh', 'release', 'edit', TAG, '--repo', REPOSITORY,
             '--draft=false', '--prerelease=false', '--latest')
