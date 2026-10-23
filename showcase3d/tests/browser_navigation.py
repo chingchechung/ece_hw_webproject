@@ -1,11 +1,14 @@
 """P1.1 synthetic dual-view acceptance; test clock changes time, never vehicle position."""
 from functools import partial
 from http.server import ThreadingHTTPServer
+import ctypes
+import ctypes.util
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import threading
 import unittest
@@ -226,6 +229,104 @@ class NavigationBrowserTests(unittest.TestCase):
         self.assertEqual(page.locator('#message').inner_text(),'');self.assertEqual(self.snapshot(page)['drivingView'],'3d')
         page.fill('#seed','23');page.click('#generate');self.assertEqual(self.snapshot(page)['game']['completed'],[False]*5)
         self.assertEqual(self.snapshot(page)['game']['map'],{'open':False,'remainingMs':30000})
+
+
+    def assert_fullscreen(self,page,active):
+        page.wait_for_function('active => Boolean(document.fullscreenElement) === active',arg=active)
+        label='Exit Fullscreen' if active else 'Fullscreen'
+        aria='Exit Fullscreen' if active else 'Enter Fullscreen'
+        page.wait_for_function('expected => document.querySelector("#fullscreen").textContent === expected',arg=label)
+        self.assertEqual(page.locator('#fullscreen').get_attribute('aria-label'),aria)
+
+    def press_escape(self,page):
+        page.bring_to_front()
+        if sys.platform!='linux':
+            page.keyboard.press('Escape');return
+        # CDP keyboard events reach the page but do not invoke Chromium's native
+        # fullscreen exit. Send a real X11 Escape under the suite's Xvfb display.
+        x11=ctypes.CDLL(ctypes.util.find_library('X11'))
+        xtest=ctypes.CDLL(ctypes.util.find_library('Xtst'))
+        x11.XOpenDisplay.argtypes=[ctypes.c_char_p];x11.XOpenDisplay.restype=ctypes.c_void_p
+        x11.XKeysymToKeycode.argtypes=[ctypes.c_void_p,ctypes.c_ulong];x11.XKeysymToKeycode.restype=ctypes.c_ubyte
+        x11.XSync.argtypes=[ctypes.c_void_p,ctypes.c_int]
+        x11.XCloseDisplay.argtypes=[ctypes.c_void_p]
+        xtest.XTestFakeKeyEvent.argtypes=[ctypes.c_void_p,ctypes.c_uint,ctypes.c_int,ctypes.c_ulong]
+        display=x11.XOpenDisplay(None)
+        self.assertTrue(display,'Native Escape requires the suite X display')
+        try:
+            key=x11.XKeysymToKeycode(display,0xff1b)
+            self.assertTrue(key)
+            self.assertTrue(xtest.XTestFakeKeyEvent(display,key,True,0))
+            self.assertTrue(xtest.XTestFakeKeyEvent(display,key,False,0))
+            x11.XSync(display,False)
+        finally:x11.XCloseDisplay(display)
+
+    def test_06_player_fullscreen_button_and_escape_preserve_earned_question_progress(self):
+        # Publish only a synthetic fixture into this suite's disposable HTTP root.
+        unit=json.loads((ROOT/'tests/fixtures/v2/S02.json').read_text())
+        publication=Path(self.temp.name)/'nested/course/dist/assignments'
+        (publication/'S02.json').write_text(json.dumps(unit))
+        (publication/'manifest.json').write_text(json.dumps({'schemaVersion':1,'units':[
+            {'unitId':'S02','title':unit['title'],'file':'S02.json'}]}))
+        page=self.new_page(1280,800,1.5,clock=True,tools=False)
+        harness.choose_quality(page,'Low')
+        self.assertTrue(page.locator('#tools').is_hidden());self.assert_fullscreen(page,False)
+        page.click('#assignment-mode');page.wait_for_function('document.querySelector("#unit-select").value === "S02"')
+        page.click('#load-assignment');page.click('#confirm-assignment')
+        page.wait_for_function('window.showcase.snapshot().assignment?.unitId === "S02"')
+        before=self.snapshot(page)
+        plan=json.loads(subprocess.check_output(['node','showcase3d/tests/write-education-route.mjs',
+            '25','19',str(before['maze']['seed']),'5'],cwd=ROOT,text=True))
+        held=set()
+        for step in plan['steps']:
+            if step['kind']=='drive':held,_=self.key_hold(page,held,step['keys'],step['seconds'])
+            else:
+                for key in held:page.keyboard.up(key)
+                page.keyboard.press('e')
+                question=unit['questions'][int(step['id'][1:])-1]
+                page.click(f'[data-answer="{question["correctOptions"][-1]}"]')
+                page.click('#dialog-close');break
+        page.keyboard.press('m');page.wait_for_timeout(250);page.keyboard.press('m')
+        saved=self.snapshot(page)
+        self.assertEqual(sum(saved['game']['completed']),1)
+        self.assertGreater(saved['game']['vehicle']['distance'],0)
+        self.assertLess(saved['game']['map']['remainingMs'],30000)
+        page.evaluate('''() => {
+            window.fullscreenEvents=[];
+            document.addEventListener('fullscreenchange',()=>fullscreenEvents.push(Boolean(document.fullscreenElement)));
+        }''')
+        for name,action,active in [
+            ('entered',lambda:page.click('#fullscreen'),True),
+            ('button-exit',lambda:page.click('#fullscreen'),False),
+            ('entered-again',lambda:page.click('#fullscreen'),True),
+            ('escape-exit',lambda:self.press_escape(page),False),
+        ]:
+            action();self.assert_fullscreen(page,active)
+            current=self.snapshot(page)
+            for field in ['game','maze','assignment','drivingView','rebuilds']:
+                self.assertEqual(current[field],saved[field],field)
+            self.capture(page,f'player-fullscreen-{name}')
+        self.assertEqual(page.evaluate('fullscreenEvents'),[True,False,True,False])
+
+    def test_07_player_fullscreen_request_and_exit_failures_keep_actual_label(self):
+        page=self.new_page(1280,800,1.5,clock=True,tools=False)
+        harness.choose_quality(page,'Low');saved=self.snapshot(page)
+        self.assert_fullscreen(page,False)
+        page.evaluate('''() => { document.documentElement.requestFullscreen = () => Promise.reject(
+            new DOMException('Synthetic request rejection','NotAllowedError')); }''')
+        page.click('#fullscreen');page.wait_for_function('document.querySelector("#status").textContent.includes("Fullscreen unavailable")')
+        self.assert_fullscreen(page,False)
+        page.evaluate('delete document.documentElement.requestFullscreen')
+        page.click('#fullscreen');self.assert_fullscreen(page,True)
+        page.evaluate('''() => { document.querySelector('#status').textContent='';
+            document.exitFullscreen = () => Promise.reject(new DOMException('Synthetic exit rejection','InvalidStateError')); }''')
+        page.click('#fullscreen');page.wait_for_function('document.querySelector("#status").textContent.includes("Fullscreen unavailable")')
+        self.assert_fullscreen(page,True)
+        page.evaluate('delete document.exitFullscreen')
+        page.click('#fullscreen');self.assert_fullscreen(page,False)
+        current=self.snapshot(page)
+        for field in ['game','maze','assignment','drivingView','rebuilds']:
+            self.assertEqual(current[field],saved[field],field)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

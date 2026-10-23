@@ -194,6 +194,13 @@ function generate() {
   $('status').textContent = `New maze · seed ${seed} · synthetic demonstration`;
 }
 function text(id,value) { const node = $(id); if (node && node.textContent !== value) node.textContent = value; }
+function syncFullscreenButton() {
+  const button = $('fullscreen');
+  if (!button) return;
+  const active = Boolean(document.fullscreenElement);
+  button.textContent = active ? 'Exit Fullscreen' : 'Fullscreen';
+  button.setAttribute('aria-label', active ? 'Exit Fullscreen' : 'Enter Fullscreen');
+}
 function randomSeed() { let seed=crypto.getRandomValues(new Uint32Array(1))[0];return seed===current.seed?(seed+1)>>>0:seed; }
 function startEducationalRound(failures) {
   const [w,h]=attemptSize(failures),map=generateMap(w,h,randomSeed(),assignment.questions.length);
@@ -500,9 +507,12 @@ async function initialize() {
   $('map-view').addEventListener('pointerdown',focusDriving);
   $('interact').addEventListener('click',activate); $('dialog-close').addEventListener('click',closeDialog);
   $('camera')?.addEventListener('click', () => {if(canPresent(false))view==='driving' ? overview() : resumeDriving();});
+  document.addEventListener('fullscreenchange', syncFullscreenButton);
+  syncFullscreenButton();
   $('fullscreen').addEventListener('click', async () => {
     try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); }
     catch { $('status').textContent = 'Fullscreen unavailable. Use the browser fullscreen command (F11 on Windows).'; }
+    syncFullscreenButton();
     focusDriving();
   });
   $('benchmark')?.addEventListener('click', () => runBenchmark());
